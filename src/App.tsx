@@ -4,18 +4,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
 import { PartyInvite } from "@/components/PartyInvite";
+import { Header } from "@/components/Header";
 import Index from "./pages/Index";
 import Battle from "./pages/Battle";
 import NotFound from "./pages/NotFound";
 
 const MainContent = () => {
   return (
-    <div className="flex min-h-screen w-full">
-      <AppSidebar />
-      <main className="flex-1">
+    <div className="min-h-screen w-full">
+      <Header />
+      <main className="pt-16">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/battle" element={<Battle />} />
@@ -35,9 +34,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SidebarProvider>
-          <MainContent />
-        </SidebarProvider>
+        <MainContent />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
