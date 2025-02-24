@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Sword, Crown, Trophy, Star, Medal } from "lucide-react";
 
-// Dota 2-inspired ranks
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
   divine: { name: "Divine", color: "#7E69AB", minMMR: 5000 },
@@ -23,10 +21,10 @@ const Index = () => {
       id: 1, 
       difficulty: "Easy", 
       title: "Forest of Arrays", 
-      players: 2,
+      players: 4,
       minRank: "guardian",
       maxRank: "crusader",
-      currentPlayers: ["Player1", "Player2"],
+      currentPlayers: ["Player1"],
     },
     { 
       id: 2, 
