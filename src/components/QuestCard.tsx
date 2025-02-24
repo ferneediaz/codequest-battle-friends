@@ -16,14 +16,14 @@ const getChestImage = (reward: string) => {
   const quality = reward.split(" ")[0].toLowerCase();
   switch (quality) {
     case "legendary":
-      return "https://images.unsplash.com/photo-1551038247-3d9af20df552?w=200&h=200&fit=crop";
+      return "https://images.unsplash.com/photo-1473177104440-ffee2f376098?w=400&h=400&fit=crop";
     case "epic":
-      return "https://images.unsplash.com/photo-1494891848038-7bd202a2afeb?w=200&h=200&fit=crop";
+      return "https://images.unsplash.com/photo-1533086723868-6060511e4169?w=400&h=400&fit=crop";
     case "rare":
-      return "https://images.unsplash.com/photo-1439337153520-7082a56a81f4?w=200&h=200&fit=crop";
+      return "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=400&h=400&fit=crop";
     case "common":
     default:
-      return "https://images.unsplash.com/photo-1486718448742-163732cd1544?w=200&h=200&fit=crop";
+      return "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=400&h=400&fit=crop";
   }
 };
 
@@ -41,15 +41,16 @@ const QuestCard = ({ title, description, progress, target, reward, isCompleted }
             )}
             <h3 className="text-lg font-bold text-white">{title}</h3>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative w-8 h-8 rounded-full overflow-hidden">
+          <div className="flex items-center gap-3">
+            <div className="relative w-16 h-16 rounded-lg overflow-hidden shadow-lg ring-2 ring-primary/20">
               <img 
                 src={getChestImage(reward)}
                 alt={reward}
                 className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </div>
-            <span className="text-sm text-primary">{reward}</span>
+            <span className="text-sm text-primary font-semibold">{reward}</span>
           </div>
         </div>
         <p className="text-gray-400 mb-4">{description}</p>
