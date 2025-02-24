@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap } from "lucide-react";
+import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -11,6 +11,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const INITIAL_CODE = {
   javascript: `// JavaScript Solution
@@ -576,29 +582,37 @@ int main() {
               <div className="mt-6 border-t border-white/10 pt-6">
                 <h3 className="text-lg font-semibold text-primary mb-4">Battle Skills</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {battleState.skills.map((skill) => (
-                    <Button
-                      key={skill.id}
-                      onClick={() => useSkill(skill)}
-                      className="relative h-auto min-h-[80px] w-full flex flex-col items-start p-3 text-left"
-                      variant={skill.isOnCooldown ? "secondary" : "default"}
-                      disabled={skill.isOnCooldown || battleState.mana < skill.manaCost}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Wand className="w-4 h-4 shrink-0" />
-                        <span className="font-semibold line-clamp-1">{skill.name}</span>
-                      </div>
-                      <div className="text-xs opacity-70 line-clamp-2">{skill.description}</div>
-                      <div className="text-xs mt-1 text-blue-400">
-                        Mana Cost: {skill.manaCost}
-                      </div>
-                      {skill.isOnCooldown && (
-                        <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
-                          Recharging...
-                        </div>
-                      )}
-                    </Button>
-                  ))}
+                  <TooltipProvider>
+                    {battleState.skills.map((skill) => (
+                      <Tooltip key={skill.id}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => useSkill(skill)}
+                            className="relative h-10 w-full flex items-center justify-between gap-2 px-3"
+                            variant={skill.isOnCooldown ? "secondary" : "default"}
+                            disabled={skill.isOnCooldown || battleState.mana < skill.manaCost}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Wand className="w-4 h-4 shrink-0" />
+                              <span className="font-medium">{skill.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-blue-400">{skill.manaCost} MP</span>
+                              <Info className="w-4 h-4 opacity-50" />
+                            </div>
+                            {skill.isOnCooldown && (
+                              <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
+                                Recharging...
+                              </div>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[200px]">
+                          <p>{skill.description}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </TooltipProvider>
                 </div>
               </div>
 
