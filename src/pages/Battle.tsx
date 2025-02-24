@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   Select,
   SelectContent,
@@ -147,11 +148,16 @@ const HINT_COST = 100; // Gold cost for revealing a hint
 const Battle = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setOpen } = useSidebar();
   const [language, setLanguage] = useState<Language>("javascript");
   const [code, setCode] = useState(INITIAL_CODE[language]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [battleState, setBattleState] = useState<BattleState>(INITIAL_BATTLE_STATE);
+
+  React.useEffect(() => {
+    setOpen(false);
+  }, [setOpen]);
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
@@ -574,12 +580,18 @@ int main() {
                     <Button
                       key={skill.id}
                       onClick={() => useSkill(skill)}
-                      className="relative"
+                      className="relative h-auto min-h-[64px] flex flex-col items-center justify-center p-4 gap-1"
                       variant={skill.isOnCooldown ? "secondary" : "default"}
                       disabled={skill.isOnCooldown || battleState.mana < skill.manaCost}
                     >
-                      <Wand className="mr-2" />
-                      {skill.name}
+                      <div className="flex items-center gap-2">
+                        <Wand className="w-4 h-4" />
+                        <span>{skill.name}</span>
+                      </div>
+                      <div className="text-xs opacity-70">{skill.description}</div>
+                      <div className="text-xs mt-1">
+                        Mana Cost: {skill.manaCost}
+                      </div>
                       {skill.isOnCooldown && (
                         <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
                           Recharging...

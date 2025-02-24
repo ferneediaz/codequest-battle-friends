@@ -10,8 +10,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { User, Users, Trophy, Settings, Bell, MessageSquare } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export function AppSidebar() {
+  const location = useLocation();
+  const isBattlePage = location.pathname === "/battle";
+
+  if (isBattlePage) {
+    return null;
+  }
+
   return (
     <Sidebar>
       <SidebarContent>
