@@ -12,6 +12,21 @@ interface QuestProps {
   isCompleted: boolean;
 }
 
+const getChestImage = (reward: string) => {
+  const quality = reward.split(" ")[0].toLowerCase();
+  switch (quality) {
+    case "legendary":
+      return "https://images.unsplash.com/photo-1551038247-3d9af20df552?w=200&h=200&fit=crop";
+    case "epic":
+      return "https://images.unsplash.com/photo-1494891848038-7bd202a2afeb?w=200&h=200&fit=crop";
+    case "rare":
+      return "https://images.unsplash.com/photo-1439337153520-7082a56a81f4?w=200&h=200&fit=crop";
+    case "common":
+    default:
+      return "https://images.unsplash.com/photo-1486718448742-163732cd1544?w=200&h=200&fit=crop";
+  }
+};
+
 const QuestCard = ({ title, description, progress, target, reward, isCompleted }: QuestProps) => {
   return (
     <div className="relative group">
@@ -27,7 +42,13 @@ const QuestCard = ({ title, description, progress, target, reward, isCompleted }
             <h3 className="text-lg font-bold text-white">{title}</h3>
           </div>
           <div className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-primary" />
+            <div className="relative w-8 h-8 rounded-full overflow-hidden">
+              <img 
+                src={getChestImage(reward)}
+                alt={reward}
+                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
             <span className="text-sm text-primary">{reward}</span>
           </div>
         </div>
