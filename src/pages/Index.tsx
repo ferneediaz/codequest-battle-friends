@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import { useToast } from "@/hooks/use-toast";
@@ -40,10 +41,11 @@ const Index = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
   const [battles] = useState([
+    // Forest of Arrays
     { 
       id: 1, 
       difficulty: "Easy", 
-      title: "Forest of Arrays", 
+      title: "Two Crystal Merger", 
       players: 4,
       category: "Forest of Arrays",
       minRank: "guardian",
@@ -53,52 +55,150 @@ const Index = () => {
     { 
       id: 2, 
       difficulty: "Medium", 
-      title: "Dungeon of Objects", 
-      players: 1,
-      category: "Hashmap Dungeons",
+      title: "Mystic Array Rotation", 
+      players: 2,
+      category: "Forest of Arrays",
       minRank: "archon",
       maxRank: "legend",
-      currentPlayers: ["Player3"],
+      currentPlayers: ["Player2"],
     },
     { 
       id: 3, 
       difficulty: "Hard", 
-      title: "Dragon's Algorithm Lair", 
+      title: "Crystal Matrix Challenge", 
       players: 3,
-      category: "Dynamic Programming Peaks",
+      category: "Forest of Arrays",
       minRank: "ancient",
       maxRank: "immortal",
-      currentPlayers: ["Player4", "Player5", "Player6"],
+      currentPlayers: ["Player3"],
     },
+    
+    // Hashmap Dungeons
     { 
       id: 4, 
-      difficulty: "Medium", 
-      title: "Binary Search Castle", 
+      difficulty: "Easy", 
+      title: "Treasure Map Decoder", 
       players: 2,
-      category: "Binary Search Castle",
-      minRank: "legend",
-      maxRank: "divine",
-      currentPlayers: ["Player7", "Player8"],
+      category: "Hashmap Dungeons",
+      minRank: "guardian",
+      maxRank: "crusader",
+      currentPlayers: ["Player4"],
     },
     { 
       id: 5, 
-      difficulty: "Hard", 
-      title: "Recursive Realm", 
-      players: 1,
-      category: "Recursion Temple",
-      minRank: "divine",
-      maxRank: "immortal",
-      currentPlayers: ["Player9"],
+      difficulty: "Medium", 
+      title: "Potion Ingredients Counter", 
+      players: 3,
+      category: "Hashmap Dungeons",
+      minRank: "archon",
+      maxRank: "legend",
+      currentPlayers: ["Player5"],
     },
     { 
       id: 6, 
-      difficulty: "Easy", 
-      title: "Linked List Garden", 
+      difficulty: "Hard", 
+      title: "Magical Items Inventory", 
       players: 4,
+      category: "Hashmap Dungeons",
+      minRank: "ancient",
+      maxRank: "divine",
+      currentPlayers: ["Player6"],
+    },
+
+    // Binary Search Castle
+    { 
+      id: 7, 
+      difficulty: "Easy", 
+      title: "Castle Guard Search", 
+      players: 2,
+      category: "Binary Search Castle",
+      minRank: "guardian",
+      maxRank: "crusader",
+      currentPlayers: ["Player7"],
+    },
+    { 
+      id: 8, 
+      difficulty: "Medium", 
+      title: "Royal Treasury Quest", 
+      players: 3,
+      category: "Binary Search Castle",
+      minRank: "archon",
+      maxRank: "legend",
+      currentPlayers: ["Player8"],
+    },
+    { 
+      id: 9, 
+      difficulty: "Hard", 
+      title: "Dragon's Lair Search", 
+      players: 4,
+      category: "Binary Search Castle",
+      minRank: "legend",
+      maxRank: "immortal",
+      currentPlayers: ["Player9"],
+    },
+
+    // Linked List Gardens
+    { 
+      id: 10, 
+      difficulty: "Easy", 
+      title: "Garden Path Traversal", 
+      players: 2,
       category: "Linked List Gardens",
       minRank: "herald",
       maxRank: "guardian",
-      currentPlayers: ["Player10", "Player11", "Player12", "Player13"],
+      currentPlayers: ["Player10"],
+    },
+    { 
+      id: 11, 
+      difficulty: "Medium", 
+      title: "Enchanted Garden Cycle", 
+      players: 3,
+      category: "Linked List Gardens",
+      minRank: "crusader",
+      maxRank: "archon",
+      currentPlayers: ["Player11"],
+    },
+    { 
+      id: 12, 
+      difficulty: "Hard", 
+      title: "Magical Garden Merge", 
+      players: 4,
+      category: "Linked List Gardens",
+      minRank: "legend",
+      maxRank: "divine",
+      currentPlayers: ["Player12"],
+    },
+
+    // Tree of Wisdom
+    { 
+      id: 13, 
+      difficulty: "Easy", 
+      title: "Sacred Tree Path", 
+      players: 2,
+      category: "Tree of Wisdom",
+      minRank: "guardian",
+      maxRank: "crusader",
+      currentPlayers: ["Player13"],
+    },
+    { 
+      id: 14, 
+      difficulty: "Medium", 
+      title: "Wisdom Tree Balance", 
+      players: 3,
+      category: "Tree of Wisdom",
+      minRank: "archon",
+      maxRank: "legend",
+      currentPlayers: ["Player14"],
+    },
+    { 
+      id: 15, 
+      difficulty: "Hard", 
+      title: "Ancient Tree Transformation", 
+      players: 4,
+      category: "Tree of Wisdom",
+      minRank: "ancient",
+      maxRank: "immortal",
+      currentPlayers: ["Player15"],
     },
   ]);
 
@@ -243,9 +343,9 @@ const Index = () => {
               <SelectTrigger className="bg-black/50 border-white/10">
                 <SelectValue placeholder="Select a realm" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gray-900 border border-white/10">
                 {BATTLE_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
+                  <SelectItem key={category} value={category} className="text-white hover:bg-gray-800 cursor-pointer">
                     {category}
                   </SelectItem>
                 ))}
