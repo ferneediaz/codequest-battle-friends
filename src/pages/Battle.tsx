@@ -67,48 +67,6 @@ const Battle = () => {
     setCode(INITIAL_CODE[newLang]);
   };
 
-  // Helper function to apply syntax highlighting
-  const highlightCode = (code: string) => {
-    return code.split('\n').map((line) => {
-      let highlighted = line;
-      
-      // Apply highlighting in the correct order to avoid nesting issues
-      highlighted = highlighted
-        // Comments (must come first)
-        .replace(
-          /(\/\/.*|#.*)/g, 
-          '<span style="color: #6A9955">$1</span>'
-        )
-        // Keywords
-        .replace(
-          /\b(function|class|return|const|let|var|for|if|in|of|public|include|vector)\b/g,
-          '<span style="color: #C586C0">$1</span>'
-        )
-        // Types and built-in objects
-        .replace(
-          /\b(Map|unordered_map|vector|int|void)\b/g,
-          '<span style="color: #4EC9B0">$1</span>'
-        )
-        // Function calls and declarations
-        .replace(
-          /\b(solution|enumerate|find|size|has|get|set)\b/g,
-          '<span style="color: #DCDCAA">$1</span>'
-        )
-        // Strings
-        .replace(
-          /"([^"]*)"/g,
-          '<span style="color: #CE9178">"$1"</span>'
-        )
-        // Numbers
-        .replace(
-          /\b(\d+)\b/g,
-          '<span style="color: #B5CEA8">$1</span>'
-        );
-
-      return `<div class="min-h-[1.5em]">${highlighted}</div>`;
-    }).join('');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-8">
@@ -181,11 +139,38 @@ const Battle = () => {
                   Run Code
                 </button>
               </div>
-              <div 
-                className="w-full h-[500px] bg-[#1E1E1E] font-mono p-4 overflow-auto text-[#D4D4D4] text-sm leading-6"
-                style={{ tabSize: 2 }}
-                dangerouslySetInnerHTML={{ __html: highlightCode(code) }}
-              />
+              <div className="relative w-full h-[500px]">
+                <textarea
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="absolute inset-0 w-full h-full bg-[#1E1E1E] font-mono p-4 text-[#D4D4D4] text-sm leading-6 resize-none outline-none"
+                  style={{ 
+                    tabSize: 2,
+                    color: 'transparent',
+                    caretColor: '#D4D4D4',
+                    WebkitTextFillColor: 'transparent',
+                    background: '#1E1E1E'
+                  }}
+                />
+                <pre
+                  className="absolute inset-0 w-full h-full pointer-events-none font-mono p-4 text-sm leading-6 overflow-auto"
+                  aria-hidden="true"
+                >
+                  <code>
+                    {code.split('\n').map((line, i) => (
+                      <div key={i} className="min-h-[1.5em]">
+                        {line
+                          .replace(/(\/\/.*|#.*)/g, '<span style="color: #6A9955">$1</span>')
+                          .replace(/\b(function|class|return|const|let|var|for|if|in|of|public|include|vector)\b/g, '<span style="color: #C586C0">$1</span>')
+                          .replace(/\b(Map|unordered_map|vector|int|void)\b/g, '<span style="color: #4EC9B0">$1</span>')
+                          .replace(/\b(solution|enumerate|find|size|has|get|set)\b/g, '<span style="color: #DCDCAA">$1</span>')
+                          .replace(/"([^"]*)"/g, '<span style="color: #CE9178">"$1"</span>')
+                          .replace(/\b(\d+)\b/g, '<span style="color: #B5CEA8">$1</span>')}
+                      </div>
+                    ))}
+                  </code>
+                </pre>
+              </div>
             </div>
           </div>
         </div>
