@@ -68,32 +68,42 @@ const Battle = () => {
   };
 
   // Helper function to apply syntax highlighting
-  const highlightCode = (code: string, language: Language) => {
-    // Split the code into lines for better control
-    return code.split('\n').map((line, i) => {
-      // Basic syntax highlighting
-      const highlighted = line
-        // Comments
-        .replace(/(\/\/.*|#.*)/g, '<span class="text-[#6A9955]">$1</span>')
+  const highlightCode = (code: string) => {
+    return code.split('\n').map((line) => {
+      let highlighted = line;
+      
+      // Apply highlighting in the correct order to avoid nesting issues
+      highlighted = highlighted
+        // Comments (must come first)
+        .replace(
+          /(\/\/.*|#.*)/g, 
+          '<span style="color: #6A9955">$1</span>'
+        )
         // Keywords
         .replace(
           /\b(function|class|return|const|let|var|for|if|in|of|public|include|vector)\b/g,
-          '<span class="text-[#C586C0]">$1</span>'
+          '<span style="color: #C586C0">$1</span>'
         )
         // Types and built-in objects
         .replace(
           /\b(Map|unordered_map|vector|int|void)\b/g,
-          '<span class="text-[#4EC9B0]">$1</span>'
+          '<span style="color: #4EC9B0">$1</span>'
         )
         // Function calls and declarations
         .replace(
           /\b(solution|enumerate|find|size|has|get|set)\b/g,
-          '<span class="text-[#DCDCAA]">$1</span>'
+          '<span style="color: #DCDCAA">$1</span>'
         )
         // Strings
-        .replace(/"([^"]*)"/, '<span class="text-[#CE9178]">\"$1\"</span>')
+        .replace(
+          /"([^"]*)"/g,
+          '<span style="color: #CE9178">"$1"</span>'
+        )
         // Numbers
-        .replace(/\b(\d+)\b/g, '<span class="text-[#B5CEA8]">$1</span>');
+        .replace(
+          /\b(\d+)\b/g,
+          '<span style="color: #B5CEA8">$1</span>'
+        );
 
       return `<div class="min-h-[1.5em]">${highlighted}</div>`;
     }).join('');
@@ -174,7 +184,7 @@ const Battle = () => {
               <div 
                 className="w-full h-[500px] bg-[#1E1E1E] font-mono p-4 overflow-auto text-[#D4D4D4] text-sm leading-6"
                 style={{ tabSize: 2 }}
-                dangerouslySetInnerHTML={{ __html: highlightCode(code, language) }}
+                dangerouslySetInnerHTML={{ __html: highlightCode(code) }}
               />
             </div>
           </div>
