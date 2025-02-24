@@ -9,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { User, Users, Trophy, Settings, Bell, MessageSquare, X } from "lucide-react";
 import { useLocation } from "react-router-dom";
@@ -16,6 +17,7 @@ import { Button } from "./ui/button";
 
 export function AppSidebar() {
   const location = useLocation();
+  const { open, toggleSidebar } = useSidebar();
   const isBattlePage = location.pathname === "/battle";
 
   if (isBattlePage) {
@@ -28,9 +30,17 @@ export function AppSidebar() {
         <SidebarGroup>
           <div className="flex items-center justify-between px-2 py-2">
             <SidebarGroupLabel>Menu</SidebarGroupLabel>
-            <SidebarTrigger className="md:hidden">
-              <X className="h-4 w-4" />
-            </SidebarTrigger>
+            {open && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7" 
+                onClick={toggleSidebar}
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close Sidebar</span>
+              </Button>
+            )}
           </div>
           <SidebarGroupContent>
             <SidebarMenu>
