@@ -526,6 +526,26 @@ int main() {
     });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      
+      const { selectionStart, selectionEnd } = e.currentTarget;
+      const currentValue = e.currentTarget.value;
+      
+      const newValue = 
+        currentValue.substring(0, selectionStart) + 
+        "  " + 
+        currentValue.substring(selectionEnd);
+      
+      setCode(newValue);
+      
+      requestAnimationFrame(() => {
+        e.currentTarget.selectionStart = e.currentTarget.selectionEnd = selectionStart + 2;
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-8">
@@ -678,6 +698,7 @@ int main() {
                 <textarea
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className="absolute inset-0 w-full h-full bg-[#1E1E1E] font-mono p-4 text-[#D4D4D4] text-sm leading-6 resize-none outline-none"
                   style={{ 
                     tabSize: 2,
