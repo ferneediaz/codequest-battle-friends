@@ -463,12 +463,16 @@ const Index = () => {
     ],
     activeTitle: 2,
     skills: [
-      { category: "Arrays & Strings", value: 85 },
-      { category: "Algorithms", value: 92 },
-      { category: "Data Structures", value: 78 },
-      { category: "Dynamic Programming", value: 65 },
-      { category: "System Design", value: 70 },
-      { category: "Problem Solving", value: 88 },
+      { category: "Arrays", value: 85 },
+      { category: "Hashmaps", value: 78 },
+      { category: "Binary Search", value: 92 },
+      { category: "Linked Lists", value: 75 },
+      { category: "Trees", value: 88 },
+      { category: "Graphs", value: 70 },
+      { category: "Dynamic Prog", value: 65 },
+      { category: "Stack/Queue", value: 82 },
+      { category: "Recursion", value: 77 },
+      { category: "Sorting", value: 90 }
     ],
   });
 
