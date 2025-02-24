@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -162,6 +161,8 @@ const Battle = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [battleState, setBattleState] = useState<BattleState>(INITIAL_BATTLE_STATE);
+  const [history, setHistory] = useState<string[]>([INITIAL_CODE[language]]);
+  const [historyIndex, setHistoryIndex] = useState(0);
 
   React.useEffect(() => {
     setOpen(false);
@@ -528,6 +529,15 @@ int main() {
     });
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newCode = e.target.value;
+    setCode(newCode);
+    if (newCode !== history[history.length - 1]) {
+      setHistory(prev => [...prev.slice(0, historyIndex + 1), newCode]);
+      setHistoryIndex(prev => prev + 1);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -543,11 +553,28 @@ int main() {
       
       setCode(newValue);
       
-      // Store the new cursor position
       const newCursorPos = selectionStart + 2;
       
-      // Use the current event's target instead of requestAnimationFrame
       textarea.selectionStart = textarea.selectionEnd = newCursorPos;
+    }
+
+    if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (historyIndex > 0) {
+        const newIndex = historyIndex - 1;
+        setHistoryIndex(newIndex);
+        setCode(history[newIndex]);
+      }
+    }
+
+    if ((e.key === 'z' && e.shiftKey && (e.ctrlKey || e.metaKey)) || 
+        (e.key === 'y' && (e.ctrlKey || e.metaKey))) {
+      e.preventDefault();
+      if (historyIndex < history.length - 1) {
+        const newIndex = historyIndex + 1;
+        setHistoryIndex(newIndex);
+        setCode(history[newIndex]);
+      }
     }
   };
 
@@ -703,7 +730,7 @@ int main() {
                 <textarea
                   ref={textareaRef}
                   value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                  onChange={handleChange}
                   onKeyDown={handleKeyDown}
                   className="absolute inset-0 w-full h-full bg-[#1E1E1E] font-mono p-4 text-[#D4D4D4] text-sm leading-6 resize-none outline-none"
                   style={{ 
