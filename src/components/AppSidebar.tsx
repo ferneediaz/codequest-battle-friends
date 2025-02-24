@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { User, Users, Trophy, Settings, Bell, MessageSquare, Menu, X } from "lucide-react";
+import { User, Users, Trophy, Settings, Bell, MessageSquare, Menu } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 
@@ -24,37 +24,22 @@ export function AppSidebar() {
   }
 
   return (
-    <>
-      {/* Toggle Button */}
-      {!open && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="fixed left-4 top-4 z-50 md:hidden" 
-          onClick={toggleSidebar}
-        >
-          <Menu className="h-4 w-4" />
-          <span className="sr-only">Open Sidebar</span>
-        </Button>
-      )}
-
+    <div className="relative">
       {/* Sidebar */}
       <Sidebar>
         <SidebarContent>
           <SidebarGroup>
             <div className="flex items-center justify-between px-4 py-3">
               <SidebarGroupLabel className="text-base font-semibold">Menu</SidebarGroupLabel>
-              {open && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8" 
-                  onClick={toggleSidebar}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Close Sidebar</span>
-                </Button>
-              )}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={toggleSidebar}
+              >
+                {open ? <Menu className="h-4 w-4 rotate-90" /> : <Menu className="h-4 w-4" />}
+                <span className="sr-only">{open ? 'Close' : 'Open'} Sidebar</span>
+              </Button>
             </div>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -111,6 +96,6 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
-    </>
+    </div>
   );
 }
