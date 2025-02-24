@@ -2,7 +2,7 @@ import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import QuestCard from "@/components/QuestCard";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Sword, Crown, Trophy, Star, Medal, Award } from "lucide-react";
+import { Shield, Sword, Crown, Trophy, Star, Medal, Award, Skull, Flame, Zap, Brain } from "lucide-react";
 import {
   Radar,
   RadarChart,
@@ -17,6 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -418,7 +424,44 @@ const Index = () => {
         { id: 1, name: "Algorithm Master", place: 1, year: 2023 },
         { id: 2, name: "Code Wars Champion", place: 2, year: 2023 },
       ],
+      totals: {
+        bugsFixed: 856,
+        linesWritten: 15420,
+        algorithmsOptimized: 234,
+        perfectSolutions: 28,
+      }
     },
+    titles: [
+      { 
+        id: 1, 
+        name: "Bug Hunter", 
+        icon: <Skull className="w-4 h-4 text-red-500" />,
+        description: "Fixed over 500 bugs",
+        rarity: "rare"
+      },
+      { 
+        id: 2, 
+        name: "Code Artisan", 
+        icon: <Star className="w-4 h-4 text-purple-500" />,
+        description: "Written over 10,000 lines of code",
+        rarity: "epic"
+      },
+      { 
+        id: 3, 
+        name: "Algorithm Sage", 
+        icon: <Brain className="w-4 h-4 text-blue-500" />,
+        description: "Optimized over 200 algorithms",
+        rarity: "legendary"
+      },
+      { 
+        id: 4, 
+        name: "Perfect Executioner", 
+        icon: <Flame className="w-4 h-4 text-yellow-500" />,
+        description: "Achieved 25+ perfect solutions",
+        rarity: "epic"
+      },
+    ],
+    activeTitle: 2,
     skills: [
       { category: "Arrays & Strings", value: 85 },
       { category: "Algorithms", value: 92 },
@@ -473,10 +516,8 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Enhanced Profile Card */}
         <div className="mb-16 p-6 rounded-lg bg-black/30 border border-white/10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Profile Info */}
             <div className="flex items-start gap-4">
               <div className="relative">
                 <div className="p-3 rounded-full bg-gradient-to-r from-primary to-accent">
@@ -496,17 +537,17 @@ const Index = () => {
               <div>
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   {userProfile.name}
-                  {userProfile.achievements.competitions.map((comp) => (
-                    comp.place === 1 && (
-                      <Trophy 
-                        key={comp.id}
-                        className="w-5 h-5 text-yellow-500 animate-float"
-                        style={{ animationDelay: `${comp.id * 0.2}s` }}
-                      />
-                    )
-                  ))}
+                  {userProfile.titles.find(t => t.id === userProfile.activeTitle)?.icon}
                 </h3>
-                <div className="flex items-center gap-2">
+                <div className="text-sm" style={{
+                  color: userProfile.titles.find(t => t.id === userProfile.activeTitle)?.rarity === 'legendary' ? '#fcd34d' :
+                    userProfile.titles.find(t => t.id === userProfile.activeTitle)?.rarity === 'epic' ? '#c084fc' :
+                    userProfile.titles.find(t => t.id === userProfile.activeTitle)?.rarity === 'rare' ? '#93c5fd' :
+                    '#d1d5db'
+                }}>
+                  {userProfile.titles.find(t => t.id === userProfile.activeTitle)?.name}
+                </div>
+                <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm" style={{ color: RANKS[userProfile.rank].color }}>
                     {RANKS[userProfile.rank].name}
                   </span>
@@ -514,27 +555,57 @@ const Index = () => {
                     MMR: {userProfile.mmr}
                   </span>
                 </div>
-                <div className="mt-4 space-y-1">
-                  {userProfile.achievements.competitions.map((comp) => (
-                    <div 
-                      key={comp.id}
-                      className="text-sm text-gray-400 flex items-center gap-2"
-                    >
-                      {comp.place === 1 ? (
-                        <Crown className="w-4 h-4 text-yellow-500" />
-                      ) : comp.place === 2 ? (
-                        <Medal className="w-4 h-4 text-gray-300" />
-                      ) : (
-                        <Medal className="w-4 h-4 text-amber-700" />
-                      )}
-                      {comp.name} ({comp.year})
-                    </div>
-                  ))}
+                
+                <div className="mt-4 p-3 bg-black/20 rounded-lg border border-white/5">
+                  <h4 className="text-sm font-semibold text-gray-400 mb-2">Earned Titles</h4>
+                  <div className="space-y-2">
+                    {userProfile.titles.map((title) => (
+                      <TooltipProvider key={title.id}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition-colors ${
+                                title.id === userProfile.activeTitle ? 'bg-white/10' : 'hover:bg-white/5'
+                              }`}
+                            >
+                              {title.icon}
+                              <span
+                                className="text-sm"
+                                style={{
+                                  color: title.rarity === 'legendary' ? '#fcd34d' :
+                                    title.rarity === 'epic' ? '#c084fc' :
+                                    title.rarity === 'rare' ? '#93c5fd' :
+                                    '#d1d5db'
+                                }}
+                              >
+                                {title.name}
+                              </span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{title.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="text-center p-2 bg-black/20 rounded-lg border border-white/5">
+                    <Skull className="w-4 h-4 text-red-500 mx-auto mb-1" />
+                    <div className="text-xs text-gray-400">Bugs Fixed</div>
+                    <div className="text-sm font-semibold text-white">{userProfile.achievements.totals.bugsFixed}</div>
+                  </div>
+                  <div className="text-center p-2 bg-black/20 rounded-lg border border-white/5">
+                    <Brain className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+                    <div className="text-xs text-gray-400">Algorithms</div>
+                    <div className="text-sm font-semibold text-white">{userProfile.achievements.totals.algorithmsOptimized}</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Spider Chart */}
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={userProfile.skills}>
@@ -554,7 +625,6 @@ const Index = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 rounded-lg bg-black/20 border border-white/5">
                 <div className="text-xl font-bold text-white mb-1">
@@ -617,7 +687,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Quests Section */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-8">Active Quests</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -627,7 +696,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {[
             { title: "Active Battles", value: "24", color: "from-blue-500 to-blue-600" },
@@ -650,7 +718,6 @@ const Index = () => {
           ))}
         </div>
 
-        {/* Rank Tiers */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-8">Rank Tiers</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
