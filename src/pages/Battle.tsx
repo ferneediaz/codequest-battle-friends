@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 const INITIAL_CODE = {
   javascript: `// JavaScript Solution
@@ -55,14 +56,12 @@ public:
 };`
 };
 
-// Judge0 language IDs
 const LANGUAGE_IDS = {
   javascript: 63,  // Node.js
   python: 71,      // Python 3
   cpp: 54,         // C++
 };
 
-// Test cases
 const TEST_CASES = [
   {
     input: {
@@ -87,6 +86,64 @@ type Token = {
   type?: 'comment' | 'keyword' | 'type' | 'function' | 'string' | 'number';
 };
 
+interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  manaCost: number;
+  cooldown: number;
+  isOnCooldown: boolean;
+}
+
+interface BattleState {
+  mana: number;
+  maxMana: number;
+  gold: number;
+  skills: Skill[];
+  hints: string[];
+  usedHints: string[];
+}
+
+const INITIAL_BATTLE_STATE: BattleState = {
+  mana: 100,
+  maxMana: 100,
+  gold: 500,
+  skills: [
+    {
+      id: "debug",
+      name: "Debug Insight",
+      description: "Highlights potential bugs in your code",
+      manaCost: 30,
+      cooldown: 30,
+      isOnCooldown: false,
+    },
+    {
+      id: "optimize",
+      name: "Code Optimizer",
+      description: "Suggests optimizations for your solution",
+      manaCost: 50,
+      cooldown: 60,
+      isOnCooldown: false,
+    },
+    {
+      id: "timeFreeze",
+      name: "Time Freeze",
+      description: "Pauses the battle timer for 30 seconds",
+      manaCost: 70,
+      cooldown: 120,
+      isOnCooldown: false,
+    },
+  ],
+  hints: [
+    "Consider using a hash map to optimize lookup times",
+    "Try using two pointers to solve this more efficiently",
+    "Think about edge cases with duplicate numbers",
+  ],
+  usedHints: [],
+};
+
+const HINT_COST = 100; // Gold cost for revealing a hint
+
 const Battle = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -94,6 +151,7 @@ const Battle = () => {
   const [code, setCode] = useState(INITIAL_CODE[language]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [battleState, setBattleState] = useState<BattleState>(INITIAL_BATTLE_STATE);
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
@@ -132,7 +190,6 @@ int main() {
 
   const submitToJudge0 = async (sourceCode: string, languageId: number) => {
     try {
-      // Submit code
       const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
         method: 'POST',
         headers: {
@@ -163,7 +220,6 @@ int main() {
         throw new Error('No submission token received.');
       }
 
-      // Poll for results
       let result;
       let attempts = 0;
       const maxAttempts = 10;
@@ -200,12 +256,11 @@ int main() {
   const handleRun = async () => {
     setIsRunning(true);
     try {
-      // Run first test case
       const testCase = TEST_CASES[0];
       const wrappedCode = createTestWrapper(language, code, testCase);
       const result = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
 
-      if (result.status.id === 3) { // If compilation and execution were successful
+      if (result.status.id === 3) {
         const output = result.stdout?.trim();
         const expectedOutput = JSON.stringify(testCase.expected);
         
@@ -282,7 +337,6 @@ int main() {
     const tokens: Token[] = [];
     let currentToken = '';
 
-    // Helper function to add current token
     const addToken = (type?: Token['type']) => {
       if (currentToken) {
         tokens.push({ text: currentToken, type });
@@ -290,18 +344,15 @@ int main() {
       }
     };
 
-    // Process each character
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
 
-      // Handle comments
       if ((char === '/' && line[i + 1] === '/') || char === '#') {
         addToken();
         tokens.push({ text: line.slice(i), type: 'comment' });
         break;
       }
 
-      // Handle strings
       if (char === '"') {
         addToken();
         let stringContent = char;
@@ -315,12 +366,10 @@ int main() {
         continue;
       }
 
-      // Handle word boundaries
       if (/\w/.test(char)) {
         currentToken += char;
       } else {
         if (currentToken) {
-          // Check token type
           if (/^(function|class|return|const|let|var|for|if|in|of|public|include|vector)$/.test(currentToken)) {
             addToken('keyword');
           } else if (/^(Map|unordered_map|vector|int|void)$/.test(currentToken)) {
@@ -338,7 +387,6 @@ int main() {
       }
     }
 
-    // Add any remaining token
     if (currentToken) {
       if (/^(function|class|return|const|let|var|for|if|in|of|public|include|vector)$/.test(currentToken)) {
         addToken('keyword');
@@ -368,11 +416,108 @@ int main() {
     }
   };
 
+  const useSkill = (skill: Skill) => {
+    if (skill.isOnCooldown) {
+      toast({
+        title: "Skill on Cooldown",
+        description: "This skill is still recharging...",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (battleState.mana < skill.manaCost) {
+      toast({
+        title: "Not Enough Mana",
+        description: "You need more mana to use this skill!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    switch (skill.id) {
+      case "debug":
+        toast({
+          title: "Debug Insight Activated",
+          description: "Looking for potential bugs in your code...",
+        });
+        break;
+      case "optimize":
+        toast({
+          title: "Code Optimizer Activated",
+          description: "Analyzing your code for optimization opportunities...",
+        });
+        break;
+      case "timeFreeze":
+        toast({
+          title: "Time Freeze Activated",
+          description: "Battle timer paused for 30 seconds!",
+        });
+        break;
+    }
+
+    setBattleState(prev => ({
+      ...prev,
+      mana: prev.mana - skill.manaCost,
+      skills: prev.skills.map(s => 
+        s.id === skill.id 
+          ? { ...s, isOnCooldown: true }
+          : s
+      ),
+    }));
+
+    setTimeout(() => {
+      setBattleState(prev => ({
+        ...prev,
+        skills: prev.skills.map(s =>
+          s.id === skill.id
+            ? { ...s, isOnCooldown: false }
+            : s
+        ),
+      }));
+    }, skill.cooldown * 1000);
+  };
+
+  const buyHint = () => {
+    if (battleState.hints.length === battleState.usedHints.length) {
+      toast({
+        title: "No More Hints",
+        description: "You've already unlocked all available hints!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (battleState.gold < HINT_COST) {
+      toast({
+        title: "Not Enough Gold",
+        description: `You need ${HINT_COST} gold to unlock a hint!`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const unusedHints = battleState.hints.filter(
+      hint => !battleState.usedHints.includes(hint)
+    );
+    const newHint = unusedHints[0];
+
+    setBattleState(prev => ({
+      ...prev,
+      gold: prev.gold - HINT_COST,
+      usedHints: [...prev.usedHints, newHint],
+    }));
+
+    toast({
+      title: "Hint Unlocked!",
+      description: newHint,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center mb-8">
+        <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => navigate("/")}
             className="text-gray-400 hover:text-white flex items-center gap-2"
@@ -380,10 +525,20 @@ int main() {
             <ArrowLeft className="w-4 h-4" />
             Back to Lobby
           </button>
+          
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-blue-400" />
+              <span className="text-blue-400">{battleState.mana}/{battleState.maxMana}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Coins className="w-5 h-5 text-yellow-400" />
+              <span className="text-yellow-400">{battleState.gold}</span>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Question Panel */}
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
             <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
@@ -411,10 +566,50 @@ int main() {
                   <li>Only one valid solution exists</li>
                 </ul>
               </div>
+
+              <div className="mt-6 border-t border-white/10 pt-6">
+                <h3 className="text-lg font-semibold text-primary mb-4">Battle Skills</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {battleState.skills.map((skill) => (
+                    <Button
+                      key={skill.id}
+                      onClick={() => useSkill(skill)}
+                      className="relative"
+                      variant={skill.isOnCooldown ? "secondary" : "default"}
+                      disabled={skill.isOnCooldown || battleState.mana < skill.manaCost}
+                    >
+                      <Wand className="mr-2" />
+                      {skill.name}
+                      {skill.isOnCooldown && (
+                        <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
+                          Recharging...
+                        </div>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 border-t border-white/10 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-primary">Hints</h3>
+                  <Button onClick={buyHint} variant="outline" className="gap-2">
+                    <MessageCircleQuestion className="w-4 h-4" />
+                    Buy Hint ({HINT_COST} <Coins className="w-4 h-4 text-yellow-400" />)
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {battleState.usedHints.map((hint, index) => (
+                    <div key={index} className="p-3 bg-black/30 rounded-md text-gray-300">
+                      <Star className="w-4 h-4 text-yellow-400 inline-block mr-2" />
+                      {hint}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Code Editor Panel */}
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
             <div className="relative h-full bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
