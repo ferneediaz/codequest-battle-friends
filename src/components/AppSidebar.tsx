@@ -8,9 +8,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { User, Users, Trophy, Settings, Bell, MessageSquare } from "lucide-react";
+import { User, Users, Trophy, Settings, Bell, MessageSquare, X } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { Button } from "./ui/button";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -22,9 +24,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarContent className="relative z-20">
+      <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="relative z-20">Menu</SidebarGroupLabel>
+          <div className="flex items-center justify-between px-2 py-2">
+            <SidebarGroupLabel>Menu</SidebarGroupLabel>
+            <SidebarTrigger className="md:hidden">
+              <X className="h-4 w-4" />
+            </SidebarTrigger>
+          </div>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
