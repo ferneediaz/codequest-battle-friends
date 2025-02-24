@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -55,6 +55,31 @@ public:
 };`
 };
 
+// Judge0 language IDs
+const LANGUAGE_IDS = {
+  javascript: 63,  // Node.js
+  python: 71,      // Python 3
+  cpp: 54,         // C++
+};
+
+// Test cases
+const TEST_CASES = [
+  {
+    input: {
+      nums: [2, 7, 11, 15],
+      target: 9
+    },
+    expected: [0, 1]
+  },
+  {
+    input: {
+      nums: [3, 2, 4],
+      target: 6
+    },
+    expected: [1, 2]
+  }
+];
+
 type Language = "javascript" | "python" | "cpp";
 
 type Token = {
@@ -64,12 +89,165 @@ type Token = {
 
 const Battle = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [language, setLanguage] = useState<Language>("javascript");
   const [code, setCode] = useState(INITIAL_CODE[language]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
     setCode(INITIAL_CODE[newLang]);
+  };
+
+  const createTestWrapper = (lang: Language, code: string, testCase: typeof TEST_CASES[0]) => {
+    switch (lang) {
+      case 'javascript':
+        return `
+${code}
+const nums = ${JSON.stringify(testCase.input.nums)};
+const target = ${testCase.input.target};
+console.log(JSON.stringify(solution(nums, target)));`;
+      case 'python':
+        return `
+${code}
+nums = ${JSON.stringify(testCase.input.nums)}
+target = ${testCase.input.target}
+print(solution(nums, target))`;
+      case 'cpp':
+        return `
+#include <iostream>
+#include <string>
+${code}
+int main() {
+    Solution s;
+    vector<int> nums = ${JSON.stringify(testCase.input.nums).replace('[', '{').replace(']', '}')};
+    int target = ${testCase.input.target};
+    vector<int> result = s.solution(nums, target);
+    cout << "[" << result[0] << "," << result[1] << "]" << endl;
+    return 0;
+}`;
+    }
+  };
+
+  const submitToJudge0 = async (sourceCode: string, languageId: number) => {
+    try {
+      // Submit code
+      const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+          'X-RapidAPI-Key': 'YOUR-RAPIDAPI-KEY', // Replace with your RapidAPI key
+        },
+        body: JSON.stringify({
+          source_code: sourceCode,
+          language_id: languageId,
+          stdin: '',
+        }),
+      });
+
+      const { token } = await submitResponse.json();
+
+      // Poll for results
+      let result;
+      do {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const resultResponse = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
+          headers: {
+            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+            'X-RapidAPI-Key': 'YOUR-RAPIDAPI-KEY', // Replace with your RapidAPI key
+          },
+        });
+        result = await resultResponse.json();
+      } while (result.status?.description === 'Processing');
+
+      return result;
+    } catch (error) {
+      console.error('Error submitting to Judge0:', error);
+      throw error;
+    }
+  };
+
+  const handleRun = async () => {
+    setIsRunning(true);
+    try {
+      // Run first test case
+      const testCase = TEST_CASES[0];
+      const wrappedCode = createTestWrapper(language, code, testCase);
+      const result = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
+
+      if (result.status.id === 3) { // If compilation and execution were successful
+        const output = result.stdout?.trim();
+        const expectedOutput = JSON.stringify(testCase.expected);
+        
+        if (output === expectedOutput) {
+          toast({
+            title: "Test Passed! ✅",
+            description: "Your solution passed the sample test case.",
+          });
+        } else {
+          toast({
+            title: "Test Failed ❌",
+            description: `Expected ${expectedOutput}, but got ${output}`,
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: result.stderr || result.compile_output || "An error occurred while running your code.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to run the code. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      let allPassed = true;
+      
+      for (const testCase of TEST_CASES) {
+        const wrappedCode = createTestWrapper(language, code, testCase);
+        const result = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
+
+        if (result.status.id !== 3 || 
+            result.stdout?.trim() !== JSON.stringify(testCase.expected)) {
+          allPassed = false;
+          break;
+        }
+      }
+
+      if (allPassed) {
+        toast({
+          title: "All Tests Passed! 🎉",
+          description: "Congratulations! Your solution passed all test cases.",
+        });
+      } else {
+        toast({
+          title: "Some Tests Failed",
+          description: "Your solution didn't pass all test cases. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit the code. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const tokenizeLine = (line: string): Token[] => {
@@ -228,20 +406,22 @@ const Battle = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
-                    className="px-4 py-2 bg-muted hover:bg-muted/90 text-muted-foreground rounded-md transition-colors flex items-center gap-2"
-                    onClick={() => console.log("Running test cases...")}
+                    className="px-4 py-2 bg-muted hover:bg-muted/90 text-muted-foreground rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
+                    onClick={handleRun}
+                    disabled={isRunning || isSubmitting}
                   >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className={`w-4 h-4 ${isRunning ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polygon points="5 3 19 12 5 21 5 3" />
                     </svg>
-                    Run
+                    {isRunning ? 'Running...' : 'Run'}
                   </button>
                   <button 
-                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2"
-                    onClick={() => console.log("Submitting solution...")}
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
+                    onClick={handleSubmit}
+                    disabled={isRunning || isSubmitting}
                   >
-                    <Check className="w-4 h-4" />
-                    Submit
+                    <Check className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`} />
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                 </div>
               </div>
