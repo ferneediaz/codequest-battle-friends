@@ -1,11 +1,32 @@
 
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const INITIAL_CODE = {
+  javascript: `function solution() {\n  // Write your code here\n}`,
+  python: `def solution():\n    # Write your code here\n    pass`,
+  cpp: `#include <vector>\n\nclass Solution {\npublic:\n    vector<int> solution() {\n        // Write your code here\n    }\n};`,
+};
+
+type Language = "javascript" | "python" | "cpp";
 
 const Battle = () => {
   const navigate = useNavigate();
-  const [code, setCode] = useState(`function solution() {\n  // Write your code here\n}`);
+  const [language, setLanguage] = useState<Language>("javascript");
+  const [code, setCode] = useState(INITIAL_CODE[language]);
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLanguage(newLang);
+    setCode(INITIAL_CODE[newLang]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
@@ -58,11 +79,24 @@ const Battle = () => {
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
             <div className="relative h-full bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
               <div className="flex items-center justify-between p-4 border-b border-white/10">
-                <h3 className="text-lg font-semibold text-white">Code Editor</h3>
+                <div className="flex items-center gap-4">
+                  <h3 className="text-lg font-semibold text-white">Code Editor</h3>
+                  <Select value={language} onValueChange={(value: Language) => handleLanguageChange(value)}>
+                    <SelectTrigger className="w-[140px] bg-black/30">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="javascript">JavaScript</SelectItem>
+                      <SelectItem value="python">Python</SelectItem>
+                      <SelectItem value="cpp">C++</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <button 
-                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors"
+                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2"
                   onClick={() => console.log("Running code...")}
                 >
+                  <Check className="w-4 h-4" />
                   Run Code
                 </button>
               </div>
