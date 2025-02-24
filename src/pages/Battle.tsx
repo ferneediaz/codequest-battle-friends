@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -576,21 +575,21 @@ int main() {
 
               <div className="mt-6 border-t border-white/10 pt-6">
                 <h3 className="text-lg font-semibold text-primary mb-4">Battle Skills</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {battleState.skills.map((skill) => (
                     <Button
                       key={skill.id}
                       onClick={() => useSkill(skill)}
-                      className="relative h-auto min-h-[64px] flex flex-col items-center justify-center p-4 gap-1"
+                      className="relative h-auto min-h-[80px] w-full flex flex-col items-start p-3 text-left"
                       variant={skill.isOnCooldown ? "secondary" : "default"}
                       disabled={skill.isOnCooldown || battleState.mana < skill.manaCost}
                     >
-                      <div className="flex items-center gap-2">
-                        <Wand className="w-4 h-4" />
-                        <span>{skill.name}</span>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Wand className="w-4 h-4 shrink-0" />
+                        <span className="font-semibold line-clamp-1">{skill.name}</span>
                       </div>
-                      <div className="text-xs opacity-70">{skill.description}</div>
-                      <div className="text-xs mt-1">
+                      <div className="text-xs opacity-70 line-clamp-2">{skill.description}</div>
+                      <div className="text-xs mt-1 text-blue-400">
                         Mana Cost: {skill.manaCost}
                       </div>
                       {skill.isOnCooldown && (
