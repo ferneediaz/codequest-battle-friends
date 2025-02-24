@@ -1,5 +1,6 @@
 
 import { Trophy, Swords, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface BattleCardProps {
   difficulty: "Easy" | "Medium" | "Hard";
@@ -15,6 +16,13 @@ const DifficultyColor = {
 };
 
 const BattleCard = ({ difficulty, title, players, onJoin }: BattleCardProps) => {
+  const navigate = useNavigate();
+
+  const handleJoin = () => {
+    onJoin();
+    navigate("/battle");
+  };
+
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
@@ -37,7 +45,7 @@ const BattleCard = ({ difficulty, title, players, onJoin }: BattleCardProps) => 
             <span className="text-sm text-gray-400">+100 XP</span>
           </div>
           <button
-            onClick={onJoin}
+            onClick={handleJoin}
             className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center space-x-2 transition-colors"
           >
             <Swords className="w-4 h-4" />
