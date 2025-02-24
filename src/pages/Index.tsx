@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import QuestCard from "@/components/QuestCard";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Sword, Crown, Trophy, Star, Medal, Chest } from "lucide-react";
+import { Shield, Sword, Crown, Trophy, Star, Medal } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -498,7 +499,7 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-4 border-l border-white/10 pl-6">
                 <div className="text-center">
-                  <Chest className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
+                  <Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
                   <span className="text-sm text-gray-400">Chests: {
                     Object.values(userProfile.chests).reduce((a, b) => a + b, 0)
                   }</span>
