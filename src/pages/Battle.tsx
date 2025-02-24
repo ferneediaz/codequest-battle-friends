@@ -147,10 +147,27 @@ int main() {
         }),
       });
 
+      if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        if (submitResponse.status === 403) {
+          throw new Error('Judge0 API subscription required. Please check your API key.');
+        } else if (submitResponse.status === 429) {
+          throw new Error('Too many requests. Please try again later.');
+        } else {
+          throw new Error(errorData.message || 'Failed to submit code.');
+        }
+      }
+
       const { token } = await submitResponse.json();
+      if (!token) {
+        throw new Error('No submission token received.');
+      }
 
       // Poll for results
       let result;
+      let attempts = 0;
+      const maxAttempts = 10;
+
       do {
         await new Promise(resolve => setTimeout(resolve, 1000));
         const resultResponse = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
@@ -159,11 +176,22 @@ int main() {
             'X-RapidAPI-Key': 'YOUR-RAPIDAPI-KEY', // Replace with your RapidAPI key
           },
         });
+
+        if (!resultResponse.ok) {
+          const errorData = await resultResponse.json();
+          throw new Error(errorData.message || 'Failed to get submission results.');
+        }
+
         result = await resultResponse.json();
+        attempts++;
+
+        if (attempts >= maxAttempts) {
+          throw new Error('Execution timed out. Please try again.');
+        }
       } while (result.status?.description === 'Processing');
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting to Judge0:', error);
       throw error;
     }
@@ -200,10 +228,10 @@ int main() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to run the code. Please try again.",
+        description: error.message || "Failed to run the code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -239,10 +267,10 @@ int main() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to submit the code. Please try again.",
+        description: error.message || "Failed to submit the code. Please try again.",
         variant: "destructive",
       });
     } finally {
