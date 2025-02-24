@@ -2,6 +2,7 @@ import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Sword, Crown, Trophy, Star, Medal } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -106,7 +107,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-16 mx-auto">
-        {/* Hero Section */}
+        <div className="fixed top-4 left-4 z-50">
+          <SidebarTrigger />
+        </div>
+
         <div className="text-center mb-16 space-y-6">
           <div className="flex justify-center gap-4 mb-6">
             <Shield className="w-12 h-12 text-primary animate-float" />
@@ -122,7 +126,6 @@ const Index = () => {
           </p>
         </div>
 
-        {/* User Profile Card */}
         <div className="mb-16 p-6 rounded-lg bg-black/30 border border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -153,7 +156,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {[
             { title: "Active Battles", value: "24", color: "from-blue-500 to-blue-600" },
@@ -176,7 +178,6 @@ const Index = () => {
           ))}
         </div>
 
-        {/* Rank Tiers */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-8">Rank Tiers</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -200,7 +201,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Battle Cards */}
         <h2 className="text-2xl font-bold text-white mb-8">Active Battles</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {battles.map((battle) => (
