@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useSidebar } from "@/components/ui/sidebar";
 import {
   Select,
   SelectContent,
@@ -154,7 +153,6 @@ const HINT_COST = 100; // Gold cost for revealing a hint
 const Battle = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { setOpen } = useSidebar();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [language, setLanguage] = useState<Language>("javascript");
   const [code, setCode] = useState(INITIAL_CODE[language]);
@@ -165,8 +163,7 @@ const Battle = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
 
   React.useEffect(() => {
-    setOpen(false);
-  }, [setOpen]);
+  }, []);
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
