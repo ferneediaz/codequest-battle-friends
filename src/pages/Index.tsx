@@ -2,7 +2,14 @@ import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import QuestCard from "@/components/QuestCard";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Sword, Crown, Trophy, Star, Medal } from "lucide-react";
+import { Shield, Sword, Crown, Trophy, Star, Medal, Award } from "lucide-react";
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  ResponsiveContainer,
+} from "recharts";
 import {
   Select,
   SelectContent,
@@ -405,7 +412,21 @@ const Index = () => {
     inventory: [
       { id: 1, name: "Quick Syntax Scroll", rarity: "rare", description: "30% faster coding speed for one battle" },
       { id: 2, name: "Debug Lens", rarity: "common", description: "Reveals one bug in your code" },
-    ]
+    ],
+    achievements: {
+      competitions: [
+        { id: 1, name: "Algorithm Master", place: 1, year: 2023 },
+        { id: 2, name: "Code Wars Champion", place: 2, year: 2023 },
+      ],
+    },
+    skills: [
+      { category: "Arrays & Strings", value: 85 },
+      { category: "Algorithms", value: 92 },
+      { category: "Data Structures", value: 78 },
+      { category: "Dynamic Programming", value: 65 },
+      { category: "System Design", value: 70 },
+      { category: "Problem Solving", value: 88 },
+    ],
   });
 
   const getRankIcon = (rank: string) => {
@@ -452,15 +473,39 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Profile Card */}
+        {/* Enhanced Profile Card */}
         <div className="mb-16 p-6 rounded-lg bg-black/30 border border-white/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-2 rounded-full bg-gradient-to-r from-primary to-accent">
-                {getRankIcon(userProfile.rank)}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Profile Info */}
+            <div className="flex items-start gap-4">
+              <div className="relative">
+                <div className="p-3 rounded-full bg-gradient-to-r from-primary to-accent">
+                  {getRankIcon(userProfile.rank)}
+                </div>
+                {userProfile.achievements.competitions.length > 0 && (
+                  <div className="absolute -top-2 -right-2">
+                    <div className="relative">
+                      <Award className="w-6 h-6 text-yellow-500 animate-glow" />
+                      <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs font-bold">
+                        {userProfile.achievements.competitions.length}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">{userProfile.name}</h3>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  {userProfile.name}
+                  {userProfile.achievements.competitions.map((comp) => (
+                    comp.place === 1 && (
+                      <Trophy 
+                        key={comp.id}
+                        className="w-5 h-5 text-yellow-500 animate-float"
+                        style={{ animationDelay: `${comp.id * 0.2}s` }}
+                      />
+                    )
+                  ))}
+                </h3>
                 <div className="flex items-center gap-2">
                   <span className="text-sm" style={{ color: RANKS[userProfile.rank].color }}>
                     {RANKS[userProfile.rank].name}
@@ -469,28 +514,103 @@ const Index = () => {
                     MMR: {userProfile.mmr}
                   </span>
                 </div>
+                <div className="mt-4 space-y-1">
+                  {userProfile.achievements.competitions.map((comp) => (
+                    <div 
+                      key={comp.id}
+                      className="text-sm text-gray-400 flex items-center gap-2"
+                    >
+                      {comp.place === 1 ? (
+                        <Crown className="w-4 h-4 text-yellow-500" />
+                      ) : comp.place === 2 ? (
+                        <Medal className="w-4 h-4 text-gray-300" />
+                      ) : (
+                        <Medal className="w-4 h-4 text-amber-700" />
+                      )}
+                      {comp.name} ({comp.year})
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="text-right">
-                <div className="text-sm text-gray-400">Win Rate</div>
-                <div className="text-xl font-bold text-white">
+
+            {/* Spider Chart */}
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={userProfile.skills}>
+                  <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                  <PolarAngleAxis
+                    dataKey="category"
+                    tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 12 }}
+                  />
+                  <Radar
+                    name="Skills"
+                    dataKey="value"
+                    stroke="#8B5CF6"
+                    fill="#8B5CF6"
+                    fillOpacity={0.3}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 rounded-lg bg-black/20 border border-white/5">
+                <div className="text-xl font-bold text-white mb-1">
                   {Math.round((userProfile.wins / (userProfile.wins + userProfile.losses)) * 100)}%
                 </div>
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-gray-400">Win Rate</div>
+                <div className="text-xs text-gray-500 mt-1">
                   {userProfile.wins}W - {userProfile.losses}L
                 </div>
               </div>
-              <div className="flex items-center gap-4 border-l border-white/10 pl-6">
-                <div className="text-center">
-                  <Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
-                  <span className="text-sm text-gray-400">Chests: {
-                    Object.values(userProfile.chests).reduce((a, b) => a + b, 0)
-                  }</span>
+              <div className="text-center p-4 rounded-lg bg-black/20 border border-white/5">
+                <div className="text-xl font-bold text-white mb-1">
+                  {Object.values(userProfile.chests).reduce((a, b) => a + b, 0)}
                 </div>
-                <div className="text-center">
-                  <Star className="w-6 h-6 text-purple-500 mx-auto mb-1" />
-                  <span className="text-sm text-gray-400">Items: {userProfile.inventory.length}</span>
+                <div className="text-sm text-gray-400">Chests</div>
+                <div className="flex justify-center gap-2 mt-1">
+                  {Object.entries(userProfile.chests).map(([type, count]) => count > 0 && (
+                    <div
+                      key={type}
+                      className="text-xs px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: type === 'legendary' ? 'rgba(234, 179, 8, 0.2)' :
+                          type === 'epic' ? 'rgba(168, 85, 247, 0.2)' :
+                          type === 'rare' ? 'rgba(59, 130, 246, 0.2)' :
+                          'rgba(107, 114, 128, 0.2)',
+                        color: type === 'legendary' ? '#fcd34d' :
+                          type === 'epic' ? '#c084fc' :
+                          type === 'rare' ? '#93c5fd' :
+                          '#d1d5db'
+                      }}
+                    >
+                      {count} {type}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="col-span-2 p-4 rounded-lg bg-black/20 border border-white/5">
+                <div className="text-sm text-gray-400 mb-2">Inventory</div>
+                <div className="space-y-2">
+                  {userProfile.inventory.map(item => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <span className="text-white">{item.name}</span>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: item.rarity === 'rare' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(107, 114, 128, 0.2)',
+                          color: item.rarity === 'rare' ? '#93c5fd' : '#d1d5db'
+                        }}
+                      >
+                        {item.rarity}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
