@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useRef } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -155,6 +156,7 @@ const Battle = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setOpen } = useSidebar();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [language, setLanguage] = useState<Language>("javascript");
   const [code, setCode] = useState(INITIAL_CODE[language]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -530,8 +532,9 @@ int main() {
     if (e.key === 'Tab') {
       e.preventDefault();
       
-      const { selectionStart, selectionEnd } = e.currentTarget;
-      const currentValue = e.currentTarget.value;
+      const textarea = e.currentTarget;
+      const { selectionStart, selectionEnd } = textarea;
+      const currentValue = textarea.value;
       
       const newValue = 
         currentValue.substring(0, selectionStart) + 
@@ -540,9 +543,11 @@ int main() {
       
       setCode(newValue);
       
-      requestAnimationFrame(() => {
-        e.currentTarget.selectionStart = e.currentTarget.selectionEnd = selectionStart + 2;
-      });
+      // Store the new cursor position
+      const newCursorPos = selectionStart + 2;
+      
+      // Use the current event's target instead of requestAnimationFrame
+      textarea.selectionStart = textarea.selectionEnd = newCursorPos;
     }
   };
 
@@ -696,6 +701,7 @@ int main() {
               </div>
               <div className="relative w-full h-[500px]">
                 <textarea
+                  ref={textareaRef}
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   onKeyDown={handleKeyDown}
