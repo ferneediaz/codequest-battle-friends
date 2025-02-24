@@ -8,10 +8,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { User, Users, Trophy, Settings, Bell, MessageSquare, X } from "lucide-react";
+import { User, Users, Trophy, Settings, Bell, MessageSquare, Menu, X } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 
@@ -25,77 +24,93 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <div className="flex items-center justify-between px-2 py-2">
-            <SidebarGroupLabel>Menu</SidebarGroupLabel>
-            {open && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7" 
-                onClick={toggleSidebar}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close Sidebar</span>
-              </Button>
-            )}
-          </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="#profile">
-                    <User />
-                    <span>Profile</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="#party">
-                    <Users />
-                    <span>Party</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="#leaderboard">
-                    <Trophy />
-                    <span>Leaderboard</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="#messages">
-                    <MessageSquare />
-                    <span>Messages</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="#notifications">
-                    <Bell />
-                    <span>Notifications</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="#settings">
-                    <Settings />
-                    <span>Settings</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+    <>
+      {/* Toggle Button */}
+      {!open && (
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="fixed left-4 top-4 z-50 md:hidden" 
+          onClick={toggleSidebar}
+        >
+          <Menu className="h-4 w-4" />
+          <span className="sr-only">Open Sidebar</span>
+        </Button>
+      )}
+
+      {/* Sidebar */}
+      <Sidebar>
+        <SidebarContent>
+          <SidebarGroup>
+            <div className="flex items-center justify-between px-4 py-3">
+              <SidebarGroupLabel className="text-base font-semibold">Menu</SidebarGroupLabel>
+              {open && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8" 
+                  onClick={toggleSidebar}
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close Sidebar</span>
+                </Button>
+              )}
+            </div>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="#profile" className="flex items-center gap-3">
+                      <User className="h-4 w-4" />
+                      <span>Profile</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="#party" className="flex items-center gap-3">
+                      <Users className="h-4 w-4" />
+                      <span>Party</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="#leaderboard" className="flex items-center gap-3">
+                      <Trophy className="h-4 w-4" />
+                      <span>Leaderboard</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="#messages" className="flex items-center gap-3">
+                      <MessageSquare className="h-4 w-4" />
+                      <span>Messages</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="#notifications" className="flex items-center gap-3">
+                      <Bell className="h-4 w-4" />
+                      <span>Notifications</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="#settings" className="flex items-center gap-3">
+                      <Settings className="h-4 w-4" />
+                      <span>Settings</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+    </>
   );
 }
