@@ -226,13 +226,24 @@ const Battle = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <button 
-                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2"
-                  onClick={() => console.log("Running code...")}
-                >
-                  <Check className="w-4 h-4" />
-                  Run Code
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    className="px-4 py-2 bg-muted hover:bg-muted/90 text-muted-foreground rounded-md transition-colors flex items-center gap-2"
+                    onClick={() => console.log("Running test cases...")}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    Run
+                  </button>
+                  <button 
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2"
+                    onClick={() => console.log("Submitting solution...")}
+                  >
+                    <Check className="w-4 h-4" />
+                    Submit
+                  </button>
+                </div>
               </div>
               <div className="relative w-full h-[500px]">
                 <textarea
