@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import QuestCard from "@/components/QuestCard";
@@ -11,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -81,7 +79,6 @@ const Index = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
   const [battles] = useState([
-    // Forest of Arrays
     { 
       id: 1, 
       difficulty: "Easy", 
@@ -113,7 +110,6 @@ const Index = () => {
       currentPlayers: ["Player3"],
     },
     
-    // Hashmap Dungeons
     { 
       id: 4, 
       difficulty: "Easy", 
@@ -145,7 +141,6 @@ const Index = () => {
       currentPlayers: ["Player6"],
     },
 
-    // Binary Search Castle
     { 
       id: 7, 
       difficulty: "Easy", 
@@ -177,7 +172,6 @@ const Index = () => {
       currentPlayers: ["Player9"],
     },
 
-    // Linked List Gardens
     { 
       id: 10, 
       difficulty: "Easy", 
@@ -209,7 +203,6 @@ const Index = () => {
       currentPlayers: ["Player12"],
     },
 
-    // Tree of Wisdom
     { 
       id: 13, 
       difficulty: "Easy", 
@@ -241,7 +234,6 @@ const Index = () => {
       currentPlayers: ["Player15"],
     },
 
-    // Graph Adventures
     { 
       id: 16, 
       difficulty: "Easy", 
@@ -273,7 +265,6 @@ const Index = () => {
       currentPlayers: ["Player18"],
     },
 
-    // Dynamic Programming Peaks
     { 
       id: 19, 
       difficulty: "Easy", 
@@ -305,7 +296,6 @@ const Index = () => {
       currentPlayers: ["Player21"],
     },
 
-    // Stack & Queue Tavern
     { 
       id: 22, 
       difficulty: "Easy", 
@@ -337,7 +327,6 @@ const Index = () => {
       currentPlayers: ["Player24"],
     },
 
-    // Recursion Temple
     { 
       id: 25, 
       difficulty: "Easy", 
@@ -369,7 +358,6 @@ const Index = () => {
       currentPlayers: ["Player27"],
     },
 
-    // Sorting Sanctuary
     { 
       id: 28, 
       difficulty: "Easy", 
@@ -449,10 +437,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-16 mx-auto">
-        <div className="fixed top-4 left-4 z-50">
-          <SidebarTrigger />
-        </div>
-
         <div className="text-center mb-16 space-y-6">
           <div className="flex justify-center gap-4 mb-6">
             <Shield className="w-12 h-12 text-primary animate-float" />
