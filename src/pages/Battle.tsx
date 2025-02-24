@@ -57,6 +57,11 @@ public:
 
 type Language = "javascript" | "python" | "cpp";
 
+type Token = {
+  text: string;
+  type?: 'comment' | 'keyword' | 'type' | 'function' | 'string' | 'number';
+};
+
 const Battle = () => {
   const navigate = useNavigate();
   const [language, setLanguage] = useState<Language>("javascript");
@@ -65,6 +70,96 @@ const Battle = () => {
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
     setCode(INITIAL_CODE[newLang]);
+  };
+
+  const tokenizeLine = (line: string): Token[] => {
+    const tokens: Token[] = [];
+    let currentToken = '';
+
+    // Helper function to add current token
+    const addToken = (type?: Token['type']) => {
+      if (currentToken) {
+        tokens.push({ text: currentToken, type });
+        currentToken = '';
+      }
+    };
+
+    // Process each character
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+
+      // Handle comments
+      if ((char === '/' && line[i + 1] === '/') || char === '#') {
+        addToken();
+        tokens.push({ text: line.slice(i), type: 'comment' });
+        break;
+      }
+
+      // Handle strings
+      if (char === '"') {
+        addToken();
+        let stringContent = char;
+        i++;
+        while (i < line.length && line[i] !== '"') {
+          stringContent += line[i];
+          i++;
+        }
+        if (i < line.length) stringContent += line[i];
+        tokens.push({ text: stringContent, type: 'string' });
+        continue;
+      }
+
+      // Handle word boundaries
+      if (/\w/.test(char)) {
+        currentToken += char;
+      } else {
+        if (currentToken) {
+          // Check token type
+          if (/^(function|class|return|const|let|var|for|if|in|of|public|include|vector)$/.test(currentToken)) {
+            addToken('keyword');
+          } else if (/^(Map|unordered_map|vector|int|void)$/.test(currentToken)) {
+            addToken('type');
+          } else if (/^(solution|enumerate|find|size|has|get|set)$/.test(currentToken)) {
+            addToken('function');
+          } else if (/^\d+$/.test(currentToken)) {
+            addToken('number');
+          } else {
+            addToken();
+          }
+        }
+        tokens.push({ text: char });
+        currentToken = '';
+      }
+    }
+
+    // Add any remaining token
+    if (currentToken) {
+      if (/^(function|class|return|const|let|var|for|if|in|of|public|include|vector)$/.test(currentToken)) {
+        addToken('keyword');
+      } else if (/^(Map|unordered_map|vector|int|void)$/.test(currentToken)) {
+        addToken('type');
+      } else if (/^(solution|enumerate|find|size|has|get|set)$/.test(currentToken)) {
+        addToken('function');
+      } else if (/^\d+$/.test(currentToken)) {
+        addToken('number');
+      } else {
+        addToken();
+      }
+    }
+
+    return tokens;
+  };
+
+  const getTokenColor = (type?: Token['type']): string => {
+    switch (type) {
+      case 'comment': return '#6A9955';
+      case 'keyword': return '#C586C0';
+      case 'type': return '#4EC9B0';
+      case 'function': return '#DCDCAA';
+      case 'string': return '#CE9178';
+      case 'number': return '#B5CEA8';
+      default: return '#D4D4D4';
+    }
   };
 
   return (
@@ -159,13 +254,11 @@ const Battle = () => {
                   <code>
                     {code.split('\n').map((line, i) => (
                       <div key={i} className="min-h-[1.5em]">
-                        {line
-                          .replace(/(\/\/.*|#.*)/g, '<span style="color: #6A9955">$1</span>')
-                          .replace(/\b(function|class|return|const|let|var|for|if|in|of|public|include|vector)\b/g, '<span style="color: #C586C0">$1</span>')
-                          .replace(/\b(Map|unordered_map|vector|int|void)\b/g, '<span style="color: #4EC9B0">$1</span>')
-                          .replace(/\b(solution|enumerate|find|size|has|get|set)\b/g, '<span style="color: #DCDCAA">$1</span>')
-                          .replace(/"([^"]*)"/g, '<span style="color: #CE9178">"$1"</span>')
-                          .replace(/\b(\d+)\b/g, '<span style="color: #B5CEA8">$1</span>')}
+                        {tokenizeLine(line).map((token, j) => (
+                          <span key={j} style={{ color: getTokenColor(token.type) }}>
+                            {token.text}
+                          </span>
+                        ))}
                       </div>
                     ))}
                   </code>
