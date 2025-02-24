@@ -11,9 +11,48 @@ import {
 } from "@/components/ui/select";
 
 const INITIAL_CODE = {
-  javascript: `function solution() {\n  // Write your code here\n}`,
-  python: `def solution():\n    # Write your code here\n    pass`,
-  cpp: `#include <vector>\n\nclass Solution {\npublic:\n    vector<int> solution() {\n        // Write your code here\n    }\n};`,
+  javascript: `// JavaScript Solution
+function solution(nums, target) {
+  const map = new Map();
+  
+  for (let i = 0; i < nums.length; i++) {
+    const complement = target - nums[i];
+    if (map.has(complement)) {
+      return [map.get(complement), i];
+    }
+    map.set(nums[i], i);
+  }
+  return [];
+}`,
+  python: `# Python Solution
+def solution(nums, target):
+    num_map = {}
+    
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in num_map:
+            return [num_map[complement], i]
+        num_map[num] = i
+    return []`,
+  cpp: `// C++ Solution
+#include <vector>
+#include <unordered_map>
+
+class Solution {
+public:
+    vector<int> solution(vector<int>& nums, int target) {
+        unordered_map<int, int> map;
+        
+        for (int i = 0; i < nums.size(); i++) {
+            int complement = target - nums[i];
+            if (map.find(complement) != map.end()) {
+                return {map[complement], i};
+            }
+            map[nums[i]] = i;
+        }
+        return {};
+    }
+};`
 };
 
 type Language = "javascript" | "python" | "cpp";
@@ -26,6 +65,38 @@ const Battle = () => {
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
     setCode(INITIAL_CODE[newLang]);
+  };
+
+  // Helper function to apply syntax highlighting
+  const highlightCode = (code: string, language: Language) => {
+    // Split the code into lines for better control
+    return code.split('\n').map((line, i) => {
+      // Basic syntax highlighting
+      const highlighted = line
+        // Comments
+        .replace(/(\/\/.*|#.*)/g, '<span class="text-[#6A9955]">$1</span>')
+        // Keywords
+        .replace(
+          /\b(function|class|return|const|let|var|for|if|in|of|public|include|vector)\b/g,
+          '<span class="text-[#C586C0]">$1</span>'
+        )
+        // Types and built-in objects
+        .replace(
+          /\b(Map|unordered_map|vector|int|void)\b/g,
+          '<span class="text-[#4EC9B0]">$1</span>'
+        )
+        // Function calls and declarations
+        .replace(
+          /\b(solution|enumerate|find|size|has|get|set)\b/g,
+          '<span class="text-[#DCDCAA]">$1</span>'
+        )
+        // Strings
+        .replace(/"([^"]*)"/, '<span class="text-[#CE9178]">\"$1\"</span>')
+        // Numbers
+        .replace(/\b(\d+)\b/g, '<span class="text-[#B5CEA8]">$1</span>');
+
+      return `<div class="min-h-[1.5em]">${highlighted}</div>`;
+    }).join('');
   };
 
   return (
@@ -100,11 +171,10 @@ const Battle = () => {
                   Run Code
                 </button>
               </div>
-              <textarea
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full h-[500px] bg-transparent text-gray-300 font-mono p-4 focus:outline-none"
-                spellCheck="false"
+              <div 
+                className="w-full h-[500px] bg-[#1E1E1E] font-mono p-4 overflow-auto text-[#D4D4D4] text-sm leading-6"
+                style={{ tabSize: 2 }}
+                dangerouslySetInnerHTML={{ __html: highlightCode(code, language) }}
               />
             </div>
           </div>
