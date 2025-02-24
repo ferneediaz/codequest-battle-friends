@@ -219,10 +219,10 @@ const Battle = () => {
                     <SelectTrigger className="w-[140px] bg-black/30">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="javascript">JavaScript</SelectItem>
-                      <SelectItem value="python">Python</SelectItem>
-                      <SelectItem value="cpp">C++</SelectItem>
+                    <SelectContent className="bg-gray-900 border border-white/10">
+                      <SelectItem value="javascript" className="text-white hover:bg-gray-800">JavaScript</SelectItem>
+                      <SelectItem value="python" className="text-white hover:bg-gray-800">Python</SelectItem>
+                      <SelectItem value="cpp" className="text-white hover:bg-gray-800">C++</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
