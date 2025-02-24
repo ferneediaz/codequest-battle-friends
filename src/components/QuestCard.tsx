@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Trophy, Star, Check, TreasureChest } from "lucide-react";
+import { Trophy, Star, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
