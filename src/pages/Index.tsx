@@ -2,6 +2,13 @@ import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Sword, Crown, Trophy, Star, Medal } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const RANKS = {
@@ -15,14 +22,30 @@ const RANKS = {
   herald: { name: "Herald", color: "#33C3F0", minMMR: 0 },
 };
 
+const BATTLE_CATEGORIES = [
+  "All Realms",
+  "Forest of Arrays",
+  "Hashmap Dungeons",
+  "Binary Search Castle",
+  "Linked List Gardens",
+  "Tree of Wisdom",
+  "Graph Adventures",
+  "Dynamic Programming Peaks",
+  "Stack & Queue Tavern",
+  "Recursion Temple",
+  "Sorting Sanctuary",
+] as const;
+
 const Index = () => {
   const { toast } = useToast();
+  const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
   const [battles] = useState([
     { 
       id: 1, 
       difficulty: "Easy", 
       title: "Forest of Arrays", 
       players: 4,
+      category: "Forest of Arrays",
       minRank: "guardian",
       maxRank: "crusader",
       currentPlayers: ["Player1"],
@@ -32,6 +55,7 @@ const Index = () => {
       difficulty: "Medium", 
       title: "Dungeon of Objects", 
       players: 1,
+      category: "Hashmap Dungeons",
       minRank: "archon",
       maxRank: "legend",
       currentPlayers: ["Player3"],
@@ -41,6 +65,7 @@ const Index = () => {
       difficulty: "Hard", 
       title: "Dragon's Algorithm Lair", 
       players: 3,
+      category: "Dynamic Programming Peaks",
       minRank: "ancient",
       maxRank: "immortal",
       currentPlayers: ["Player4", "Player5", "Player6"],
@@ -50,6 +75,7 @@ const Index = () => {
       difficulty: "Medium", 
       title: "Binary Search Castle", 
       players: 2,
+      category: "Binary Search Castle",
       minRank: "legend",
       maxRank: "divine",
       currentPlayers: ["Player7", "Player8"],
@@ -59,6 +85,7 @@ const Index = () => {
       difficulty: "Hard", 
       title: "Recursive Realm", 
       players: 1,
+      category: "Recursion Temple",
       minRank: "divine",
       maxRank: "immortal",
       currentPlayers: ["Player9"],
@@ -68,6 +95,7 @@ const Index = () => {
       difficulty: "Easy", 
       title: "Linked List Garden", 
       players: 4,
+      category: "Linked List Gardens",
       minRank: "herald",
       maxRank: "guardian",
       currentPlayers: ["Player10", "Player11", "Player12", "Player13"],
@@ -81,13 +109,6 @@ const Index = () => {
     wins: 42,
     losses: 18,
   });
-
-  const handleJoinBattle = () => {
-    toast({
-      title: "Joining Battle",
-      description: "Finding your perfect match...",
-    });
-  };
 
   const getRankIcon = (rank: string) => {
     switch (rank) {
@@ -103,6 +124,17 @@ const Index = () => {
         return <Medal className="w-6 h-6" style={{ color: RANKS[rank].color }} />;
     }
   };
+
+  const handleJoinBattle = () => {
+    toast({
+      title: "Joining Battle",
+      description: "Finding your perfect match...",
+    });
+  };
+
+  const filteredBattles = battles.filter(
+    battle => selectedCategory === "All Realms" || battle.category === selectedCategory
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
@@ -126,6 +158,7 @@ const Index = () => {
           </p>
         </div>
 
+        {/* Profile Card */}
         <div className="mb-16 p-6 rounded-lg bg-black/30 border border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -156,6 +189,7 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {[
             { title: "Active Battles", value: "24", color: "from-blue-500 to-blue-600" },
@@ -178,6 +212,7 @@ const Index = () => {
           ))}
         </div>
 
+        {/* Rank Tiers */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-8">Rank Tiers</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -201,9 +236,26 @@ const Index = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-white mb-8">Active Battles</h2>
+        <div className="mb-8 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-white">Active Battles</h2>
+          <div className="w-64">
+            <Select onValueChange={setSelectedCategory} defaultValue={selectedCategory}>
+              <SelectTrigger className="bg-black/50 border-white/10">
+                <SelectValue placeholder="Select a realm" />
+              </SelectTrigger>
+              <SelectContent>
+                {BATTLE_CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {battles.map((battle) => (
+          {filteredBattles.map((battle) => (
             <BattleCard
               key={battle.id}
               difficulty={battle.difficulty as "Easy" | "Medium" | "Hard"}
