@@ -1,7 +1,8 @@
 import { useState } from "react";
 import BattleCard from "@/components/BattleCard";
+import QuestCard from "@/components/QuestCard";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Sword, Crown, Trophy, Star, Medal } from "lucide-react";
+import { Shield, Sword, Crown, Trophy, Star, Medal, Chest } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,45 @@ const BATTLE_CATEGORIES = [
   "Recursion Temple",
   "Sorting Sanctuary",
 ] as const;
+
+const QUESTS = [
+  {
+    id: 1,
+    title: "Battle Initiate",
+    description: "Win your first coding battle",
+    progress: 0,
+    target: 1,
+    reward: "Common Chest",
+    isCompleted: false,
+  },
+  {
+    id: 2,
+    title: "Battle Master",
+    description: "Win 5 coding battles",
+    progress: 2,
+    target: 5,
+    reward: "Rare Chest",
+    isCompleted: false,
+  },
+  {
+    id: 3,
+    title: "Code Warrior",
+    description: "Complete 10 battles in different categories",
+    progress: 3,
+    target: 10,
+    reward: "Epic Chest + Warrior Title",
+    isCompleted: false,
+  },
+  {
+    id: 4,
+    title: "Perfect Solver",
+    description: "Complete a battle with a perfect score",
+    progress: 0,
+    target: 1,
+    reward: "Legendary Item",
+    isCompleted: false,
+  },
+];
 
 const Index = () => {
   const { toast } = useToast();
@@ -367,6 +407,16 @@ const Index = () => {
     mmr: 3500,
     wins: 42,
     losses: 18,
+    chests: {
+      common: 2,
+      rare: 1,
+      epic: 0,
+      legendary: 0,
+    },
+    inventory: [
+      { id: 1, name: "Quick Syntax Scroll", rarity: "rare", description: "30% faster coding speed for one battle" },
+      { id: 2, name: "Debug Lens", rarity: "common", description: "Reveals one bug in your code" },
+    ]
   });
 
   const getRankIcon = (rank: string) => {
@@ -436,15 +486,39 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-400">Win Rate</div>
-              <div className="text-xl font-bold text-white">
-                {Math.round((userProfile.wins / (userProfile.wins + userProfile.losses)) * 100)}%
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <div className="text-sm text-gray-400">Win Rate</div>
+                <div className="text-xl font-bold text-white">
+                  {Math.round((userProfile.wins / (userProfile.wins + userProfile.losses)) * 100)}%
+                </div>
+                <div className="text-sm text-gray-400">
+                  {userProfile.wins}W - {userProfile.losses}L
+                </div>
               </div>
-              <div className="text-sm text-gray-400">
-                {userProfile.wins}W - {userProfile.losses}L
+              <div className="flex items-center gap-4 border-l border-white/10 pl-6">
+                <div className="text-center">
+                  <Chest className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
+                  <span className="text-sm text-gray-400">Chests: {
+                    Object.values(userProfile.chests).reduce((a, b) => a + b, 0)
+                  }</span>
+                </div>
+                <div className="text-center">
+                  <Star className="w-6 h-6 text-purple-500 mx-auto mb-1" />
+                  <span className="text-sm text-gray-400">Items: {userProfile.inventory.length}</span>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Quests Section */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-8">Active Quests</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {QUESTS.map((quest) => (
+              <QuestCard key={quest.id} {...quest} />
+            ))}
           </div>
         </div>
 
