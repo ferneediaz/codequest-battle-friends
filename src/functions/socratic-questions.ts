@@ -2,7 +2,7 @@
 // HuggingFace Inference API endpoint
 const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base";
 // Add your free HuggingFace API token here - you can get one at huggingface.co
-const HUGGINGFACE_API_KEY = "";
+const HUGGINGFACE_API_KEY = "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";
 
 export async function generateSocraticQuestion(userMessage: string) {
   try {
