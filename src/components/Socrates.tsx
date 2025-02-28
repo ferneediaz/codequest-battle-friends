@@ -12,19 +12,6 @@ export const Socrates = () => {
   const { toast } = useToast();
   const [isThinking, setIsThinking] = useState(false);
 
-  const socraticResponses = [
-    "What do you think would happen if we tried a different approach?",
-    "How might we break this problem down into smaller parts?",
-    "Can you explain your reasoning behind that thought?",
-    "What patterns do you notice in this problem?",
-    "How does this relate to problems you've solved before?",
-    "What assumptions are we making here?",
-    "What would be the consequences of this solution?",
-    "Could you provide a specific example?",
-    "How could we verify if this solution works?",
-    "What alternative solutions might exist?",
-  ];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -34,12 +21,31 @@ export const Socrates = () => {
     setInput("");
     setIsThinking(true);
 
-    // Simulate AI thinking
-    setTimeout(() => {
-      const randomResponse = socraticResponses[Math.floor(Math.random() * socraticResponses.length)];
-      setMessages(prev => [...prev, { role: 'assistant', content: randomResponse }]);
+    try {
+      const response = await fetch('/functions/socratic-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userMessage }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      const data = await response.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.question }]);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate a response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsThinking(false);
-    }, 1500);
+    }
   };
 
   return (
