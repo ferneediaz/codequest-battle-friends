@@ -1,37 +1,39 @@
 
-// Fallback to empty string if API key is not available
-const OPENAI_API_KEY = '';
+// HuggingFace Inference API endpoint
+const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base";
+// Add your free HuggingFace API token here - you can get one at huggingface.co
+const HUGGINGFACE_API_KEY = "";
 
 export async function generateSocraticQuestion(userMessage: string) {
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch(HUGGINGFACE_API_URL, {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
+        "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: `You are Socrates, a wise teacher who uses the Socratic method to help learners discover answers through questioning.
-            Never give direct answers. Instead, respond with ONE thought-provoking question that guides them to discover the solution themselves.
-            Keep your questions focused, clear, and specific to their coding challenge. Respond with just the question, no additional text.`
-          },
-          { role: 'user', content: userMessage }
-        ],
+        inputs: `Act as Socrates, the ancient Greek philosopher known for teaching through questions. 
+                Given this coding problem or question: "${userMessage}"
+                Respond with one thought-provoking question that will help guide the person to discover the answer themselves.
+                Keep the response focused on coding and programming concepts.`,
+        parameters: {
+          max_length: 100,
+          temperature: 0.7,
+          top_p: 0.9,
+        }
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to get response from OpenAI');
+      throw new Error("Failed to get response from HuggingFace");
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    // The model returns an array of generated texts, we take the first one
+    return Array.isArray(data) ? data[0].generated_text : data.generated_text;
   } catch (error) {
-    console.error('Error generating Socratic question:', error);
+    console.error("Error generating Socratic question:", error);
     throw error;
   }
 }
