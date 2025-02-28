@@ -1,7 +1,6 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,8 +24,7 @@ const QuestionSelectDialog = ({ open, onClose, onQuestionSelect }: QuestionSelec
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Fetch questions when dialog opens
-  useState(() => {
+  useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const { data, error } = await supabase
@@ -50,7 +48,7 @@ const QuestionSelectDialog = ({ open, onClose, onQuestionSelect }: QuestionSelec
     if (open) {
       fetchQuestions();
     }
-  }, [open]);
+  }, [open, toast]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -72,27 +70,33 @@ const QuestionSelectDialog = ({ open, onClose, onQuestionSelect }: QuestionSelec
           <DialogTitle>Select a Question</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[400px] px-4">
-          <div className="space-y-4">
-            {questions.map((question) => (
-              <div
-                key={question.id}
-                className="group relative cursor-pointer"
-                onClick={() => onQuestionSelect(question.id)}
-              >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
-                <div className="relative p-4 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-white/20 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`text-sm font-semibold ${getDifficultyColor(question.difficulty)}`}>
-                      {question.difficulty}
-                    </span>
-                    <span className="text-sm text-gray-400">{question.category}</span>
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <span className="text-gray-400">Loading questions...</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {questions.map((question) => (
+                <div
+                  key={question.id}
+                  className="group relative cursor-pointer"
+                  onClick={() => onQuestionSelect(question.id)}
+                >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
+                  <div className="relative p-4 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-white/20 transition-all">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-sm font-semibold ${getDifficultyColor(question.difficulty)}`}>
+                        {question.difficulty}
+                      </span>
+                      <span className="text-sm text-gray-400">{question.category}</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{question.title}</h3>
+                    <p className="text-sm text-gray-400">{question.description}</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{question.title}</h3>
-                  <p className="text-sm text-gray-400">{question.description}</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </DialogContent>
     </Dialog>
