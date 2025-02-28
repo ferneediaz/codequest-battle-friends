@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
@@ -212,7 +211,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Left column - Stats */}
-              <div className="space-y-4">
+              <div className="space-y-4 flex flex-col h-[300px]">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-black/50 p-3 rounded-lg">
                     <div className="flex items-center gap-2">
@@ -245,23 +244,25 @@ const Index = () => {
                     <div className="text-lg font-bold text-purple-400 mt-1">65%</div>
                   </div>
                 </div>
-                <div className="bg-black/50 p-3 rounded-lg">
+                <div className="bg-black/50 p-3 rounded-lg flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Medal className="w-4 h-4 text-primary" />
                     <div className="text-sm text-gray-400">Recent Achievements</div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Perfect Solver</span>
-                      <Award className="w-4 h-4 text-yellow-400" />
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Graph Master</span>
-                      <Brain className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Battle Veteran</span>
-                      <Skull className="w-4 h-4 text-red-400" />
+                  <div className="space-y-2 h-full flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Perfect Solver</span>
+                        <Award className="w-4 h-4 text-yellow-400" />
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Graph Master</span>
+                        <Brain className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Battle Veteran</span>
+                        <Skull className="w-4 h-4 text-red-400" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -313,8 +314,8 @@ const Index = () => {
               </div>
 
               {/* Right column - Active Quests */}
-              <div className="space-y-4">
-                <div className="bg-black/50 p-4 rounded-lg h-[300px] overflow-y-auto">
+              <div className="h-[300px]">
+                <div className="bg-black/50 p-4 rounded-lg h-full overflow-y-auto">
                   <h3 className="text-lg font-bold text-white mb-4">Active Quests</h3>
                   <div className="space-y-2">
                     {QUESTS.map((quest) => (
@@ -403,4 +404,3 @@ const Index = () => {
 };
 
 export default Index;
-
