@@ -1,15 +1,26 @@
 
 // HuggingFace Inference API endpoint
 const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base";
-// Add your free HuggingFace API token here - you can get one at huggingface.co
-const HUGGINGFACE_API_KEY = "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";
+
+export const getStoredApiKey = () => {
+  return localStorage.getItem('huggingface_api_key');
+};
+
+export const setStoredApiKey = (key: string) => {
+  localStorage.setItem('huggingface_api_key', key);
+};
 
 export async function generateSocraticQuestion(userMessage: string) {
+  const apiKey = getStoredApiKey();
+  if (!apiKey) {
+    throw new Error("Please set your HuggingFace API key first");
+  }
+
   try {
     const response = await fetch(HUGGINGFACE_API_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+        "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -30,7 +41,6 @@ export async function generateSocraticQuestion(userMessage: string) {
     }
 
     const data = await response.json();
-    // The model returns an array of generated texts, we take the first one
     return Array.isArray(data) ? data[0].generated_text : data.generated_text;
   } catch (error) {
     console.error("Error generating Socratic question:", error);
