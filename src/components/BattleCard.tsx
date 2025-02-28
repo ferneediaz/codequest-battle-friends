@@ -64,6 +64,20 @@ const BattleCard = ({
       return;
     }
 
+    // Check if user is already in the battle
+    const { data: existingParticipant } = await supabase
+      .from('battle_participants')
+      .select('*')
+      .eq('battle_id', battleId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (existingParticipant) {
+      console.log("User already in battle");
+      navigate(`/battle?battleId=${battleId}`);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('battle_participants')
@@ -226,3 +240,4 @@ const BattleCard = ({
 };
 
 export default BattleCard;
+
