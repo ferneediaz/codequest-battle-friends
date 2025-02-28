@@ -47,6 +47,8 @@ export async function generateSocraticQuestion(userMessage: string) {
                 - "If we need to find two numbers that add up to 9, and we're looking at the number 2, what other number would we need to find?"
                 - "How could we efficiently check if the complement (target - current number) exists in our array?"
                 - "Instead of checking every possible pair, could we use a data structure to remember the numbers we've seen?"
+                - "Could we use a hash map to store each number's index as we iterate through the array?"
+                - "What data structure would give us O(1) lookup time for finding the complement?"
                 
                 Bad questions to avoid:
                 - Generic questions not specific to Two Sum
