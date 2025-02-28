@@ -47,25 +47,31 @@ export type Database = {
       battles: {
         Row: {
           created_at: string
+          current_participants: number | null
           id: string
+          max_participants: number | null
           question_id: string
-          status: Database["public"]["Enums"]["battle_status"]
+          status: Database["public"]["Enums"]["room_status"]
           team_a_score: number | null
           team_b_score: number | null
         }
         Insert: {
           created_at?: string
+          current_participants?: number | null
           id?: string
+          max_participants?: number | null
           question_id: string
-          status?: Database["public"]["Enums"]["battle_status"]
+          status?: Database["public"]["Enums"]["room_status"]
           team_a_score?: number | null
           team_b_score?: number | null
         }
         Update: {
           created_at?: string
+          current_participants?: number | null
           id?: string
+          max_participants?: number | null
           question_id?: string
-          status?: Database["public"]["Enums"]["battle_status"]
+          status?: Database["public"]["Enums"]["room_status"]
           team_a_score?: number | null
           team_b_score?: number | null
         }
@@ -142,6 +148,7 @@ export type Database = {
     }
     Enums: {
       battle_status: "waiting" | "in_progress" | "completed"
+      room_status: "waiting" | "in_progress" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -15,4 +15,7 @@ export interface Battle {
   question_id: string;
   team_a_score: number;
   team_b_score: number;
+  max_participants: number;
+  current_participants: number;
 }
+

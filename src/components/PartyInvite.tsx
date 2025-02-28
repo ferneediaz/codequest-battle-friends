@@ -66,7 +66,7 @@ export function PartyInvite() {
                   </div>
                   <Button variant="ghost" size="sm">
                     <UserPlus className="w-4 h-4" />
-                  </Button>
+                    </Button>
                 </div>
               ))}
             </div>
@@ -83,3 +83,4 @@ export function PartyInvite() {
     </div>
   );
 }
+
