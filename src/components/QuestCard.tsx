@@ -32,50 +32,51 @@ const QuestCard = ({ title, description, progress, target, reward, isCompleted }
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
-      <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/20 transition-all duration-300">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+      <div className="relative p-2 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/20 transition-all duration-300">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1">
             {isCompleted ? (
-              <Check className="w-5 h-5 text-green-400" />
+              <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
             ) : (
-              <Trophy className="w-5 h-5 text-yellow-500" />
+              <Trophy className="w-4 h-4 text-yellow-500 flex-shrink-0" />
             )}
-            <h3 className="text-lg font-bold text-white">{title}</h3>
+            <div className="flex flex-col items-start">
+              <h3 className="text-sm font-bold text-white">{title}</h3>
+              <p className="text-xs text-gray-400 line-clamp-1">{description}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          
+          <div className="flex items-center gap-2">
             <div className={cn(
-              "relative w-16 h-16 rounded-lg overflow-hidden shadow-lg",
+              "relative w-8 h-8 rounded-lg overflow-hidden shadow-lg flex-shrink-0",
               "flex items-center justify-center",
               getChestStyle(reward)
             )}>
-              <Trophy 
-                className="w-10 h-10 transform group-hover:scale-110 transition-transform duration-300"
-              />
+              <Trophy className="w-5 h-5 transform group-hover:scale-110 transition-transform duration-300" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
             </div>
-            <span className="text-sm text-primary font-semibold">{reward}</span>
-          </div>
-        </div>
-        <p className="text-gray-400 mb-4">{description}</p>
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm text-gray-400">
-            <span>Progress</span>
-            <span>{progress}/{target}</span>
-          </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
-            <div 
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(progress / target) * 100}%` }}
-            />
+            <div className="flex flex-col items-end">
+              <span className="text-xs text-primary font-semibold">{reward.split(' ')[0]}</span>
+              <div className="flex items-center gap-1">
+                <div className="w-20 bg-gray-700 rounded-full h-1.5">
+                  <div 
+                    className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${(progress / target) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs text-gray-400">{progress}/{target}</span>
+              </div>
+            </div>
           </div>
         </div>
         {isCompleted && (
           <Button 
             variant="outline" 
-            className="w-full mt-4"
+            size="sm"
+            className="w-full mt-2 text-xs py-1 h-7"
             onClick={() => {}}
           >
-            Claim Reward
+            Claim
           </Button>
         )}
       </div>
@@ -84,3 +85,4 @@ const QuestCard = ({ title, description, progress, target, reward, isCompleted }
 };
 
 export default QuestCard;
+
