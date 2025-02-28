@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Send, Brain, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -77,10 +76,10 @@ export const Socrates = () => {
         <div className="p-4 border-b border-border bg-primary/5">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">Socrates</h3>
+            <h3 className="font-semibold">Socrates - Two Sum Problem Helper</h3>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            I'll help you think through problems with questions
+            Share your thoughts or struggles, and I'll help guide you through the Two Sum problem
           </p>
         </div>
 
@@ -104,8 +103,14 @@ export const Socrates = () => {
           <>
             <div className="h-96 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && (
-                <div className="text-center text-muted-foreground text-sm">
-                  Share your coding challenge, and I'll help you think it through
+                <div className="text-center text-muted-foreground text-sm p-4">
+                  <p className="mb-2">I'll help you solve the Two Sum problem using guiding questions.</p>
+                  <p className="text-xs">Try saying things like:</p>
+                  <ul className="text-xs list-disc list-inside mt-1 space-y-1">
+                    <li>"I'm not sure where to start"</li>
+                    <li>"How can I make this solution more efficient?"</li>
+                    <li>"I'm stuck on handling edge cases"</li>
+                  </ul>
                 </div>
               )}
               {messages.map((message, index) => (
@@ -155,7 +160,7 @@ export const Socrates = () => {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Describe your challenge..."
+                  placeholder="Share your thoughts or questions..."
                   className="flex-1 bg-muted px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <Button type="submit" size="icon" disabled={!input.trim() || isThinking}>

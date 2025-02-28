@@ -16,6 +16,16 @@ export async function generateSocraticQuestion(userMessage: string) {
     throw new Error("Please set your HuggingFace API key first");
   }
 
+  const problemContext = `
+    Problem: Given an array of integers, find two numbers that add up to a target sum.
+    Example: nums = [2, 7, 11, 15], target = 9
+    Expected Output: [0, 1] (because nums[0] + nums[1] = 2 + 7 = 9)
+    Constraints: 
+    - 2 ≤ nums.length ≤ 104
+    - -109 ≤ nums[i] ≤ 109
+    - Only one valid solution exists
+  `;
+
   try {
     const response = await fetch(HUGGINGFACE_API_URL, {
       method: "POST",
@@ -24,10 +34,14 @@ export async function generateSocraticQuestion(userMessage: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        inputs: `Act as Socrates, the ancient Greek philosopher known for teaching through questions. 
-                Given this coding problem or question: "${userMessage}"
-                Respond with one thought-provoking question that will help guide the person to discover the answer themselves.
-                Keep the response focused on coding and programming concepts.`,
+        inputs: `You are Socrates helping a student solve this coding problem:
+                ${problemContext}
+                
+                The student says: "${userMessage}"
+                
+                Respond with ONE thought-provoking question that will guide them towards solving this specific problem.
+                Focus on making them think about data structures, algorithms, and problem-solving approaches.
+                Keep your question clear, specific, and related to solving the two sum problem.`,
         parameters: {
           max_length: 100,
           temperature: 0.7,
