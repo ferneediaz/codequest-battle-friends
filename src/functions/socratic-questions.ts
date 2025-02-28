@@ -42,34 +42,34 @@ export async function generateSocraticQuestion(userMessage: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        inputs: `You are Socrates helping a student solve this coding problem:
+        inputs: `You are a helpful programming tutor. A student needs help solving the Two Sum problem:
                 ${problemContext}
                 
                 The student says: "${userMessage}"
                 
-                You must provide step-by-step guidance. Based on their message, choose ONE of these helpful responses:
+                If they're just starting or confused, give this response:
+                "Let's solve this step by step:
+                1. We need to find two numbers in the array that add up to the target (9)
+                2. Let's look at the first number (2). We need to find 7 (target 9 - current number 2)
+                3. Instead of searching the whole array, what if we stored numbers we've seen?
+                4. We could use a hash map to store {number: index} for quick lookups
+                
+                Would you like me to explain how to use the hash map approach?"
 
-                If they mention O(n²) or brute force:
-                "You're right that checking every pair would be O(n²). What if instead of looking at every other number, we calculated exactly what number we need (target - current) and checked if we've seen it before?"
+                If they understand and want implementation help:
+                "Here's how we can implement it:
+                1. Create an empty hash map to store {number: index}
+                2. For each number in the array:
+                   - Calculate what we need (target - current number)
+                   - Check if that number exists in our hash map
+                   - If yes, return [stored_index, current_index]
+                   - If no, store current {number: index} in map
+                
+                Would you like to see this in code?"
 
-                If they ask about complement or seem confused:
-                "Let's work through an example. If target is 9 and we're looking at number 2, what specific number do we need to find to make 9? This number (9-2 = 7) is called the complement. How could we quickly check if 7 exists in our array?"
-
-                If they mention hash maps or storing values:
-                "Good thinking! A hash map gives us O(1) lookup. If we store each number as we see it, how could we use the hash map to find the complement of our current number?"
-
-                If they seem stuck on implementation:
-                "Let's break it down: As we iterate through the array, for each number n, we need to check if (target - n) exists in our hash map. If it does, what should we return? If it doesn't, what should we store in the hash map?"
-
-                If they seem to understand the concept:
-                "You're on the right track! Remember, for each number we look at, we: 1) Calculate what number we need (complement), 2) Check if we've seen that number before, 3) If not, store the current number and index. Can you try implementing this logic?"
-
-                Default response if unclear:
-                "Let's try a concrete example. With array [2,7,11,15] and target 9, when we look at 2, what specific number do we need to find? How could we efficiently check if that number exists?"
-
-                Choose ONE question that best matches their current understanding:`,
+                Choose the response that best helps the student:`,
         parameters: {
-          max_length: 150,
+          max_length: 200,
           temperature: 0.7,
           top_p: 0.9,
         }
