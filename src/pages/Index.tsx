@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
@@ -187,122 +188,148 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-16 mx-auto">
         <div className="mb-16 bg-black/30 rounded-lg p-6 border border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white mb-6">Profile</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-primary" />
-                    <div className="text-sm text-gray-400">Rank</div>
-                  </div>
-                  <div className="text-lg font-bold mt-1" style={{ color: RANKS[currentRank].color }}>
-                    {RANKS[currentRank].name}
-                  </div>
-                </div>
-                <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-400" />
-                    <div className="text-sm text-gray-400">MMR</div>
-                  </div>
-                  <div className="text-lg font-bold text-yellow-400 mt-1">{currentMMR}</div>
-                </div>
-                <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Sword className="w-4 h-4 text-green-400" />
-                    <div className="text-sm text-gray-400">Battles Won</div>
-                  </div>
-                  <div className="text-lg font-bold text-green-400 mt-1">23</div>
-                </div>
-                <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-purple-400" />
-                    <div className="text-sm text-gray-400">Win Rate</div>
-                  </div>
-                  <div className="text-lg font-bold text-purple-400 mt-1">65%</div>
-                </div>
-              </div>
-              <div className="bg-black/50 p-4 rounded-lg mt-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Medal className="w-4 h-4 text-primary" />
-                  <div className="text-sm text-gray-400">Recent Achievements</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Perfect Solver</span>
-                    <Award className="w-4 h-4 text-yellow-400" />
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Graph Master</span>
-                    <Brain className="w-4 h-4 text-blue-400" />
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Battle Veteran</span>
-                    <Skull className="w-4 h-4 text-red-400" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white mb-6">DSA Skills</h3>
-              <div className="aspect-square bg-black/50 rounded-lg p-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={DSA_SKILLS}>
-                    <PolarGrid stroke="#ffffff20" />
-                    <PolarAngleAxis 
-                      dataKey="subject" 
-                      tick={{ fill: '#9ca3af' }}
-                      fontSize={12}
-                    />
-                    <PolarRadiusAxis 
-                      angle={30} 
-                      domain={[0, 100]} 
-                      tick={{ fill: '#9ca3af' }}
-                      fontSize={12}
-                    />
-                    <Radar
-                      name="Skills"
-                      dataKey="score"
-                      stroke="#8b5cf6"
-                      fill="#8b5cf680"
-                      fillOpacity={0.6}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-black/50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-orange-400" />
-                    <div className="text-sm text-gray-400">Strongest</div>
-                  </div>
-                  <div className="text-sm font-medium text-orange-400 mt-1">Sorting (90%)</div>
-                </div>
-                <div className="bg-black/50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-blue-400" />
-                    <div className="text-sm text-gray-400">To Improve</div>
-                  </div>
-                  <div className="text-sm font-medium text-blue-400 mt-1">DP (45%)</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white mb-6">Active Quests</h3>
-              <div className="space-y-2 max-h-[calc(100%-2rem)] overflow-y-auto pr-2">
-                {QUESTS.map((quest) => (
-                  <QuestCard
-                    key={quest.id}
-                    title={quest.title}
-                    description={quest.description}
-                    progress={quest.progress}
-                    target={quest.target}
-                    reward={quest.reward}
-                    isCompleted={quest.isCompleted}
+          <div className="flex flex-col space-y-6">
+            {/* Rank display strip */}
+            <div className="flex justify-between items-center bg-black/50 p-4 rounded-lg">
+              {Object.entries(RANKS).reverse().map(([key, rank]) => (
+                <div 
+                  key={key} 
+                  className={`flex flex-col items-center ${key === currentRank ? 'scale-110 transform' : 'opacity-50'}`}
+                >
+                  <Crown 
+                    className="w-6 h-6 mb-1" 
+                    style={{ color: rank.color }} 
                   />
-                ))}
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ color: rank.color }}
+                  >
+                    {rank.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Left column - Stats */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-black/50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-primary" />
+                      <div className="text-sm text-gray-400">Current Rank</div>
+                    </div>
+                    <div className="text-lg font-bold mt-1" style={{ color: RANKS[currentRank].color }}>
+                      {RANKS[currentRank].name}
+                    </div>
+                  </div>
+                  <div className="bg-black/50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-4 h-4 text-yellow-400" />
+                      <div className="text-sm text-gray-400">MMR</div>
+                    </div>
+                    <div className="text-lg font-bold text-yellow-400 mt-1">{currentMMR}</div>
+                  </div>
+                  <div className="bg-black/50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Sword className="w-4 h-4 text-green-400" />
+                      <div className="text-sm text-gray-400">Battles Won</div>
+                    </div>
+                    <div className="text-lg font-bold text-green-400 mt-1">23</div>
+                  </div>
+                  <div className="bg-black/50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-purple-400" />
+                      <div className="text-sm text-gray-400">Win Rate</div>
+                    </div>
+                    <div className="text-lg font-bold text-purple-400 mt-1">65%</div>
+                  </div>
+                </div>
+                <div className="bg-black/50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Medal className="w-4 h-4 text-primary" />
+                    <div className="text-sm text-gray-400">Recent Achievements</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Perfect Solver</span>
+                      <Award className="w-4 h-4 text-yellow-400" />
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Graph Master</span>
+                      <Brain className="w-4 h-4 text-blue-400" />
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Battle Veteran</span>
+                      <Skull className="w-4 h-4 text-red-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Middle column - DSA Skills */}
+              <div className="space-y-4">
+                <div className="aspect-square bg-black/50 rounded-lg p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={DSA_SKILLS}>
+                      <PolarGrid stroke="#ffffff20" />
+                      <PolarAngleAxis 
+                        dataKey="subject" 
+                        tick={{ fill: '#9ca3af' }}
+                        fontSize={12}
+                      />
+                      <PolarRadiusAxis 
+                        angle={30} 
+                        domain={[0, 100]} 
+                        tick={{ fill: '#9ca3af' }}
+                        fontSize={12}
+                      />
+                      <Radar
+                        name="Skills"
+                        dataKey="score"
+                        stroke="#8b5cf6"
+                        fill="#8b5cf680"
+                        fillOpacity={0.6}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-black/50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Flame className="w-4 h-4 text-orange-400" />
+                      <div className="text-sm text-gray-400">Strongest</div>
+                    </div>
+                    <div className="text-sm font-medium text-orange-400 mt-1">Sorting (90%)</div>
+                  </div>
+                  <div className="bg-black/50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-blue-400" />
+                      <div className="text-sm text-gray-400">To Improve</div>
+                    </div>
+                    <div className="text-sm font-medium text-blue-400 mt-1">DP (45%)</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column - Active Quests */}
+              <div className="space-y-4">
+                <div className="bg-black/50 p-4 rounded-lg max-h-[400px] overflow-y-auto">
+                  <h3 className="text-lg font-bold text-white mb-4">Active Quests</h3>
+                  <div className="space-y-2">
+                    {QUESTS.map((quest) => (
+                      <QuestCard
+                        key={quest.id}
+                        title={quest.title}
+                        description={quest.description}
+                        progress={quest.progress}
+                        target={quest.target}
+                        reward={quest.reward}
+                        isCompleted={quest.isCompleted}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -376,3 +403,4 @@ const Index = () => {
 };
 
 export default Index;
+
