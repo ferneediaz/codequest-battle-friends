@@ -1,15 +1,9 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
 import QuestCard from "@/components/QuestCard";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Sword, Crown, Trophy, Star, Medal, Award, Skull, Flame, Zap, Brain } from "lucide-react";
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  ResponsiveContainer,
-} from "recharts";
+import { Shield, Sword, Crown, Trophy, Star, Medal, Award, Skull, Flame, Zap, Brain, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -17,12 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -124,6 +112,13 @@ const Index = () => {
     },
   ]);
 
+  const handleCreateBattle = () => {
+    toast({
+      title: "Creating New Battle",
+      description: "Opening battle creation form...",
+    });
+  };
+
   const handleJoinBattle = () => {
     toast({
       title: "Joining Battle",
@@ -145,6 +140,14 @@ const Index = () => {
           <p className="text-xl text-gray-400">
             Choose your battle and start coding!
           </p>
+          <Button 
+            onClick={handleCreateBattle}
+            size="lg"
+            className="mt-8 bg-primary hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Create New Battle
+          </Button>
         </div>
 
         <div className="mb-8 flex items-center justify-between">
