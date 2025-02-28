@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
 import QuestCard from "@/components/QuestCard";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Sword, Crown, Trophy, Star, Medal, Award, Skull, Flame, Zap, Brain, Plus } from "lucide-react";
+import { Shield, Sword, Crown, Trophy, Star, Medal, Award, Skull, Flame, Zap, Brain, Plus, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
   SelectContent,
@@ -79,38 +80,63 @@ const QUESTS = [
 const Index = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
-  const [battles] = useState([
-    { 
-      id: 1, 
-      difficulty: "Easy", 
-      title: "Two Crystal Merger", 
-      players: 4,
-      category: "Forest of Arrays",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player1"],
-    },
-    { 
-      id: 2, 
-      difficulty: "Medium", 
-      title: "Mystic Array Rotation", 
-      players: 2,
-      category: "Forest of Arrays",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player2"],
-    },
-    { 
-      id: 3, 
-      difficulty: "Hard", 
-      title: "Crystal Matrix Challenge", 
-      players: 3,
-      category: "Forest of Arrays",
-      minRank: "ancient",
-      maxRank: "immortal",
-      currentPlayers: ["Player3"],
-    },
-  ]);
+  const [battles, setBattles] = useState<Battle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBattles = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('battles')
+          .select('*')
+          .eq('status', 'waiting');
+        
+        if (error) throw error;
+        
+        if (data) {
+          setBattles(data.map(battle => ({
+            ...battle,
+            difficulty: battle.difficulty || "Medium",
+            players: battle.max_participants || 2,
+            minRank: "guardian",
+            maxRank: "immortal",
+            currentPlayers: battle.current_participants || 0,
+          })));
+        }
+      } catch (error: any) {
+        console.error('Error fetching battles:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load battles",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBattles();
+
+    const channel = supabase
+      .channel('public:battles')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'battles'
+        },
+        async (payload) => {
+          console.log('Real-time update:', payload);
+          fetchBattles();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
 
   const handleCreateBattle = () => {
     toast({
@@ -151,7 +177,10 @@ const Index = () => {
         </div>
 
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Available Battles</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold text-white">Available Battles</h2>
+            {loading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+          </div>
           <div className="w-64">
             <Select onValueChange={setSelectedCategory} defaultValue={selectedCategory}>
               <SelectTrigger className="bg-black/50 border-white/10">
@@ -168,20 +197,30 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBattles.map((battle) => (
-            <BattleCard
-              key={battle.id}
-              difficulty={battle.difficulty as "Easy" | "Medium" | "Hard"}
-              title={battle.title}
-              players={battle.players}
-              onJoin={handleJoinBattle}
-              minRank={RANKS[battle.minRank].name}
-              maxRank={RANKS[battle.maxRank].name}
-              currentPlayers={battle.currentPlayers}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center min-h-[200px]">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : battles.length === 0 ? (
+          <div className="text-center text-gray-400 py-12">
+            <p>No active battles found. Create one to get started!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBattles.map((battle) => (
+              <BattleCard
+                key={battle.id}
+                difficulty={battle.difficulty}
+                title={battle.title}
+                players={battle.players}
+                onJoin={handleJoinBattle}
+                minRank={RANKS[battle.minRank].name}
+                maxRank={RANKS[battle.maxRank].name}
+                currentPlayers={[`${battle.currentPlayers} players`]}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
