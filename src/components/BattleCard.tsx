@@ -48,7 +48,8 @@ const BattleCard = ({
   };
 
   const handleJoinBattle = async () => {
-    if (!user || !battleId) {
+    if (!user) {
+      console.log("No user found, redirecting to auth");
       toast({
         title: "Authentication Required",
         description: "Please log in to join a battle",
@@ -58,8 +59,13 @@ const BattleCard = ({
       return;
     }
 
+    if (!battleId) {
+      console.error("No battleId provided");
+      return;
+    }
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('battle_participants')
         .insert([
           {
@@ -67,10 +73,15 @@ const BattleCard = ({
             user_id: user.id,
             team: 'B' // Joining user goes to team B
           }
-        ]);
+        ])
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Join battle error:", error);
+        throw error;
+      }
 
+      console.log("Successfully joined battle:", data);
       navigate(`/battle?battleId=${battleId}`);
     } catch (error: any) {
       console.error("Join battle error:", error);
@@ -84,6 +95,7 @@ const BattleCard = ({
 
   const createBattle = async (questionId: string) => {
     if (!user) {
+      console.log("No user found, redirecting to auth");
       toast({
         title: "Authentication Required",
         description: "Please log in to create a battle",
@@ -96,7 +108,9 @@ const BattleCard = ({
     try {
       setIsCreating(true);
       console.log("Creating battle with question:", questionId);
+      console.log("Current user:", user);
 
+      // First create the battle
       const { data: battle, error: battleError } = await supabase
         .from('battles')
         .insert([
@@ -112,10 +126,15 @@ const BattleCard = ({
         .select()
         .single();
 
-      if (battleError) throw battleError;
+      if (battleError) {
+        console.error("Battle creation error:", battleError);
+        throw battleError;
+      }
+
       console.log("Battle created:", battle);
 
-      const { error: participantError } = await supabase
+      // Then add the creator as a participant
+      const { data: participant, error: participantError } = await supabase
         .from('battle_participants')
         .insert([
           {
@@ -123,9 +142,15 @@ const BattleCard = ({
             user_id: user.id,
             team: 'A' // Creator joins team A by default
           }
-        ]);
+        ])
+        .select();
 
-      if (participantError) throw participantError;
+      if (participantError) {
+        console.error("Participant creation error:", participantError);
+        throw participantError;
+      }
+
+      console.log("Participant added:", participant);
 
       toast({
         title: "Battle Created",
