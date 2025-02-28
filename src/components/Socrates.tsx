@@ -80,11 +80,11 @@ export const Socrates = () => {
 
       <div
         className={cn(
-          "absolute bottom-16 right-0 w-96 bg-black/90 border border-border rounded-lg shadow-lg transition-all duration-200 ease-in-out overflow-hidden",
+          "absolute bottom-16 right-0 w-96 bg-[#222222] border border-gray-700 rounded-lg shadow-lg transition-all duration-200 ease-in-out overflow-hidden",
           isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         )}
       >
-        <div className="p-4 border-b border-border bg-black/90">
+        <div className="p-4 border-b border-gray-700 bg-[#222222]">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
             <h3 className="font-semibold text-white">Socrates - Two Sum Problem Helper</h3>
@@ -95,14 +95,14 @@ export const Socrates = () => {
         </div>
 
         {isSettingKey ? (
-          <div className="p-4 bg-black/90">
+          <div className="p-4 bg-[#222222]">
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2 text-white">Enter your Groq API Key</label>
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                className="w-full p-2 border rounded-md bg-gray-800 text-white placeholder-gray-400"
+                className="w-full p-2 border rounded-md bg-[#333333] text-white placeholder-gray-400 border-gray-600"
                 placeholder="gsk_..."
               />
             </div>
@@ -112,7 +112,7 @@ export const Socrates = () => {
           </div>
         ) : (
           <>
-            <div className="h-96 overflow-y-auto p-4 space-y-4 bg-black/90">
+            <div className="h-96 overflow-y-auto p-4 space-y-4 bg-[#222222]">
               {messages.length === 0 && (
                 <div className="text-center text-gray-300 text-sm p-4">
                   <p className="mb-2">I'll help you solve the Two Sum problem using guiding questions.</p>
@@ -142,7 +142,7 @@ export const Socrates = () => {
                       "rounded-lg p-3",
                       message.role === 'user'
                         ? "bg-primary text-white"
-                        : "bg-gray-800 text-white"
+                        : "bg-[#333333] text-white"
                     )}
                   >
                     {message.content}
@@ -154,7 +154,7 @@ export const Socrates = () => {
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                     <Sparkles className="h-4 w-4 text-primary animate-pulse" />
                   </div>
-                  <div className="bg-gray-800 rounded-lg p-3">
+                  <div className="bg-[#333333] rounded-lg p-3">
                     <div className="flex gap-1 text-white">
                       <span className="animate-bounce">●</span>
                       <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>●</span>
@@ -165,14 +165,14 @@ export const Socrates = () => {
               )}
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4 border-t border-border bg-black/90">
+            <form onSubmit={handleSubmit} className="p-4 border-t border-gray-700 bg-[#222222]">
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Share your thoughts or questions..."
-                  className="flex-1 bg-gray-800 text-white border border-gray-700 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary placeholder-gray-400"
+                  className="flex-1 bg-[#333333] text-white border border-gray-600 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary placeholder-gray-400"
                 />
                 <Button type="submit" size="icon" disabled={!input.trim() || isThinking}>
                   <Send className="h-4 w-4" />
