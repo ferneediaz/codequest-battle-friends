@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
@@ -5,6 +6,7 @@ import QuestCard from "@/components/QuestCard";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Sword, Crown, Trophy, Star, Medal, Award, Skull, Flame, Zap, Brain, Plus, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import {
   Select,
   SelectContent,
@@ -22,7 +24,7 @@ const RANKS = {
   crusader: { name: "Crusader", color: "#F97316", minMMR: 1000 },
   guardian: { name: "Guardian", color: "#0EA5E9", minMMR: 500 },
   herald: { name: "Herald", color: "#33C3F0", minMMR: 0 },
-};
+} as const;
 
 const BATTLE_CATEGORIES = [
   "All Realms",
@@ -38,49 +40,18 @@ const BATTLE_CATEGORIES = [
   "Sorting Sanctuary",
 ] as const;
 
-const QUESTS = [
-  {
-    id: 1,
-    title: "Battle Initiate",
-    description: "Win your first coding battle",
-    progress: 0,
-    target: 1,
-    reward: "Common Chest",
-    isCompleted: false,
-  },
-  {
-    id: 2,
-    title: "Battle Master",
-    description: "Win 5 coding battles",
-    progress: 2,
-    target: 5,
-    reward: "Rare Chest",
-    isCompleted: false,
-  },
-  {
-    id: 3,
-    title: "Code Warrior",
-    description: "Complete 10 battles in different categories",
-    progress: 3,
-    target: 10,
-    reward: "Epic Chest + Warrior Title",
-    isCompleted: false,
-  },
-  {
-    id: 4,
-    title: "Perfect Solver",
-    description: "Complete a battle with a perfect score",
-    progress: 0,
-    target: 1,
-    reward: "Legendary Item",
-    isCompleted: false,
-  },
-];
+type BattleWithExtras = Database["public"]["Tables"]["battles"]["Row"] & {
+  difficulty: "Easy" | "Medium" | "Hard";
+  category: string;
+  title: string;
+  minRank: keyof typeof RANKS;
+  maxRank: keyof typeof RANKS;
+};
 
 const Index = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
-  const [battles, setBattles] = useState<Battle[]>([]);
+  const [battles, setBattles] = useState<BattleWithExtras[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,11 +67,11 @@ const Index = () => {
         if (data) {
           setBattles(data.map(battle => ({
             ...battle,
-            difficulty: battle.difficulty || "Medium",
-            players: battle.max_participants || 2,
-            minRank: "guardian",
-            maxRank: "immortal",
-            currentPlayers: battle.current_participants || 0,
+            difficulty: "Medium" as const,
+            category: "Forest of Arrays",
+            title: "Sample Battle",
+            minRank: "guardian" as const,
+            maxRank: "immortal" as const,
           })));
         }
       } catch (error: any) {
@@ -212,11 +183,11 @@ const Index = () => {
                 key={battle.id}
                 difficulty={battle.difficulty}
                 title={battle.title}
-                players={battle.players}
+                players={battle.max_participants || 2}
                 onJoin={handleJoinBattle}
                 minRank={RANKS[battle.minRank].name}
                 maxRank={RANKS[battle.maxRank].name}
-                currentPlayers={[`${battle.currentPlayers} players`]}
+                currentPlayers={[`${battle.current_participants || 0} players`]}
               />
             ))}
           </div>
