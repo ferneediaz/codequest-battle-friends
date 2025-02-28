@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
@@ -39,6 +38,45 @@ const BATTLE_CATEGORIES = [
   "Recursion Temple",
   "Sorting Sanctuary",
 ] as const;
+
+const QUESTS = [
+  {
+    id: 1,
+    title: "Battle Initiate",
+    description: "Win your first coding battle",
+    progress: 0,
+    target: 1,
+    reward: "Common Chest",
+    isCompleted: false,
+  },
+  {
+    id: 2,
+    title: "Battle Master",
+    description: "Win 5 coding battles",
+    progress: 2,
+    target: 5,
+    reward: "Rare Chest",
+    isCompleted: false,
+  },
+  {
+    id: 3,
+    title: "Code Warrior",
+    description: "Complete 10 battles in different categories",
+    progress: 3,
+    target: 10,
+    reward: "Epic Chest + Warrior Title",
+    isCompleted: false,
+  },
+  {
+    id: 4,
+    title: "Perfect Solver",
+    description: "Complete a battle with a perfect score",
+    progress: 0,
+    target: 1,
+    reward: "Legendary Item",
+    isCompleted: false,
+  },
+];
 
 type BattleWithExtras = Database["public"]["Tables"]["battles"]["Row"] & {
   difficulty: "Easy" | "Medium" | "Hard";
@@ -130,6 +168,55 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-16 mx-auto">
+        <div className="mb-16 bg-black/30 rounded-lg p-6 border border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-white">Profile</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-black/50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-400">Rank</div>
+                  <div className="text-lg font-bold text-primary">Guardian</div>
+                </div>
+                <div className="bg-black/50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-400">MMR</div>
+                  <div className="text-lg font-bold text-primary">1200</div>
+                </div>
+                <div className="bg-black/50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-400">Battles Won</div>
+                  <div className="text-lg font-bold text-green-400">23</div>
+                </div>
+                <div className="bg-black/50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-400">Win Rate</div>
+                  <div className="text-lg font-bold text-yellow-400">65%</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-white">Skills</h3>
+              <div className="aspect-square bg-black/50 rounded-lg p-4 flex items-center justify-center">
+                <div className="text-sm text-gray-400">Spider Graph Placeholder</div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-white">Active Quests</h3>
+              <div className="space-y-2">
+                {QUESTS.slice(0, 3).map((quest) => (
+                  <QuestCard
+                    key={quest.id}
+                    title={quest.title}
+                    description={quest.description}
+                    progress={quest.progress}
+                    target={quest.target}
+                    reward={quest.reward}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
             CodeQuest Battles
