@@ -41,7 +41,20 @@ export async function generateSocraticQuestion(userMessage: string) {
                 
                 Respond with ONE thought-provoking question that will guide them towards solving this specific problem.
                 Focus on making them think about data structures, algorithms, and problem-solving approaches.
-                Keep your question clear, specific, and related to solving the two sum problem.`,
+                Keep your question clear, specific, and related to solving the two sum problem.
+                
+                Examples of good questions:
+                - "If we need to find two numbers that add up to 9, and we're looking at the number 2, what other number would we need to find?"
+                - "How could we efficiently check if the complement (target - current number) exists in our array?"
+                - "Instead of checking every possible pair, could we use a data structure to remember the numbers we've seen?"
+                
+                Bad questions to avoid:
+                - Generic questions not specific to Two Sum
+                - Philosophy questions
+                - Questions about ancient Greece
+                - Questions that don't help solve the problem
+                
+                Your turn - give ONE specific, helpful question related to solving Two Sum:`,
         parameters: {
           max_length: 100,
           temperature: 0.7,
