@@ -1,26 +1,53 @@
-# Welcome to your Lovable project
 
-## Project info
+# Two Sum Learning Assistant
 
-**URL**: https://lovable.dev/projects/252ffe31-b922-4182-9325-73b5197d7506
+## About
 
-## How can I edit this code?
+This application is designed to enhance both Data Structure & Algorithm (DSA) skills and communication abilities through an innovative AI-powered Socratic learning approach. Instead of providing direct solutions, the system engages students in a thoughtful dialogue about their problem-solving process.
 
-There are several ways of editing your application.
+## Key Features
 
-**Use Lovable**
+### 1. Socratic AI Assistant
+- Asks targeted questions to guide understanding
+- Never provides direct solutions
+- Focuses on the immediate step you're stuck on
+- Helps students analyze their own code and thinking process
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/252ffe31-b922-4182-9325-73b5197d7506) and start prompting.
+### 2. Interactive Learning Environment
+- Real-time communication with AI mentor
+- Safe space to explore different approaches
+- Encourages self-discovery and deeper understanding
 
-Changes made via Lovable will be committed automatically to this repo.
+### 3. Collaborative Features
+- Party system for group learning
+- Real-time collaboration capabilities
+- Learn from peer interactions and discussions
 
-**Use your preferred IDE**
+## Why This Approach?
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Traditional coding platforms often focus solely on whether solutions work or not. Our platform takes a different approach:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Understanding Over Solutions**: Rather than providing answers, we help students understand their thought process.
+2. **Communication Skills**: By engaging in dialogue, students improve their ability to articulate technical concepts.
+3. **Deep Learning**: The Socratic method leads to deeper understanding and better retention of concepts.
 
-Follow these steps:
+## Getting Started
+
+1. Set up your Groq API key in the settings
+2. Start discussing your approach to the Two Sum problem
+3. Engage with the AI's questions to deepen your understanding
+4. Form or join a party to learn collaboratively
+
+## Technologies Used
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+- Groq API for AI interactions
+
+## Project Setup
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
@@ -36,34 +63,15 @@ npm i
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Contributing
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Want to contribute? Great! You can:
+1. Fork the repository
+2. Create a new branch
+3. Make your changes
+4. Submit a pull request
 
-**Use GitHub Codespaces**
+## Learn More
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Visit [Lovable](https://lovable.dev) to learn more about creating interactive learning experiences.
 
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/252ffe31-b922-4182-9325-73b5197d7506) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
