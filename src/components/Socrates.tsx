@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Send, Brain, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,10 +25,10 @@ export const Socrates = () => {
       return;
     }
 
-    if (!apiKey.startsWith('hf_')) {
+    if (!apiKey.startsWith('sk-')) {
       toast({
         title: "Error",
-        description: "HuggingFace API keys should start with 'hf_'",
+        description: "OpenAI API keys should start with 'sk-'",
         variant: "destructive",
       });
       return;
@@ -96,13 +97,13 @@ export const Socrates = () => {
         {isSettingKey ? (
           <div className="p-4">
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Enter your HuggingFace API Key</label>
+              <label className="block text-sm font-medium mb-2">Enter your OpenAI API Key</label>
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="w-full p-2 border rounded-md"
-                placeholder="hf_..."
+                placeholder="sk-..."
               />
             </div>
             <Button onClick={handleSetApiKey} className="w-full">
