@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
@@ -14,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -25,6 +25,19 @@ const RANKS = {
   guardian: { name: "Guardian", color: "#0EA5E9", minMMR: 500 },
   herald: { name: "Herald", color: "#33C3F0", minMMR: 0 },
 } as const;
+
+const DSA_SKILLS = [
+  { subject: 'Arrays', score: 80 },
+  { subject: 'Hashmaps', score: 65 },
+  { subject: 'Binary Search', score: 70 },
+  { subject: 'Linked Lists', score: 75 },
+  { subject: 'Trees', score: 60 },
+  { subject: 'Graphs', score: 55 },
+  { subject: 'Dynamic Programming', score: 45 },
+  { subject: 'Stack & Queue', score: 85 },
+  { subject: 'Recursion', score: 70 },
+  { subject: 'Sorting', score: 90 },
+];
 
 const BATTLE_CATEGORIES = [
   "All Realms",
@@ -194,9 +207,31 @@ const Index = () => {
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white">Skills</h3>
-              <div className="aspect-square bg-black/50 rounded-lg p-4 flex items-center justify-center">
-                <div className="text-sm text-gray-400">Spider Graph Placeholder</div>
+              <h3 className="text-2xl font-bold text-white">DSA Skills</h3>
+              <div className="aspect-square bg-black/50 rounded-lg p-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={DSA_SKILLS}>
+                    <PolarGrid stroke="#ffffff20" />
+                    <PolarAngleAxis 
+                      dataKey="subject" 
+                      tick={{ fill: '#9ca3af' }}
+                      fontSize={12}
+                    />
+                    <PolarRadiusAxis 
+                      angle={30} 
+                      domain={[0, 100]} 
+                      tick={{ fill: '#9ca3af' }}
+                      fontSize={12}
+                    />
+                    <Radar
+                      name="Skills"
+                      dataKey="score"
+                      stroke="#8b5cf6"
+                      fill="#8b5cf680"
+                      fillOpacity={0.6}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
@@ -287,4 +322,3 @@ const Index = () => {
 };
 
 export default Index;
-
