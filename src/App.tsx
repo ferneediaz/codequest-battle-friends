@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PartyInvite } from "@/components/PartyInvite";
 import { Header } from "@/components/Header";
+import { Socrates } from "@/components/Socrates";
 import Index from "./pages/Index";
 import Battle from "./pages/Battle";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const MainContent = () => {
         </Routes>
       </main>
       <PartyInvite />
+      <Socrates />
     </div>
   );
 };
