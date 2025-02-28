@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import BattleCard from "@/components/BattleCard";
@@ -210,6 +211,7 @@ const Index = () => {
                     progress={quest.progress}
                     target={quest.target}
                     reward={quest.reward}
+                    isCompleted={quest.isCompleted}
                   />
                 ))}
               </div>
@@ -285,3 +287,4 @@ const Index = () => {
 };
 
 export default Index;
+
