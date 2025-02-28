@@ -1,27 +1,27 @@
 
-// HuggingFace Inference API endpoint
-const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base";
+// OpenAI API endpoint
+const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
 export const getStoredApiKey = () => {
-  return localStorage.getItem('huggingface_api_key');
+  return localStorage.getItem('openai_api_key');
 };
 
 export const setStoredApiKey = (key: string) => {
-  localStorage.setItem('huggingface_api_key', key);
+  localStorage.setItem('openai_api_key', key);
 };
 
 export const validateApiKey = (key: string) => {
-  return key.startsWith('hf_') && key.length > 8;
+  return key && key.startsWith('sk-') && key.length > 20;
 };
 
 export async function generateSocraticQuestion(userMessage: string) {
   const apiKey = getStoredApiKey();
   if (!apiKey) {
-    throw new Error("Please set your HuggingFace API key first");
+    throw new Error("Please set your OpenAI API key first");
   }
 
   if (!validateApiKey(apiKey)) {
-    throw new Error("Invalid API key format. HuggingFace API keys should start with 'hf_'");
+    throw new Error("Invalid API key format. OpenAI API keys should start with 'sk-'");
   }
 
   const problemContext = `
@@ -35,7 +35,7 @@ export async function generateSocraticQuestion(userMessage: string) {
   `;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(OPENAI_API_URL, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
