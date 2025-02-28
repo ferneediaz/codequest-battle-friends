@@ -22,14 +22,29 @@ This application is designed to enhance both Data Structure & Algorithm (DSA) sk
 - Party system for group learning
 - Real-time collaboration capabilities
 - Learn from peer interactions and discussions
+- Only one person can submit a final solution, encouraging:
+  - Active discussion of different approaches
+  - Explanation and defense of solving strategies
+  - Understanding of alternative solutions
+  - Development of communication skills through code review
+  - Consensus building within the group
 
 ## Why This Approach?
 
 Traditional coding platforms often focus solely on whether solutions work or not. Our platform takes a different approach:
 
 1. **Understanding Over Solutions**: Rather than providing answers, we help students understand their thought process.
-2. **Communication Skills**: By engaging in dialogue, students improve their ability to articulate technical concepts.
+2. **Communication Skills**: By engaging in dialogue, students improve their ability to:
+   - Explain their approach to others
+   - Compare different solution strategies
+   - Articulate technical concepts clearly
+   - Give and receive constructive feedback
 3. **Deep Learning**: The Socratic method leads to deeper understanding and better retention of concepts.
+4. **Collaborative Growth**: The "one solution" rule ensures that:
+   - Everyone must understand and discuss different approaches
+   - Team members learn to evaluate and compare solutions
+   - The best ideas from multiple approaches can be combined
+   - Students develop skills in technical communication
 
 ## Getting Started
 
@@ -37,6 +52,7 @@ Traditional coding platforms often focus solely on whether solutions work or not
 2. Start discussing your approach to the Two Sum problem
 3. Engage with the AI's questions to deepen your understanding
 4. Form or join a party to learn collaboratively
+5. Share and discuss your approach with others before submitting
 
 ## Technologies Used
 
