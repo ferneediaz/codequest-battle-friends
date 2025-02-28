@@ -73,6 +73,7 @@ const BattleCard = ({
 
       navigate(`/battle?battleId=${battleId}`);
     } catch (error: any) {
+      console.error("Join battle error:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -94,6 +95,7 @@ const BattleCard = ({
 
     try {
       setIsCreating(true);
+      console.log("Creating battle with question:", questionId);
 
       const { data: battle, error: battleError } = await supabase
         .from('battles')
@@ -111,6 +113,7 @@ const BattleCard = ({
         .single();
 
       if (battleError) throw battleError;
+      console.log("Battle created:", battle);
 
       const { error: participantError } = await supabase
         .from('battle_participants')
@@ -131,6 +134,7 @@ const BattleCard = ({
 
       navigate(`/battle?battleId=${battle.id}`);
     } catch (error: any) {
+      console.error("Create battle error:", error);
       toast({
         title: "Error",
         description: error.message,
