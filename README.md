@@ -1,5 +1,5 @@
 
-# Two Sum Learning Assistant
+# CodeQuest Battles
 
 ## About
 
