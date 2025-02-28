@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth"; // Fixed import path
-import { useBattle } from "@/hooks/useBattle"; // Fixed import path
+import { useAuth } from "@/hooks/useAuth";
+import { useBattle } from "@/hooks/useBattle";
 import {
   Select,
   SelectContent,
@@ -820,3 +821,4 @@ int main() {
 };
 
 export default Battle;
+
