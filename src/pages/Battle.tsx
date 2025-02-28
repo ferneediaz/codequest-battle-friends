@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { useBattle } from "@/hooks/use-battle";
+import { useAuth } from "@/hooks/useAuth"; // Fixed import path
+import { useBattle } from "@/hooks/useBattle"; // Fixed import path
 import {
   Select,
   SelectContent,
@@ -166,7 +166,7 @@ const Battle = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const battleId = new URLSearchParams(window.location.search).get('battleId');
-  const { battle, participants, userTeam, loading: battleLoading } = useBattle(battleId || '');
+  const { battle, participants, userTeam, loading: battleLoading, updateCode } = useBattle(battleId || '');
 
   const teammateCode = useMemo(() => {
     if (!userTeam || !participants) return null;

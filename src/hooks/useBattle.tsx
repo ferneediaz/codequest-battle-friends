@@ -16,7 +16,6 @@ export function useBattle(battleId: string) {
   useEffect(() => {
     if (!user) return;
 
-    // Fetch battle and participants
     const fetchBattle = async () => {
       try {
         const { data: battleData, error: battleError } = await supabase
@@ -26,7 +25,7 @@ export function useBattle(battleId: string) {
           .single();
 
         if (battleError) throw battleError;
-        setBattle(battleData);
+        setBattle(battleData as Battle);
 
         const { data: participantsData, error: participantsError } = await supabase
           .from('battle_participants')
@@ -34,9 +33,16 @@ export function useBattle(battleId: string) {
           .eq('battle_id', battleId);
 
         if (participantsError) throw participantsError;
-        setParticipants(participantsData);
+        
+        // Cast the team value to 'A' | 'B' since we know it's valid from our DB constraints
+        const typedParticipants = participantsData.map(p => ({
+          ...p,
+          team: p.team as 'A' | 'B'
+        }));
+        
+        setParticipants(typedParticipants);
 
-        const userParticipant = participantsData.find(p => p.user_id === user.id);
+        const userParticipant = typedParticipants.find(p => p.user_id === user.id);
         if (userParticipant) {
           setUserTeam(userParticipant.team);
         }
@@ -53,7 +59,6 @@ export function useBattle(battleId: string) {
 
     fetchBattle();
 
-    // Subscribe to real-time updates
     const battleSubscription = supabase
       .channel('battle_changes')
       .on(
@@ -64,7 +69,7 @@ export function useBattle(battleId: string) {
           table: 'battles',
           filter: `id=eq.${battleId}`,
         },
-        (payload) => {
+        (payload: any) => {
           setBattle(payload.new as Battle);
         }
       )
@@ -76,14 +81,20 @@ export function useBattle(battleId: string) {
           table: 'battle_participants',
           filter: `battle_id=eq.${battleId}`,
         },
-        (payload) => {
+        (payload: any) => {
+          if (!payload.new) return;
+          
           setParticipants(prev => {
             const updated = [...prev];
-            const index = updated.findIndex(p => p.id === payload.new.id);
+            const newParticipant = {
+              ...payload.new,
+              team: payload.new.team as 'A' | 'B'
+            };
+            const index = updated.findIndex(p => p.id === newParticipant.id);
             if (index >= 0) {
-              updated[index] = payload.new;
+              updated[index] = newParticipant;
             } else {
-              updated.push(payload.new);
+              updated.push(newParticipant);
             }
             return updated;
           });
