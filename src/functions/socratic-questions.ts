@@ -10,10 +10,18 @@ export const setStoredApiKey = (key: string) => {
   localStorage.setItem('huggingface_api_key', key);
 };
 
+export const validateApiKey = (key: string) => {
+  return key.startsWith('hf_') && key.length > 8;
+};
+
 export async function generateSocraticQuestion(userMessage: string) {
   const apiKey = getStoredApiKey();
   if (!apiKey) {
     throw new Error("Please set your HuggingFace API key first");
+  }
+
+  if (!validateApiKey(apiKey)) {
+    throw new Error("Invalid API key format. HuggingFace API keys should start with 'hf_'");
   }
 
   const problemContext = `
@@ -66,13 +74,18 @@ export async function generateSocraticQuestion(userMessage: string) {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to get response from HuggingFace");
+      const errorData = await response.text();
+      console.error("HuggingFace API error:", errorData);
+      throw new Error("Failed to get response from HuggingFace. Please check if your API key is valid.");
     }
 
     const data = await response.json();
     return Array.isArray(data) ? data[0].generated_text : data.generated_text;
   } catch (error) {
     console.error("Error generating Socratic question:", error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to generate response. Please check your API key and try again.");
   }
 }

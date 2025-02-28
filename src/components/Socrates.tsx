@@ -23,6 +23,16 @@ export const Socrates = () => {
       });
       return;
     }
+
+    if (!apiKey.startsWith('hf_')) {
+      toast({
+        title: "Error",
+        description: "HuggingFace API keys should start with 'hf_'",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setStoredApiKey(apiKey.trim());
     setIsSettingKey(false);
     toast({
