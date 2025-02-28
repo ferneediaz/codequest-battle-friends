@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Send, Brain, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { generateSocraticQuestion } from "@/functions/socratic-questions";
 
 export const Socrates = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,20 +22,8 @@ export const Socrates = () => {
     setIsThinking(true);
 
     try {
-      const response = await fetch('/functions/socratic-questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userMessage }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
-
-      const data = await response.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.question }]);
+      const question = await generateSocraticQuestion(userMessage);
+      setMessages(prev => [...prev, { role: 'assistant', content: question }]);
     } catch (error) {
       console.error('Error:', error);
       toast({
