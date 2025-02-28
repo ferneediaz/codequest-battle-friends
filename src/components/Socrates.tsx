@@ -87,7 +87,7 @@ export const Socrates = () => {
         <div className="p-4 border-b border-border bg-primary/5">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">Socrates - Two Sum Problem Helper</h3>
+            <h3 className="font-semibold text-foreground">Socrates - Two Sum Problem Helper</h3>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             Share your thoughts or struggles, and I'll help guide you through the Two Sum problem
@@ -97,12 +97,12 @@ export const Socrates = () => {
         {isSettingKey ? (
           <div className="p-4">
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Enter your OpenAI API Key</label>
+              <label className="block text-sm font-medium mb-2 text-foreground">Enter your OpenAI API Key</label>
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md bg-background text-foreground"
                 placeholder="sk-..."
               />
             </div>
@@ -142,7 +142,7 @@ export const Socrates = () => {
                       "rounded-lg p-3",
                       message.role === 'user'
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
+                        : "bg-muted text-foreground"
                     )}
                   >
                     {message.content}
@@ -155,7 +155,7 @@ export const Socrates = () => {
                     <Sparkles className="h-4 w-4 text-primary animate-pulse" />
                   </div>
                   <div className="bg-muted rounded-lg p-3">
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 text-foreground">
                       <span className="animate-bounce">●</span>
                       <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>●</span>
                       <span className="animate-bounce" style={{ animationDelay: "0.4s" }}>●</span>
@@ -172,7 +172,7 @@ export const Socrates = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Share your thoughts or questions..."
-                  className="flex-1 bg-muted px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex-1 bg-background text-foreground border border-input px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground"
                 />
                 <Button type="submit" size="icon" disabled={!input.trim() || isThinking}>
                   <Send className="h-4 w-4" />
