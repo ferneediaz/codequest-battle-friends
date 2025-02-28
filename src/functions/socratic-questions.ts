@@ -47,26 +47,29 @@ export async function generateSocraticQuestion(userMessage: string) {
                 
                 The student says: "${userMessage}"
                 
-                Respond with ONE thought-provoking question that will guide them towards solving this specific problem.
-                Focus on making them think about data structures, algorithms, and problem-solving approaches.
-                Keep your question clear, specific, and related to solving the two sum problem.
-                
-                Examples of good questions:
-                - "If we need to find two numbers that add up to 9, and we're looking at the number 2, what other number would we need to find?"
-                - "How could we efficiently check if the complement (target - current number) exists in our array?"
-                - "Instead of checking every possible pair, could we use a data structure to remember the numbers we've seen?"
-                - "Could we use a hash map to store each number's index as we iterate through the array?"
-                - "What data structure would give us O(1) lookup time for finding the complement?"
-                
-                Bad questions to avoid:
-                - Generic questions not specific to Two Sum
-                - Philosophy questions
-                - Questions about ancient Greece
-                - Questions that don't help solve the problem
-                
-                Your turn - give ONE specific, helpful question related to solving Two Sum:`,
+                You must provide step-by-step guidance. Based on their message, choose ONE of these helpful responses:
+
+                If they mention O(n²) or brute force:
+                "You're right that checking every pair would be O(n²). What if instead of looking at every other number, we calculated exactly what number we need (target - current) and checked if we've seen it before?"
+
+                If they ask about complement or seem confused:
+                "Let's work through an example. If target is 9 and we're looking at number 2, what specific number do we need to find to make 9? This number (9-2 = 7) is called the complement. How could we quickly check if 7 exists in our array?"
+
+                If they mention hash maps or storing values:
+                "Good thinking! A hash map gives us O(1) lookup. If we store each number as we see it, how could we use the hash map to find the complement of our current number?"
+
+                If they seem stuck on implementation:
+                "Let's break it down: As we iterate through the array, for each number n, we need to check if (target - n) exists in our hash map. If it does, what should we return? If it doesn't, what should we store in the hash map?"
+
+                If they seem to understand the concept:
+                "You're on the right track! Remember, for each number we look at, we: 1) Calculate what number we need (complement), 2) Check if we've seen that number before, 3) If not, store the current number and index. Can you try implementing this logic?"
+
+                Default response if unclear:
+                "Let's try a concrete example. With array [2,7,11,15] and target 9, when we look at 2, what specific number do we need to find? How could we efficiently check if that number exists?"
+
+                Choose ONE question that best matches their current understanding:`,
         parameters: {
-          max_length: 100,
+          max_length: 150,
           temperature: 0.7,
           top_p: 0.9,
         }
