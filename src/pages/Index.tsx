@@ -269,20 +269,20 @@ const Index = () => {
 
               {/* Middle column - DSA Skills */}
               <div className="space-y-4">
-                <div className="aspect-square bg-black/50 rounded-lg p-4">
+                <div className="h-[300px] bg-black/50 rounded-lg p-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={DSA_SKILLS}>
                       <PolarGrid stroke="#ffffff20" />
                       <PolarAngleAxis 
                         dataKey="subject" 
                         tick={{ fill: '#9ca3af' }}
-                        fontSize={12}
+                        fontSize={10}
                       />
                       <PolarRadiusAxis 
                         angle={30} 
                         domain={[0, 100]} 
                         tick={{ fill: '#9ca3af' }}
-                        fontSize={12}
+                        fontSize={10}
                       />
                       <Radar
                         name="Skills"
@@ -314,7 +314,7 @@ const Index = () => {
 
               {/* Right column - Active Quests */}
               <div className="space-y-4">
-                <div className="bg-black/50 p-4 rounded-lg max-h-[400px] overflow-y-auto">
+                <div className="bg-black/50 p-4 rounded-lg h-[300px] overflow-y-auto">
                   <h3 className="text-lg font-bold text-white mb-4">Active Quests</h3>
                   <div className="space-y-2">
                     {QUESTS.map((quest) => (
