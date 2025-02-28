@@ -9,6 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      battle_participants: {
+        Row: {
+          battle_id: string
+          current_code: string | null
+          id: string
+          joined_at: string
+          team: string
+          user_id: string
+        }
+        Insert: {
+          battle_id: string
+          current_code?: string | null
+          id?: string
+          joined_at?: string
+          team: string
+          user_id: string
+        }
+        Update: {
+          battle_id?: string
+          current_code?: string | null
+          id?: string
+          joined_at?: string
+          team?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_participants_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      battles: {
+        Row: {
+          created_at: string
+          id: string
+          question_id: string
+          status: Database["public"]["Enums"]["battle_status"]
+          team_a_score: number | null
+          team_b_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_id: string
+          status?: Database["public"]["Enums"]["battle_status"]
+          team_a_score?: number | null
+          team_b_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_id?: string
+          status?: Database["public"]["Enums"]["battle_status"]
+          team_a_score?: number | null
+          team_b_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battles_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -71,7 +141,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      battle_status: "waiting" | "in_progress" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
