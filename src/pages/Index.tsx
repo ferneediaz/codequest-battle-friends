@@ -183,31 +183,63 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-16 mx-auto">
         <div className="mb-16 bg-black/30 rounded-lg p-6 border border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white">Profile</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="text-2xl font-bold text-white mb-6">Profile</h3>
+              <div className="grid grid-cols-2 gap-3">
                 <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-400">Rank</div>
-                  <div className="text-lg font-bold text-primary">Guardian</div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <div className="text-sm text-gray-400">Rank</div>
+                  </div>
+                  <div className="text-lg font-bold text-primary mt-1">Guardian</div>
                 </div>
                 <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-400">MMR</div>
-                  <div className="text-lg font-bold text-primary">1200</div>
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-yellow-400" />
+                    <div className="text-sm text-gray-400">MMR</div>
+                  </div>
+                  <div className="text-lg font-bold text-yellow-400 mt-1">1200</div>
                 </div>
                 <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-400">Battles Won</div>
-                  <div className="text-lg font-bold text-green-400">23</div>
+                  <div className="flex items-center gap-2">
+                    <Sword className="w-4 h-4 text-green-400" />
+                    <div className="text-sm text-gray-400">Battles Won</div>
+                  </div>
+                  <div className="text-lg font-bold text-green-400 mt-1">23</div>
                 </div>
                 <div className="bg-black/50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-400">Win Rate</div>
-                  <div className="text-lg font-bold text-yellow-400">65%</div>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-purple-400" />
+                    <div className="text-sm text-gray-400">Win Rate</div>
+                  </div>
+                  <div className="text-lg font-bold text-purple-400 mt-1">65%</div>
+                </div>
+              </div>
+              <div className="bg-black/50 p-4 rounded-lg mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Medal className="w-4 h-4 text-primary" />
+                  <div className="text-sm text-gray-400">Recent Achievements</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Perfect Solver</span>
+                    <Award className="w-4 h-4 text-yellow-400" />
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Graph Master</span>
+                    <Brain className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Battle Veteran</span>
+                    <Skull className="w-4 h-4 text-red-400" />
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white">DSA Skills</h3>
+              <h3 className="text-2xl font-bold text-white mb-6">DSA Skills</h3>
               <div className="aspect-square bg-black/50 rounded-lg p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={DSA_SKILLS}>
@@ -233,12 +265,28 @@ const Index = () => {
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-black/50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-orange-400" />
+                    <div className="text-sm text-gray-400">Strongest</div>
+                  </div>
+                  <div className="text-sm font-medium text-orange-400 mt-1">Sorting (90%)</div>
+                </div>
+                <div className="bg-black/50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-blue-400" />
+                    <div className="text-sm text-gray-400">To Improve</div>
+                  </div>
+                  <div className="text-sm font-medium text-blue-400 mt-1">DP (45%)</div>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white">Active Quests</h3>
-              <div className="space-y-2">
-                {QUESTS.slice(0, 3).map((quest) => (
+              <h3 className="text-2xl font-bold text-white mb-6">Active Quests</h3>
+              <div className="space-y-2 max-h-[calc(100%-2rem)] overflow-y-auto pr-2">
+                {QUESTS.map((quest) => (
                   <QuestCard
                     key={quest.id}
                     title={quest.title}
