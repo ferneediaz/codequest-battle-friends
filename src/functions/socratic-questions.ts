@@ -1,27 +1,27 @@
 
-// OpenAI API endpoint
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+// Groq API endpoint
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 export const getStoredApiKey = () => {
-  return localStorage.getItem('openai_api_key');
+  return localStorage.getItem('groq_api_key');
 };
 
 export const setStoredApiKey = (key: string) => {
-  localStorage.setItem('openai_api_key', key);
+  localStorage.setItem('groq_api_key', key);
 };
 
 export const validateApiKey = (key: string) => {
-  return key && key.startsWith('sk-') && key.length > 20;
+  return key && key.startsWith('gsk_') && key.length > 20;
 };
 
 export async function generateSocraticQuestion(userMessage: string) {
   const apiKey = getStoredApiKey();
   if (!apiKey) {
-    throw new Error("Please set your OpenAI API key first");
+    throw new Error("Please set your Groq API key first");
   }
 
   if (!validateApiKey(apiKey)) {
-    throw new Error("Invalid API key format. OpenAI API keys should start with 'sk-'");
+    throw new Error("Invalid API key format. Groq API keys should start with 'gsk_'");
   }
 
   const problemContext = `
@@ -35,14 +35,14 @@ export async function generateSocraticQuestion(userMessage: string) {
   `;
 
   try {
-    const response = await fetch(OPENAI_API_URL, {
+    const response = await fetch(GROQ_API_URL, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "mixtral-8x7b-32768",
         messages: [
           {
             role: "system",
@@ -85,8 +85,8 @@ export async function generateSocraticQuestion(userMessage: string) {
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error("OpenAI API error:", errorData);
-      throw new Error("Failed to get response from OpenAI. Please check if your API key is valid.");
+      console.error("Groq API error:", errorData);
+      throw new Error("Failed to get response from Groq. Please check if your API key is valid.");
     }
 
     const data = await response.json();

@@ -25,10 +25,10 @@ export const Socrates = () => {
       return;
     }
 
-    if (!apiKey.startsWith('sk-')) {
+    if (!apiKey.startsWith('gsk_')) {
       toast({
         title: "Error",
-        description: "OpenAI API keys should start with 'sk-'",
+        description: "Groq API keys should start with 'gsk_'",
         variant: "destructive",
       });
       return;
@@ -97,13 +97,13 @@ export const Socrates = () => {
         {isSettingKey ? (
           <div className="p-4 bg-card">
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2 text-card-foreground">Enter your OpenAI API Key</label>
+              <label className="block text-sm font-medium mb-2 text-card-foreground">Enter your Groq API Key</label>
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="w-full p-2 border rounded-md bg-background text-foreground placeholder-muted-foreground"
-                placeholder="sk-..."
+                placeholder="gsk_..."
               />
             </div>
             <Button onClick={handleSetApiKey} className="w-full">
