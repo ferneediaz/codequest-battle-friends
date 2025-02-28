@@ -105,6 +105,10 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
   const [battles, setBattles] = useState<BattleWithExtras[]>([]);
   const [loading, setLoading] = useState(true);
+  const currentMMR = 1200;
+  const currentRank = Object.entries(RANKS).reduce((acc, [key, rank]) => 
+    currentMMR >= rank.minMMR ? key as keyof typeof RANKS : acc
+  , 'herald' as keyof typeof RANKS);
 
   useEffect(() => {
     const fetchBattles = async () => {
@@ -192,14 +196,16 @@ const Index = () => {
                     <Shield className="w-4 h-4 text-primary" />
                     <div className="text-sm text-gray-400">Rank</div>
                   </div>
-                  <div className="text-lg font-bold text-primary mt-1">Guardian</div>
+                  <div className="text-lg font-bold mt-1" style={{ color: RANKS[currentRank].color }}>
+                    {RANKS[currentRank].name}
+                  </div>
                 </div>
                 <div className="bg-black/50 p-4 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-yellow-400" />
                     <div className="text-sm text-gray-400">MMR</div>
                   </div>
-                  <div className="text-lg font-bold text-yellow-400 mt-1">1200</div>
+                  <div className="text-lg font-bold text-yellow-400 mt-1">{currentMMR}</div>
                 </div>
                 <div className="bg-black/50 p-4 rounded-lg">
                   <div className="flex items-center gap-2">
