@@ -193,8 +193,10 @@ const Battle = () => {
         .from('battles')
         .insert({
           room_code: newRoomCode,
-          question_id: '00000000-0000-0000-0000-000000000000', // Replace with actual question ID
-          status: 'waiting'
+          question_id: '00000000-0000-0000-0000-000000000000', // Our test question
+          status: 'waiting',
+          current_participants: 0,
+          max_participants: 2
         })
         .select()
         .single();
@@ -206,48 +208,83 @@ const Battle = () => {
         .insert({
           battle_id: data.id,
           user_id: selectedUser,
-          team: 'A'
+          team: 'A',
+          current_code: INITIAL_CODE[language]
         });
 
       setCurrentRoom(data.id);
+      
+      // Copy room code to clipboard
+      await navigator.clipboard.writeText(newRoomCode);
+      
       toast({
-        title: "Room Created!",
-        description: `Share this code with your friend: ${newRoomCode}`,
+        title: "Room Created Successfully! 🎉",
+        description: `Room code ${newRoomCode} has been copied to your clipboard. Share it with your friend!`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating room:', error);
       toast({
         title: "Error",
-        description: "Failed to create room",
+        description: "Failed to create room. Please try again.",
         variant: "destructive",
       });
     }
   };
 
   const joinBattleRoom = async (code: string) => {
+    if (!code) {
+      toast({
+        title: "Error",
+        description: "Please enter a room code",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const { data, error } = await supabase
+      const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .select('*')
         .eq('room_code', code.toUpperCase())
         .single();
 
-      if (error) throw error;
+      if (battleError) throw battleError;
+
+      if (battleData.current_participants >= battleData.max_participants) {
+        toast({
+          title: "Error",
+          description: "This room is full",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Get existing code from the other participant
+      const { data: participantData } = await supabase
+        .from('battle_participants')
+        .select('current_code')
+        .eq('battle_id', battleData.id)
+        .single();
+
+      if (participantData?.current_code) {
+        setCode(participantData.current_code);
+      }
 
       await supabase
         .from('battle_participants')
         .insert({
-          battle_id: data.id,
+          battle_id: battleData.id,
           user_id: selectedUser,
-          team: 'B'
+          team: 'B',
+          current_code: participantData?.current_code || INITIAL_CODE[language]
         });
 
-      setCurrentRoom(data.id);
+      setCurrentRoom(battleData.id);
       toast({
-        title: "Joined Room!",
-        description: "You've joined the battle",
+        title: "Joined Room Successfully! 🎉",
+        description: "You've joined the battle. Good luck!",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error joining room:', error);
       toast({
         title: "Error",
@@ -258,12 +295,24 @@ const Battle = () => {
   };
 
   const broadcastCodeUpdate = async (newCode: string) => {
-    if (currentRoom) {
+    if (!currentRoom) return;
+
+    try {
+      // Update the current user's code in the database
+      await supabase
+        .from('battle_participants')
+        .update({ current_code: newCode })
+        .eq('battle_id', currentRoom)
+        .eq('user_id', selectedUser);
+
+      // Broadcast the code update to other participants
       await supabase.channel(`battle:${currentRoom}`).send({
         type: 'broadcast',
         event: 'code_update',
         payload: { code: newCode, userId: selectedUser }
       });
+    } catch (error) {
+      console.error('Error broadcasting code update:', error);
     }
   };
 
@@ -881,33 +930,3 @@ int main() {
                     tabSize: 2,
                     color: 'transparent',
                     caretColor: '#D4D4D4',
-                    WebkitTextFillColor: 'transparent',
-                    background: '#1E1E1E'
-                  }}
-                />
-                <pre
-                  className="absolute inset-0 w-full h-full pointer-events-none font-mono p-4 text-sm leading-6 overflow-auto"
-                  aria-hidden="true"
-                >
-                  <code>
-                    {code.split('\n').map((line, i) => (
-                      <div key={i} className="min-h-[1.5em]">
-                        {tokenizeLine(line).map((token, j) => (
-                          <span key={j} style={{ color: getTokenColor(token.type) }}>
-                            {token.text}
-                          </span>
-                        ))}
-                      </div>
-                    ))}
-                  </code>
-                </pre>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Battle;
