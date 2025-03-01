@@ -1,1 +1,5 @@
+
 project_id = "prrpkxpymithbynrfkqg"
+
+[functions.execute-code]
+verify_jwt = false

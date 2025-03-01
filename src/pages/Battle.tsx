@@ -202,66 +202,18 @@ int main() {
 
   const submitToJudge0 = async (sourceCode: string, languageId: number) => {
     try {
-      const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-          'X-RapidAPI-Key': 'YOUR-RAPIDAPI-KEY', // Replace with your RapidAPI key
-        },
-        body: JSON.stringify({
-          source_code: sourceCode,
-          language_id: languageId,
-          stdin: '',
-        }),
+      const { data, error } = await supabase.functions.invoke('execute-code', {
+        body: { sourceCode, languageId }
       });
 
-      if (!submitResponse.ok) {
-        const errorData = await submitResponse.json();
-        if (submitResponse.status === 403) {
-          throw new Error('Judge0 API subscription required. Please check your API key.');
-        } else if (submitResponse.status === 429) {
-          throw new Error('Too many requests. Please try again later.');
-        } else {
-          throw new Error(errorData.message || 'Failed to submit code.');
-        }
+      if (error) {
+        throw error;
       }
 
-      const { token } = await submitResponse.json();
-      if (!token) {
-        throw new Error('No submission token received.');
-      }
-
-      let result;
-      let attempts = 0;
-      const maxAttempts = 10;
-
-      do {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const resultResponse = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
-          headers: {
-            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-            'X-RapidAPI-Key': 'YOUR-RAPIDAPI-KEY', // Replace with your RapidAPI key
-          },
-        });
-
-        if (!resultResponse.ok) {
-          const errorData = await resultResponse.json();
-          throw new Error(errorData.message || 'Failed to get submission results.');
-        }
-
-        result = await resultResponse.json();
-        attempts++;
-
-        if (attempts >= maxAttempts) {
-          throw new Error('Execution timed out. Please try again.');
-        }
-      } while (result.status?.description === 'Processing');
-
-      return result;
+      return data;
     } catch (error: any) {
       console.error('Error submitting to Judge0:', error);
-      throw error;
+      throw new Error(error.message || 'Failed to execute code');
     }
   };
 
