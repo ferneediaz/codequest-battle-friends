@@ -147,7 +147,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_manage_battle_participant: {
+        Args: {
+          participant_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       battle_status: "waiting" | "in_progress" | "completed"
