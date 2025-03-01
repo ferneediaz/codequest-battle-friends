@@ -10,6 +10,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -35,7 +36,7 @@ serve(async (req) => {
     });
 
     if (!submitResponse.ok) {
-      throw new Error('Failed to submit code to Judge0');
+      throw new Error(`Judge0 submission failed: ${submitResponse.statusText}`);
     }
 
     const { token } = await submitResponse.json();
@@ -60,7 +61,7 @@ serve(async (req) => {
       });
 
       if (!resultResponse.ok) {
-        throw new Error('Failed to get submission results');
+        throw new Error(`Failed to get submission results: ${resultResponse.statusText}`);
       }
 
       result = await resultResponse.json();
@@ -71,17 +72,18 @@ serve(async (req) => {
       if (attempts >= maxAttempts) {
         throw new Error('Execution timed out');
       }
-    } while (result.status?.description === 'Processing');
+    } while (result.status?.id === 1 || result.status?.id === 2); // Processing or In Queue
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
     });
   } catch (error) {
     console.error('Error executing code:', error);
     return new Response(
       JSON.stringify({ error: error.message || 'Failed to execute code' }),
       { 
-        status: 500,
+        status: 200, // Sending 200 even for errors to prevent Supabase from rejecting the response
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
