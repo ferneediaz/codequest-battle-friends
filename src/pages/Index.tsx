@@ -353,51 +353,106 @@ const Index = () => {
           </Button>
         </div>
 
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-white">Available Battles</h2>
-            {loading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-          </div>
-          <div className="w-64">
-            <Select onValueChange={setSelectedCategory} defaultValue={selectedCategory}>
-              <SelectTrigger className="bg-black/50 border-white/10">
-                <SelectValue placeholder="Select a realm" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-900 border border-white/10">
-                {BATTLE_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category} className="text-white hover:bg-gray-800 cursor-pointer">
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Active Battles Section */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-8">Active Battles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              <div className="col-span-full flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : battles.length === 0 ? (
+              <div className="col-span-full text-center text-gray-400 py-12">
+                <p>No active battles found. Create one to get started!</p>
+              </div>
+            ) : (
+              filteredBattles.map((battle) => (
+                <BattleCard
+                  key={battle.id}
+                  difficulty={battle.difficulty}
+                  title={battle.title}
+                  players={battle.max_participants || 2}
+                  onJoin={handleJoinBattle}
+                  minRank={RANKS[battle.minRank].name}
+                  maxRank={RANKS[battle.maxRank].name}
+                  currentPlayers={[`${battle.current_participants || 0} players`]}
+                  battleId={battle.id}
+                />
+              ))
+            )}
           </div>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center min-h-[200px]">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        {/* Create Battle Section */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-8">Choose Your Quest</h2>
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {loading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+            </div>
+            <div className="w-64">
+              <Select onValueChange={setSelectedCategory} defaultValue={selectedCategory}>
+                <SelectTrigger className="bg-black/50 border-white/10">
+                  <SelectValue placeholder="Select a realm" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border border-white/10">
+                  {BATTLE_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category} className="text-white hover:bg-gray-800 cursor-pointer">
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        ) : battles.length === 0 ? (
-          <div className="text-center text-gray-400 py-12">
-            <p>No active battles found. Create one to get started!</p>
-          </div>
-        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBattles.map((battle) => (
-              <BattleCard
-                key={battle.id}
-                difficulty={battle.difficulty}
-                title={battle.title}
-                players={battle.max_participants || 2}
-                onJoin={handleJoinBattle}
-                minRank={RANKS[battle.minRank].name}
-                maxRank={RANKS[battle.maxRank].name}
-                currentPlayers={[`${battle.current_participants || 0} players`]}
-              />
-            ))}
+            {/* Add fantasy-themed question cards here */}
+            <div className="group relative cursor-pointer" onClick={handleCreateBattle}>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
+              <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-white/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-semibold text-green-400">Forest of Arrays</span>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">The Lost Array Fragments</h3>
+                <p className="text-sm text-gray-400 mb-4">Venture into the mystical forest to recover lost array fragments and restore balance to the data structure realm.</p>
+                <Button className="w-full">Begin Quest</Button>
+              </div>
+            </div>
+
+            <div className="group relative cursor-pointer" onClick={handleCreateBattle}>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
+              <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-white/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-semibold text-yellow-400">Binary Search Castle</span>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">The Binary Oracle's Challenge</h3>
+                <p className="text-sm text-gray-400 mb-4">Scale the heights of the Binary Search Castle and unlock the secrets of efficient searching algorithms.</p>
+                <Button className="w-full">Accept Challenge</Button>
+              </div>
+            </div>
+
+            <div className="group relative cursor-pointer" onClick={handleCreateBattle}>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
+              <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-white/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-semibold text-red-400">Dynamic Programming Peaks</span>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">The Path of Dynamic Wisdom</h3>
+                <p className="text-sm text-gray-400 mb-4">Climb the treacherous peaks where ancient dynamic programming secrets await the worthy.</p>
+                <Button className="w-full">Start Journey</Button>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
