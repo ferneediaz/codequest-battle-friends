@@ -242,35 +242,41 @@ const Battle = () => {
     }
 
     try {
+      console.log('Attempting to join room with code:', code);
+      
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .select('*')
         .eq('room_code', code.toUpperCase())
         .single();
 
-      if (battleError) throw battleError;
-
-      if (battleData.current_participants >= battleData.max_participants) {
-        toast({
-          title: "Error",
-          description: "This room is full",
-          variant: "destructive",
-        });
-        return;
+      if (battleError) {
+        console.error('Error fetching battle:', battleError);
+        throw battleError;
       }
 
-      // Get existing code from the other participant
+      console.log('Found battle:', battleData);
+
+      // Check if room exists and is not full
+      if (!battleData) {
+        throw new Error('Room not found');
+      }
+
+      if (battleData.current_participants >= battleData.max_participants) {
+        throw new Error('Room is full');
+      }
+
+      // Get existing code from other participant
       const { data: participantData } = await supabase
         .from('battle_participants')
         .select('current_code')
         .eq('battle_id', battleData.id)
         .single();
 
-      if (participantData?.current_code) {
-        setCode(participantData.current_code);
-      }
+      console.log('Existing participant data:', participantData);
 
-      await supabase
+      // Insert new participant
+      const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
           battle_id: battleData.id,
@@ -279,16 +285,27 @@ const Battle = () => {
           current_code: participantData?.current_code || INITIAL_CODE[language]
         });
 
+      if (participantError) {
+        console.error('Error joining battle:', participantError);
+        throw participantError;
+      }
+
       setCurrentRoom(battleData.id);
+      
+      if (participantData?.current_code) {
+        setCode(participantData.current_code);
+      }
+
       toast({
         title: "Joined Room Successfully! 🎉",
         description: "You've joined the battle. Good luck!",
       });
+
     } catch (error: any) {
       console.error('Error joining room:', error);
       toast({
         title: "Error",
-        description: "Invalid room code or room is full",
+        description: error.message || "Invalid room code or room is full",
         variant: "destructive",
       });
     }
