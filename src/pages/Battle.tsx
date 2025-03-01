@@ -223,10 +223,18 @@ int main() {
     try {
       const testCase = TEST_CASES[0];
       const wrappedCode = createTestWrapper(language, code, testCase);
-      const result = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
+      const response = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
 
-      if (result.status.id === 3) {
-        const output = result.stdout?.trim();
+      if (!response) {
+        throw new Error('No response from server');
+      }
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      if (response.status?.id === 3) { // Accepted
+        const output = response.stdout?.trim();
         const expectedOutput = JSON.stringify(testCase.expected);
         
         if (output === expectedOutput) {
@@ -244,7 +252,7 @@ int main() {
       } else {
         toast({
           title: "Error",
-          description: result.stderr || result.compile_output || "An error occurred while running your code.",
+          description: response.stderr || response.compile_output || "An error occurred while running your code.",
           variant: "destructive",
         });
       }
