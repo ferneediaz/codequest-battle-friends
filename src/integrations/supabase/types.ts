@@ -153,6 +153,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_battle: {
+        Args: {
+          battle_id: string
+        }
+        Returns: boolean
+      }
       can_manage_battle_participant: {
         Args: {
           participant_id: string
