@@ -225,7 +225,7 @@ int main() {
     try {
       const testCase = TEST_CASES[0];
       const wrappedCode = createTestWrapper(language, code, testCase);
-      console.log('Submitting code:', wrappedCode);
+      console.log('Submitting code to Judge0:', wrappedCode);
       
       const response = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
       console.log('Judge0 response:', response);
@@ -239,17 +239,33 @@ int main() {
         return;
       }
 
+      if (response.stderr || response.compile_output) {
+        const errorMessage = response.stderr || response.compile_output;
+        console.error('Execution error:', errorMessage);
+        toast({
+          title: "Code Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const output = response.stdout?.trim();
-      console.log('Output:', output);
+      console.log('Code output:', output);
       
       if (response.status?.id === 3) { // Accepted
         const expectedOutput = JSON.stringify(testCase.expected);
-        console.log('Expected:', expectedOutput);
+        console.log('Expected output:', expectedOutput);
         
-        // Normalize the output strings for comparison
-        const normalizedOutput = output.replace(/\s+/g, '');
-        const normalizedExpected = expectedOutput.replace(/\s+/g, '');
+        // Normalize both outputs for comparison
+        const normalizedOutput = output?.replace(/[\s\[\]]/g, '')?.toLowerCase() || '';
+        const normalizedExpected = expectedOutput.replace(/[\s\[\]]/g, '')?.toLowerCase();
         
+        console.log('Comparing normalized outputs:', {
+          normalizedOutput,
+          normalizedExpected
+        });
+
         if (normalizedOutput === normalizedExpected) {
           toast({
             title: "Test Passed! ✅",
@@ -263,17 +279,17 @@ int main() {
           });
         }
       } else {
-        const errorMessage = response.stderr || response.compile_output || "An error occurred while running your code.";
         toast({
           title: "Execution Error",
-          description: errorMessage,
+          description: `Status: ${response.status?.description || 'Unknown error'}`,
           variant: "destructive",
         });
       }
     } catch (error: any) {
+      console.error('Error running code:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to run the code. Please try again.",
+        description: error.message || "Failed to run code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -285,16 +301,37 @@ int main() {
     setIsSubmitting(true);
     try {
       let allPassed = true;
+      const results = [];
       
       for (const testCase of TEST_CASES) {
+        console.log('Testing case:', testCase);
         const wrappedCode = createTestWrapper(language, code, testCase);
         const result = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
-
-        if (result.status.id !== 3 || 
-            result.stdout?.trim() !== JSON.stringify(testCase.expected)) {
+        
+        if (result.error || result.stderr || result.compile_output) {
+          console.error('Test error:', result);
           allPassed = false;
           break;
         }
+
+        const output = result.stdout?.trim();
+        const expectedOutput = JSON.stringify(testCase.expected);
+        
+        const normalizedOutput = output?.replace(/[\s\[\]]/g, '')?.toLowerCase() || '';
+        const normalizedExpected = expectedOutput.replace(/[\s\[\]]/g, '')?.toLowerCase();
+        
+        console.log('Test case comparison:', {
+          output: normalizedOutput,
+          expected: normalizedExpected
+        });
+
+        if (normalizedOutput !== normalizedExpected) {
+          allPassed = false;
+          results.push(`Failed: Expected ${expectedOutput}, got ${output}`);
+          break;
+        }
+        
+        results.push('Passed');
       }
 
       if (allPassed) {
@@ -305,14 +342,15 @@ int main() {
       } else {
         toast({
           title: "Some Tests Failed",
-          description: "Your solution didn't pass all test cases. Please try again.",
+          description: results.join('\n'),
           variant: "destructive",
         });
       }
     } catch (error: any) {
+      console.error('Error submitting code:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to submit the code. Please try again.",
+        description: error.message || "Failed to submit code. Please try again.",
         variant: "destructive",
       });
     } finally {
