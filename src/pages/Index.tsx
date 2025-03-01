@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import { useNavigate } from "react-router-dom";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -102,6 +103,7 @@ type BattleWithExtras = Database["public"]["Tables"]["battles"]["Row"] & {
 
 const Index = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
   const [battles, setBattles] = useState<BattleWithExtras[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,6 +168,7 @@ const Index = () => {
   }, [toast]);
 
   const handleCreateBattle = () => {
+    navigate('/battle');
     toast({
       title: "Creating New Battle",
       description: "Opening battle creation form...",
@@ -406,7 +409,6 @@ const Index = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Add fantasy-themed question cards here */}
             <div className="group relative cursor-pointer" onClick={handleCreateBattle}>
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
               <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-white/20">
