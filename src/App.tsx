@@ -9,6 +9,7 @@ import { Header } from "@/components/Header";
 import { Socrates } from "@/components/Socrates";
 import Index from "./pages/Index";
 import Battle from "./pages/Battle";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const MainContent = () => {
@@ -19,6 +20,7 @@ const MainContent = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/battle" element={<Battle />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
