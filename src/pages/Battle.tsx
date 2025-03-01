@@ -21,14 +21,14 @@ import {
 const INITIAL_CODE = {
   javascript: `// JavaScript Solution
 function solution(nums, target) {
-  const map = new Map();
+  const map = {};
   
   for (let i = 0; i < nums.length; i++) {
     const complement = target - nums[i];
-    if (map.has(complement)) {
-      return [map.get(complement), i];
+    if (complement in map) {
+      return [map[complement], i];
     }
-    map.set(nums[i], i);
+    map[nums[i]] = i;
   }
   return [];
 }`,
