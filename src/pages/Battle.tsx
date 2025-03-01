@@ -1,4 +1,3 @@
-<lov-code>
 import React, { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -930,4 +929,38 @@ int main() {
                   style={{ 
                     tabSize: 2,
                     color: 'transparent',
-                    caretColor: '#D4D4D
+                    caretColor: '#D4D4D4',
+                    whiteSpace: 'pre',
+                    fontFamily: 'monospace'
+                  }}
+                />
+                <div
+                  className="absolute inset-0 w-full h-full pointer-events-none font-mono p-4 text-sm leading-6"
+                  style={{
+                    whiteSpace: 'pre',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {code.split('\n').map((line, i) => (
+                    <div key={i} className="relative">
+                      {tokenizeLine(line).map((token, j) => (
+                        <span
+                          key={`${i}-${j}`}
+                          style={{ color: getTokenColor(token.type) }}
+                        >
+                          {token.text}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Battle;
