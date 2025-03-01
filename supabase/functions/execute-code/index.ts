@@ -20,7 +20,7 @@ serve(async (req) => {
 
     if (!JUDGE0_API_KEY) {
       console.error('JUDGE0_RAPIDAPI_KEY is not set');
-      throw new Error('Judge0 API key is not configured');
+      throw new Error('Judge0 API key not configured. Please set up the API key in Supabase Edge Function settings.');
     }
 
     console.log('Executing code with Judge0:', { languageId, sourceCode });
@@ -36,14 +36,12 @@ serve(async (req) => {
       body: JSON.stringify({
         source_code: sourceCode,
         language_id: languageId,
-        stdin: '',
-        expected_output: '',
       }),
     });
 
     if (!submitResponse.ok) {
       const errorText = await submitResponse.text();
-      console.error('Judge0 submission failed:', submitResponse.status, errorText);
+      console.error('Judge0 API error:', submitResponse.status, errorText);
       throw new Error(`Judge0 API error: ${submitResponse.status} ${errorText}`);
     }
 
@@ -62,11 +60,12 @@ serve(async (req) => {
       }), 
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
       }
     );
   } catch (error) {
     console.error('Error executing code:', error);
+    
+    // Return a more informative error response
     return new Response(
       JSON.stringify({ 
         error: error.message || 'Failed to execute code',
@@ -74,9 +73,7 @@ serve(async (req) => {
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200, 
       }
     );
   }
 });
-

@@ -171,24 +171,24 @@ const Battle = () => {
     setCode(INITIAL_CODE[newLang]);
   };
 
-const createTestWrapper = (lang: Language, code: string, testCase: typeof TEST_CASES[0]) => {
-  switch (lang) {
-    case 'javascript':
-      return `
+  const createTestWrapper = (lang: Language, code: string, testCase: typeof TEST_CASES[0]) => {
+    switch (lang) {
+      case 'javascript':
+        return `
 ${code}
 const nums = ${JSON.stringify(testCase.input.nums)};
 const target = ${JSON.stringify(testCase.input.target)};
 const result = solution(nums, target);
 console.log(JSON.stringify(result));`;
-    case 'python':
-      return `
+      case 'python':
+        return `
 ${code}
 nums = ${JSON.stringify(testCase.input.nums)}
 target = ${testCase.input.target}
 result = solution(nums, target)
 print(str(result).replace(' ', ''))`;
-    case 'cpp':
-      return `
+      case 'cpp':
+        return `
 #include <iostream>
 #include <string>
 ${code}
@@ -200,8 +200,8 @@ int main() {
     cout << "[" << result[0] << "," << result[1] << "]" << endl;
     return 0;
 }`;
-  }
-};
+    }
+  };
 
   const submitToJudge0 = async (sourceCode: string, languageId: number) => {
     try {
@@ -220,61 +220,66 @@ int main() {
     }
   };
 
-const handleRun = async () => {
-  setIsRunning(true);
-  try {
-    const testCase = TEST_CASES[0];
-    const wrappedCode = createTestWrapper(language, code, testCase);
-    console.log('Submitting code:', wrappedCode);
-    
-    const response = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
-    console.log('Judge0 response:', response);
-
-    if (response.error) {
-      throw new Error(response.error);
-    }
-
-    const output = response.stdout?.trim();
-    console.log('Output:', output);
-    
-    if (response.status?.id === 3) { // Accepted
-      const expectedOutput = JSON.stringify(testCase.expected);
-      console.log('Expected:', expectedOutput);
+  const handleRun = async () => {
+    setIsRunning(true);
+    try {
+      const testCase = TEST_CASES[0];
+      const wrappedCode = createTestWrapper(language, code, testCase);
+      console.log('Submitting code:', wrappedCode);
       
-      // Normalize the output strings for comparison
-      const normalizedOutput = output.replace(/\s+/g, '');
-      const normalizedExpected = expectedOutput.replace(/\s+/g, '');
-      
-      if (normalizedOutput === normalizedExpected) {
+      const response = await submitToJudge0(wrappedCode, LANGUAGE_IDS[language]);
+      console.log('Judge0 response:', response);
+
+      if (response.error) {
         toast({
-          title: "Test Passed! ✅",
-          description: "Your solution passed the sample test case.",
+          title: "Error",
+          description: response.error,
+          variant: "destructive",
         });
+        return;
+      }
+
+      const output = response.stdout?.trim();
+      console.log('Output:', output);
+      
+      if (response.status?.id === 3) { // Accepted
+        const expectedOutput = JSON.stringify(testCase.expected);
+        console.log('Expected:', expectedOutput);
+        
+        // Normalize the output strings for comparison
+        const normalizedOutput = output.replace(/\s+/g, '');
+        const normalizedExpected = expectedOutput.replace(/\s+/g, '');
+        
+        if (normalizedOutput === normalizedExpected) {
+          toast({
+            title: "Test Passed! ✅",
+            description: "Your solution passed the sample test case.",
+          });
+        } else {
+          toast({
+            title: "Test Failed ❌",
+            description: `Expected ${expectedOutput}, but got ${output}`,
+            variant: "destructive",
+          });
+        }
       } else {
+        const errorMessage = response.stderr || response.compile_output || "An error occurred while running your code.";
         toast({
-          title: "Test Failed ❌",
-          description: `Expected ${expectedOutput}, but got ${output}`,
+          title: "Execution Error",
+          description: errorMessage,
           variant: "destructive",
         });
       }
-    } else {
-      const errorMessage = response.stderr || response.compile_output || "An error occurred while running your code.";
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: errorMessage,
+        description: error.message || "Failed to run the code. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsRunning(false);
     }
-  } catch (error: any) {
-    toast({
-      title: "Error",
-      description: error.message || "Failed to run the code. Please try again.",
-      variant: "destructive",
-    });
-  } finally {
-    setIsRunning(false);
-  }
-};
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
