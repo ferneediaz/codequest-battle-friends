@@ -6,12 +6,24 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import QuestCard from "@/components/QuestCard";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleBeginQuest = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to begin a quest.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
     try {
       // Generate a unique battle ID
       const battleId = crypto.randomUUID();
@@ -21,7 +33,7 @@ const Index = () => {
         .from('battles')
         .insert({
           id: battleId,
-          status: 'waiting', // Changed from 'active' to 'waiting'
+          status: 'waiting',
           created_at: new Date().toISOString(),
           question_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder ID
           max_participants: 2
