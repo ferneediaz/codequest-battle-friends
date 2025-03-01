@@ -9,7 +9,136 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      battle_participants: {
+        Row: {
+          battle_id: string
+          current_code: string | null
+          id: string
+          joined_at: string
+          team: string
+          user_id: string
+        }
+        Insert: {
+          battle_id: string
+          current_code?: string | null
+          id?: string
+          joined_at?: string
+          team: string
+          user_id: string
+        }
+        Update: {
+          battle_id?: string
+          current_code?: string | null
+          id?: string
+          joined_at?: string
+          team?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_participants_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      battles: {
+        Row: {
+          created_at: string
+          current_participants: number | null
+          id: string
+          max_participants: number | null
+          question_id: string
+          status: Database["public"]["Enums"]["room_status"]
+          team_a_score: number | null
+          team_b_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          current_participants?: number | null
+          id?: string
+          max_participants?: number | null
+          question_id: string
+          status?: Database["public"]["Enums"]["room_status"]
+          team_a_score?: number | null
+          team_b_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          current_participants?: number | null
+          id?: string
+          max_participants?: number | null
+          question_id?: string
+          status?: Database["public"]["Enums"]["room_status"]
+          team_a_score?: number | null
+          team_b_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battles_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          difficulty: string
+          id: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          difficulty: string
+          id?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          difficulty?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +147,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      battle_status: "waiting" | "in_progress" | "completed"
+      room_status: "waiting" | "in_progress" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
