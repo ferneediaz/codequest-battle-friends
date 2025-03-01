@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Trophy, Star, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ interface QuestProps {
   target: number;
   reward: string;
   isCompleted: boolean;
+  onBeginQuest?: () => void;
 }
 
 const getChestStyle = (reward: string) => {
@@ -28,7 +28,13 @@ const getChestStyle = (reward: string) => {
   }
 };
 
-const QuestCard = ({ title, description, progress, target, reward, isCompleted }: QuestProps) => {
+const QuestCard = ({ title, description, progress, target, reward, isCompleted, onBeginQuest }: QuestProps) => {
+  const handleBeginQuest = () => {
+    if (onBeginQuest) {
+      onBeginQuest();
+    }
+  };
+
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
@@ -69,6 +75,16 @@ const QuestCard = ({ title, description, progress, target, reward, isCompleted }
             </div>
           </div>
         </div>
+        {!isCompleted && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="w-full mt-2 text-xs py-1 h-7"
+            onClick={handleBeginQuest}
+          >
+            Begin Quest
+          </Button>
+        )}
         {isCompleted && (
           <Button 
             variant="outline" 
@@ -85,4 +101,3 @@ const QuestCard = ({ title, description, progress, target, reward, isCompleted }
 };
 
 export default QuestCard;
-

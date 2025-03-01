@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -178,8 +177,9 @@ const Battle = () => {
   useEffect(() => {
     if (!battleId) {
       navigate('/');
+      return;
     }
-  }, [battleId]);
+  }, [battleId, navigate]);
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
@@ -821,4 +821,3 @@ int main() {
 };
 
 export default Battle;
-
