@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -162,9 +162,110 @@ const Battle = () => {
   const [battleState, setBattleState] = useState<BattleState>(INITIAL_BATTLE_STATE);
   const [history, setHistory] = useState<string[]>([INITIAL_CODE[language]]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [roomCode, setRoomCode] = useState<string>("");
+  const [currentRoom, setCurrentRoom] = useState<string | null>(null);
 
-  React.useEffect(() => {
-  }, []);
+  // Mock user selection (temporary solution)
+  const [selectedUser, setSelectedUser] = useState<string>("11111111-1111-1111-1111-111111111111");
+
+  useEffect(() => {
+    if (currentRoom) {
+      // Subscribe to room updates
+      const channel = supabase.channel(`battle:${currentRoom}`)
+        .on('broadcast', { event: 'code_update' }, ({ payload }) => {
+          if (payload.userId !== selectedUser) {
+            setCode(payload.code);
+          }
+        })
+        .subscribe();
+
+      return () => {
+        channel.unsubscribe();
+      };
+    }
+  }, [currentRoom, selectedUser]);
+
+  const createBattleRoom = async () => {
+    try {
+      const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      const { data, error } = await supabase
+        .from('battles')
+        .insert({
+          room_code: newRoomCode,
+          question_id: '00000000-0000-0000-0000-000000000000', // Replace with actual question ID
+          status: 'waiting'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await supabase
+        .from('battle_participants')
+        .insert({
+          battle_id: data.id,
+          user_id: selectedUser,
+          team: 'A'
+        });
+
+      setCurrentRoom(data.id);
+      toast({
+        title: "Room Created!",
+        description: `Share this code with your friend: ${newRoomCode}`,
+      });
+    } catch (error) {
+      console.error('Error creating room:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create room",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const joinBattleRoom = async (code: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('battles')
+        .select('*')
+        .eq('room_code', code.toUpperCase())
+        .single();
+
+      if (error) throw error;
+
+      await supabase
+        .from('battle_participants')
+        .insert({
+          battle_id: data.id,
+          user_id: selectedUser,
+          team: 'B'
+        });
+
+      setCurrentRoom(data.id);
+      toast({
+        title: "Joined Room!",
+        description: "You've joined the battle",
+      });
+    } catch (error) {
+      console.error('Error joining room:', error);
+      toast({
+        title: "Error",
+        description: "Invalid room code or room is full",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const broadcastCodeUpdate = async (newCode: string) => {
+    if (currentRoom) {
+      await supabase.channel(`battle:${currentRoom}`).send({
+        type: 'broadcast',
+        event: 'code_update',
+        payload: { code: newCode, userId: selectedUser }
+      });
+    }
+  };
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
@@ -539,15 +640,6 @@ int main() {
     });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newCode = e.target.value;
-    setCode(newCode);
-    if (newCode !== history[history.length - 1]) {
-      setHistory(prev => [...prev.slice(0, historyIndex + 1), newCode]);
-      setHistoryIndex(prev => prev + 1);
-    }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -591,6 +683,7 @@ int main() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-8">
+        {/* Top Bar */}
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => navigate("/")}
@@ -600,15 +693,42 @@ int main() {
             Back to Lobby
           </button>
           
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-blue-400" />
-              <span className="text-blue-400">{battleState.mana}/{battleState.maxMana}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Coins className="w-5 h-5 text-yellow-400" />
-              <span className="text-yellow-400">{battleState.gold}</span>
-            </div>
+          {/* Room Controls */}
+          <div className="flex items-center gap-4">
+            {!currentRoom ? (
+              <>
+                <Button onClick={createBattleRoom} variant="outline">
+                  Create Room
+                </Button>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={roomCode}
+                    onChange={(e) => setRoomCode(e.target.value)}
+                    placeholder="Enter room code"
+                    className="px-3 py-1 bg-black/30 border border-white/10 rounded text-white"
+                  />
+                  <Button onClick={() => joinBattleRoom(roomCode)} variant="outline">
+                    Join Room
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-white">
+                Room Active
+              </div>
+            )}
+            
+            {/* Mock user selection */}
+            <Select value={selectedUser} onValueChange={setSelectedUser}>
+              <SelectTrigger className="w-[200px] bg-black/30">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="11111111-1111-1111-1111-111111111111">Player One</SelectItem>
+                <SelectItem value="22222222-2222-2222-2222-222222222222">Player Two</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

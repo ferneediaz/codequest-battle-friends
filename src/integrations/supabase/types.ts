@@ -51,6 +51,7 @@ export type Database = {
           id: string
           max_participants: number | null
           question_id: string
+          room_code: string | null
           status: Database["public"]["Enums"]["room_status"]
           team_a_score: number | null
           team_b_score: number | null
@@ -61,6 +62,7 @@ export type Database = {
           id?: string
           max_participants?: number | null
           question_id: string
+          room_code?: string | null
           status?: Database["public"]["Enums"]["room_status"]
           team_a_score?: number | null
           team_b_score?: number | null
@@ -71,6 +73,7 @@ export type Database = {
           id?: string
           max_participants?: number | null
           question_id?: string
+          room_code?: string | null
           status?: Database["public"]["Enums"]["room_status"]
           team_a_score?: number | null
           team_b_score?: number | null
