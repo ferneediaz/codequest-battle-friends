@@ -48,10 +48,12 @@ export type Database = {
         Row: {
           created_at: string
           current_participants: number | null
+          document_content: string | null
           id: string
           max_participants: number | null
           question_id: string
           room_code: string | null
+          shared_document_id: string | null
           status: Database["public"]["Enums"]["room_status"]
           team_a_score: number | null
           team_b_score: number | null
@@ -59,10 +61,12 @@ export type Database = {
         Insert: {
           created_at?: string
           current_participants?: number | null
+          document_content?: string | null
           id?: string
           max_participants?: number | null
           question_id: string
           room_code?: string | null
+          shared_document_id?: string | null
           status?: Database["public"]["Enums"]["room_status"]
           team_a_score?: number | null
           team_b_score?: number | null
@@ -70,10 +74,12 @@ export type Database = {
         Update: {
           created_at?: string
           current_participants?: number | null
+          document_content?: string | null
           id?: string
           max_participants?: number | null
           question_id?: string
           room_code?: string | null
+          shared_document_id?: string | null
           status?: Database["public"]["Enums"]["room_status"]
           team_a_score?: number | null
           team_b_score?: number | null

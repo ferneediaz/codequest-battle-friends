@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -152,8 +153,9 @@ const INITIAL_BATTLE_STATE: BattleState = {
 const HINT_COST = 100; // Gold cost for revealing a hint
 
 const Battle = () => {
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [language, setLanguage] = useState<Language>("javascript");
   const [code, setCode] = useState(INITIAL_CODE[language]);
@@ -165,15 +167,11 @@ const Battle = () => {
   const [roomCode, setRoomCode] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
 
-  // Mock user selection (temporary solution)
-  const [selectedUser, setSelectedUser] = useState<string>("11111111-1111-1111-1111-111111111111");
-
   useEffect(() => {
     if (currentRoom) {
-      // Subscribe to room updates
       const channel = supabase.channel(`battle:${currentRoom}`)
         .on('broadcast', { event: 'code_update' }, ({ payload }) => {
-          if (payload.userId !== selectedUser) {
+          if (payload.userId !== user?.id) {
             setCode(payload.code);
           }
         })
@@ -183,13 +181,22 @@ const Battle = () => {
         channel.unsubscribe();
       };
     }
-  }, [currentRoom, selectedUser]);
+  }, [currentRoom, user?.id]);
 
   const createBattleRoom = async () => {
     try {
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to create a battle room",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
-      const { data, error } = await supabase
+      const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .insert({
           room_code: newRoomCode,
@@ -201,20 +208,21 @@ const Battle = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (battleError) throw battleError;
 
-      await supabase
+      const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
-          battle_id: data.id,
-          user_id: selectedUser,
+          battle_id: battleData.id,
+          user_id: user.id,
           team: 'A',
           current_code: INITIAL_CODE[language]
         });
 
-      setCurrentRoom(data.id);
+      if (participantError) throw participantError;
+
+      setCurrentRoom(battleData.id);
       
-      // Copy room code to clipboard
       await navigator.clipboard.writeText(newRoomCode);
       
       toast({
@@ -232,6 +240,15 @@ const Battle = () => {
   };
 
   const joinBattleRoom = async (code: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to join a battle room",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!code) {
       toast({
         title: "Error",
@@ -242,22 +259,14 @@ const Battle = () => {
     }
 
     try {
-      console.log('Attempting to join room with code:', code);
-      
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .select('*')
         .eq('room_code', code.toUpperCase())
         .single();
 
-      if (battleError) {
-        console.error('Error fetching battle:', battleError);
-        throw battleError;
-      }
+      if (battleError) throw battleError;
 
-      console.log('Found battle:', battleData);
-
-      // Check if room exists and is not full
       if (!battleData) {
         throw new Error('Room not found');
       }
@@ -266,29 +275,22 @@ const Battle = () => {
         throw new Error('Room is full');
       }
 
-      // Get existing code from other participant
       const { data: participantData } = await supabase
         .from('battle_participants')
         .select('current_code')
         .eq('battle_id', battleData.id)
         .single();
 
-      console.log('Existing participant data:', participantData);
-
-      // Insert new participant
       const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
           battle_id: battleData.id,
-          user_id: selectedUser,
+          user_id: user.id,
           team: 'B',
           current_code: participantData?.current_code || INITIAL_CODE[language]
         });
 
-      if (participantError) {
-        console.error('Error joining battle:', participantError);
-        throw participantError;
-      }
+      if (participantError) throw participantError;
 
       setCurrentRoom(battleData.id);
       
@@ -312,21 +314,19 @@ const Battle = () => {
   };
 
   const broadcastCodeUpdate = async (newCode: string) => {
-    if (!currentRoom) return;
+    if (!currentRoom || !user) return;
 
     try {
-      // Update the current user's code in the database
       await supabase
         .from('battle_participants')
         .update({ current_code: newCode })
         .eq('battle_id', currentRoom)
-        .eq('user_id', selectedUser);
+        .eq('user_id', user.id);
 
-      // Broadcast the code update to other participants
       await supabase.channel(`battle:${currentRoom}`).send({
         type: 'broadcast',
         event: 'code_update',
-        payload: { code: newCode, userId: selectedUser }
+        payload: { code: newCode, userId: user.id }
       });
     } catch (error) {
       console.error('Error broadcasting code update:', error);
@@ -749,12 +749,12 @@ int main() {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
     setCode(newCode);
-    // Add the new code to history
+    
     if (newCode !== history[history.length - 1]) {
       setHistory([...history, newCode]);
       setHistoryIndex(history.length);
     }
-    // Broadcast code changes to other users if in a room
+    
     if (currentRoom) {
       broadcastCodeUpdate(newCode);
     }
