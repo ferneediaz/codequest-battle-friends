@@ -23,10 +23,10 @@ serve(async (req) => {
       throw new Error('Judge0 API key is not configured');
     }
 
-    console.log('Executing code with Judge0:', { languageId });
+    console.log('Executing code with Judge0:', { languageId, sourceCode });
 
     // Submit code to Judge0
-    const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
+    const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -37,67 +37,46 @@ serve(async (req) => {
         source_code: sourceCode,
         language_id: languageId,
         stdin: '',
+        expected_output: '',
       }),
     });
 
     if (!submitResponse.ok) {
-      throw new Error(`Judge0 submission failed: ${submitResponse.statusText}`);
+      const errorText = await submitResponse.text();
+      console.error('Judge0 submission failed:', submitResponse.status, errorText);
+      throw new Error(`Judge0 API error: ${submitResponse.status} ${errorText}`);
     }
 
-    const submission = await submitResponse.json();
-    if (!submission?.token) {
-      throw new Error('No submission token received from Judge0');
-    }
+    const result = await submitResponse.json();
+    console.log('Judge0 execution result:', result);
 
-    console.log('Submission token received:', submission.token);
-
-    // Poll for results
-    let result;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    do {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const resultResponse = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${submission.token}`, {
-        headers: {
-          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-          'X-RapidAPI-Key': JUDGE0_API_KEY,
-        },
-      });
-
-      if (!resultResponse.ok) {
-        throw new Error(`Failed to get submission results: ${resultResponse.statusText}`);
+    return new Response(
+      JSON.stringify({
+        stdout: result.stdout,
+        stderr: result.stderr,
+        compile_output: result.compile_output,
+        status: {
+          id: result.status?.id || -1,
+          description: result.status?.description || 'Unknown'
+        }
+      }), 
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
       }
-
-      result = await resultResponse.json();
-      attempts++;
-
-      console.log('Polling attempt:', attempts, 'Status:', result?.status?.description);
-
-      if (attempts >= maxAttempts) {
-        throw new Error('Execution timed out');
-      }
-    } while (result?.status?.id === 1 || result?.status?.id === 2); // Processing or In Queue
-
-    if (!result?.status) {
-      throw new Error('Invalid response from Judge0');
-    }
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    );
   } catch (error) {
     console.error('Error executing code:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message || 'Failed to execute code',
-        status: { id: -1, description: 'Error' }  // Add a default status object for error cases
+        status: { id: -1, description: 'Error' }
       }),
       { 
-        status: 200, // Sending 200 even for errors to prevent Supabase from rejecting the response
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200, 
       }
     );
   }
 });
+
