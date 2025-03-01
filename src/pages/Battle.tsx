@@ -680,6 +680,20 @@ int main() {
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newCode = e.target.value;
+    setCode(newCode);
+    // Add the new code to history
+    if (newCode !== history[history.length - 1]) {
+      setHistory([...history, newCode]);
+      setHistoryIndex(history.length);
+    }
+    // Broadcast code changes to other users if in a room
+    if (currentRoom) {
+      broadcastCodeUpdate(newCode);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-8">
