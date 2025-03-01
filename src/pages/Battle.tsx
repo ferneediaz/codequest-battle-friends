@@ -1,9 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { useBattle } from "@/hooks/useBattle";
 import {
   Select,
   SelectContent,
@@ -155,7 +153,6 @@ const HINT_COST = 100; // Gold cost for revealing a hint
 const Battle = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [language, setLanguage] = useState<Language>("javascript");
   const [code, setCode] = useState(INITIAL_CODE[language]);
@@ -165,21 +162,8 @@ const Battle = () => {
   const [history, setHistory] = useState<string[]>([INITIAL_CODE[language]]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
-  const battleId = new URLSearchParams(window.location.search).get('battleId');
-  const { battle, participants, userTeam, loading: battleLoading, updateCode } = useBattle(battleId || '');
-
-  const teammateCode = useMemo(() => {
-    if (!userTeam || !participants) return null;
-    const teammate = participants.find(p => p.team === userTeam && p.user_id !== user?.id);
-    return teammate?.current_code || null;
-  }, [participants, userTeam, user]);
-
-  useEffect(() => {
-    if (!battleId) {
-      navigate('/');
-      return;
-    }
-  }, [battleId, navigate]);
+  React.useEffect(() => {
+  }, []);
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
@@ -549,10 +533,6 @@ int main() {
       setHistory(prev => [...prev.slice(0, historyIndex + 1), newCode]);
       setHistoryIndex(prev => prev + 1);
     }
-    
-    if (battleId) {
-      updateCode(newCode);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -595,46 +575,9 @@ int main() {
     }
   };
 
-  const renderTeamInfo = () => {
-    if (!battle || !participants) return null;
-
-    const teamA = participants.filter(p => p.team === 'A');
-    const teamB = participants.filter(p => p.team === 'B');
-
-    return (
-      <div className="flex justify-between mb-4">
-        <div className={`p-4 rounded-lg ${userTeam === 'A' ? 'bg-blue-500/20' : 'bg-gray-800'}`}>
-          <h3 className="text-lg font-semibold mb-2">Team A</h3>
-          <div className="space-y-1">
-            {teamA.map(participant => (
-              <div key={participant.id} className="text-sm">
-                {participant.user_id === user?.id ? 'You' : 'Teammate'}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className={`p-4 rounded-lg ${userTeam === 'B' ? 'bg-blue-500/20' : 'bg-gray-800'}`}>
-          <h3 className="text-lg font-semibold mb-2">Team B</h3>
-          <div className="space-y-1">
-            {teamB.map(participant => (
-              <div key={participant.id} className="text-sm">
-                {participant.user_id === user?.id ? 'You' : 'Teammate'}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  if (battleLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading battle...</div>;
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="container px-4 py-8">
-        {renderTeamInfo()}
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => navigate("/")}

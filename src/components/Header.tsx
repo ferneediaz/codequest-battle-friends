@@ -1,28 +1,8 @@
 
-import { User, Users, Trophy, Settings, Bell, MessageSquare, LogOut } from "lucide-react";
+import { User, Users, Trophy, Settings, Bell, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate("/auth");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error signing out",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm border-b border-white/10">
       <div className="flex items-center justify-between px-4 h-16">
@@ -63,10 +43,6 @@ export function Header() {
               <Settings className="h-4 w-4" />
               <span className="sr-only">Settings</span>
             </a>
-          </Button>
-          <Button variant="ghost" size="icon" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4" />
-            <span className="sr-only">Sign Out</span>
           </Button>
         </nav>
       </div>
