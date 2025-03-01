@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
+import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -191,6 +191,7 @@ const Battle = () => {
           description: "Please sign in to create a battle room",
           variant: "destructive",
         });
+        navigate('/auth');
         return;
       }
 
@@ -209,7 +210,10 @@ const Battle = () => {
         .select()
         .single();
 
-      if (battleError) throw battleError;
+      if (battleError) {
+        console.error('Error creating battle:', battleError);
+        throw battleError;
+      }
 
       const { error: participantError } = await supabase
         .from('battle_participants')
@@ -220,7 +224,10 @@ const Battle = () => {
           current_code: INITIAL_CODE[language]
         });
 
-      if (participantError) throw participantError;
+      if (participantError) {
+        console.error('Error adding participant:', participantError);
+        throw participantError;
+      }
 
       setCurrentRoom(battleData.id);
       
@@ -234,7 +241,7 @@ const Battle = () => {
       console.error('Error creating room:', error);
       toast({
         title: "Error",
-        description: "Failed to create room. Please try again.",
+        description: error.message || "Failed to create room. Please try again.",
         variant: "destructive",
       });
     }
@@ -247,6 +254,7 @@ const Battle = () => {
         description: "Please sign in to join a battle room",
         variant: "destructive",
       });
+      navigate('/auth');
       return;
     }
 
@@ -266,7 +274,7 @@ const Battle = () => {
         .eq('room_code', code.toUpperCase())
         .single();
 
-      if (battleError) throw battleError;
+      if (battleError) throw new Error('Room not found');
 
       if (!battleData) {
         throw new Error('Room not found');
