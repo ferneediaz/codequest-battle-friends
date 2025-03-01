@@ -203,7 +203,8 @@ const Battle = () => {
           question_id: '00000000-0000-0000-0000-000000000000', // Our test question
           status: 'waiting',
           current_participants: 0,
-          max_participants: 2
+          max_participants: 2,
+          document_content: INITIAL_CODE[language]
         })
         .select()
         .single();
@@ -798,17 +799,6 @@ int main() {
                 Room Active
               </div>
             )}
-            
-            {/* Mock user selection */}
-            <Select value={selectedUser} onValueChange={setSelectedUser}>
-              <SelectTrigger className="w-[200px] bg-black/30">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="11111111-1111-1111-1111-111111111111">Player One</SelectItem>
-                <SelectItem value="22222222-2222-2222-2222-222222222222">Player Two</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
