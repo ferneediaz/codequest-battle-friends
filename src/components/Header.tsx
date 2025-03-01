@@ -17,6 +17,9 @@ export function Header() {
           <div className="flex items-center gap-4">
             {user ? (
               <>
+                <span className="text-sm text-white/80">
+                  {user.email}
+                </span>
                 <Button onClick={signOut} variant="ghost" className="text-white">
                   Sign Out
                 </Button>
