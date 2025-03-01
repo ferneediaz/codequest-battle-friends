@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Trophy, Star, Check } from "lucide-react";
@@ -18,13 +19,13 @@ const Index = () => {
       // Create the initial battle in Supabase
       const { error } = await supabase
         .from('battles')
-        .insert([
-          {
-            id: battleId,
-            status: 'active',
-            created_at: new Date().toISOString(),
-          }
-        ]);
+        .insert({
+          id: battleId,
+          status: 'waiting', // Changed from 'active' to 'waiting'
+          created_at: new Date().toISOString(),
+          question_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder ID
+          max_participants: 2
+        });
 
       if (error) throw error;
 
