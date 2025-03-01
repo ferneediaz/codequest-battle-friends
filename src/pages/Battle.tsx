@@ -1,3 +1,4 @@
+<lov-code>
 import React, { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Check, Coins, Wand, Star, MessageCircleQuestion, Zap, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -929,4 +930,4 @@ int main() {
                   style={{ 
                     tabSize: 2,
                     color: 'transparent',
-                    caretColor: '#D4D4D4',
+                    caretColor: '#D4D4D
