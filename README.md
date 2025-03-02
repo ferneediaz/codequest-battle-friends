@@ -1,4 +1,3 @@
-
 # CodeQuest Battles
 
 ## About
@@ -10,7 +9,6 @@ This application is designed to enhance both Data Structure & Algorithm (DSA) sk
 Before you begin, ensure you have the following installed:
 - Node.js (v18 or higher)
 - npm (v8 or higher)
-- A Supabase account (free tier works perfectly)
 - A RapidAPI account (for Judge0 API integration)
 
 ## Detailed Setup Guide
@@ -36,12 +34,14 @@ npm install
 
 ### 3. Supabase Setup
 
-1. Create a new Supabase project at https://supabase.com
-2. Once created, go to Project Settings > API to find your:
-   - Project URL
-   - Project anon/public key
+The application is already configured to use a Supabase project. The necessary Supabase URL and anon key are included in the codebase, so you don't need to set up any environment variables for this.
 
-3. Create the necessary database tables and types by running these SQL commands in your Supabase SQL editor:
+If you want to use your own Supabase instance instead:
+
+1. Create a new Supabase project at https://supabase.com
+2. Once created, go to Project Settings > API
+3. Update the Supabase configuration in `src/integrations/supabase/client.ts` with your project's URL and anon key
+4. Run the following SQL commands in your Supabase SQL editor to set up the database schema:
 
 ```sql
 -- Create enum for room status
@@ -185,11 +185,12 @@ TO authenticated
 USING (auth.uid() = user_id);
 ```
 
-4. Set up an Edge Function for code execution:
-   - Go to your Supabase Dashboard > Edge Functions
-   - Create a new function called `execute-code`
-   - Add your RapidAPI key as a secret with name `JUDGE0_RAPIDAPI_KEY`
-   - Deploy this code:
+### 4. Edge Function Setup
+
+1. Go to your Supabase Dashboard > Edge Functions
+2. Create a new function called `execute-code`
+3. Add your RapidAPI key as a secret with name `JUDGE0_RAPIDAPI_KEY`
+4. Deploy this code:
 
 ```typescript
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -248,42 +249,7 @@ serve(async (req) => {
 })
 ```
 
-### 4. Environment Setup
-
-Create a new file called `.env.local` in the project root with these variables:
-
-```env
-VITE_SUPABASE_URL=your_project_url
-VITE_SUPABASE_ANON_KEY=your_anon_key
-```
-
-Replace `your_project_url` and `your_anon_key` with the values from your Supabase project settings.
-
-### 5. Supabase Auth Configuration
-
-In your Supabase project:
-1. Go to Authentication > Settings
-2. Set your Site URL to `http://localhost:8080` (for development)
-3. Add `http://localhost:8080/*` to Additional Redirect URLs
-4. Optional: Disable "Confirm email" for easier testing
-
-### 6. Add Sample Question Data
-
-Run this SQL in your Supabase SQL editor to add a sample question:
-
-```sql
-INSERT INTO public.questions (title, description, difficulty, category, constraints, examples)
-VALUES (
-  'Two Sum',
-  'Given an array of integers nums and an integer target, return indices of the two numbers in nums such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.',
-  'easy',
-  'arrays',
-  ARRAY['2 <= nums.length <= 104', '-109 <= nums[i] <= 109', '-109 <= target <= 109'],
-  '[{"input":"nums = [2,7,11,15], target = 9","output":"[0,1]","explanation":"Because nums[0] + nums[1] == 9, we return [0, 1]"},{"input":"nums = [3,2,4], target = 6","output":"[1,2]","explanation":"Because nums[1] + nums[2] == 6, we return [1, 2]"}]'::jsonb
-);
-```
-
-### 7. Run the Project
+### 5. Run the Project
 
 ```bash
 # Start the development server
@@ -334,4 +300,3 @@ npm run build
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
