@@ -53,16 +53,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return false;
     }
 
-    // For submissions, check if the answer is correct
-    if (isSubmission) {
-      if (data.status?.id === 3) { // Accepted
-        return data.isCorrect === true;
+    if (data.status?.id === 3) { // Accepted
+      if (isSubmission) {
+        return data.isCorrect;
       }
-    } else {
-      // For run only, we just need to check if it executed successfully
-      if (data.status?.id === 3) {
-        return true;
-      }
+      // For run only, if it executed successfully it's a success
+      return true;
     }
 
     // Handle other status codes
@@ -101,6 +97,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const executeCode = async (isSubmission: boolean = false) => {
+    if (isExecuting) return; // Prevent multiple executions
+
     try {
       setIsExecuting(true);
       
@@ -120,7 +118,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         if (!isSubmission) {
           console.log('Output:', data.stdout);
         }
-      } else if (isSubmission && data.status?.id === 3 && !data.isCorrect) {
+      } else if (isSubmission && data.status?.id === 3) {
         toast.error('Code executed successfully but the answer is incorrect');
       }
     } catch (error) {

@@ -24,13 +24,6 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // For submissions, we use test cases. For run, we just execute the code.
-    const stdin = isSubmission ? JSON.stringify({
-      nums: [2, 7, 11, 15],
-      target: 9
-    }) : '';
-    const expectedOutput = isSubmission ? JSON.stringify([0, 1]) : '';
-
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
       method: 'POST',
       headers: {
@@ -41,8 +34,8 @@ serve(async (req) => {
       body: JSON.stringify({
         source_code: sourceCode,
         language_id: languageId,
-        stdin: stdin,
-        expected_output: expectedOutput,
+        stdin: isSubmission ? '[2,7,11,15]\n9' : '',
+        expected_output: isSubmission ? '[0,1]' : '',
         cpu_time_limit: 2,
         memory_limit: 128000,
       }),
@@ -57,16 +50,10 @@ serve(async (req) => {
     const result = await submitResponse.json();
     console.log('Judge0 execution result:', result);
 
-    // For submissions, we need to check if the answer is correct
+    // For submissions, compare with expected output directly from Judge0
     let isCorrect = false;
-    if (isSubmission && result.stdout) {
-      try {
-        const actualOutput = JSON.parse(result.stdout.trim());
-        const expected = JSON.parse(expectedOutput);
-        isCorrect = JSON.stringify(actualOutput) === JSON.stringify(expected);
-      } catch (e) {
-        console.error('Error parsing output:', e);
-      }
+    if (isSubmission) {
+      isCorrect = result.status?.id === 3; // Accepted status means correct
     }
 
     return new Response(
