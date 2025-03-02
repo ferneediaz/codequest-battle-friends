@@ -23,7 +23,7 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // For submissions, wrap the solution function with test case validation
+    // For submissions, wrap the solution function with test cases
     const processedCode = isSubmission ? `
 ${sourceCode}
 
@@ -39,40 +39,32 @@ let allPassed = true;
 const results = [];
 
 for (const test of testCases) {
-  const result = solution(test.nums, test.target);
+  const userResult = solution(test.nums, test.target);
+  
   // Sort both arrays to handle different valid solutions
-  const sortedResult = result.sort((a, b) => a - b);
-  const sortedExpected = test.expected.sort((a, b) => a - b);
+  const sortedResult = [...userResult].sort((a, b) => a - b);
+  const sortedExpected = [...test.expected].sort((a, b) => a - b);
+  
+  // Convert to strings for exact comparison
   const passed = JSON.stringify(sortedResult) === JSON.stringify(sortedExpected);
   
   if (!passed) {
     allPassed = false;
   }
-  results.push({ 
+  
+  results.push({
     input: test,
-    output: result,
+    output: userResult,
     passed
   });
   
-  if (!passed) {
-    console.log(\`Test failed:
-Input: nums = [\${test.nums}], target = \${test.target}
-Expected: [\${test.expected}]
-Got: [\${result}]\`);
-    break; // Stop at first failure
-  }
+  if (!passed) break;
 }
 
-if (allPassed) {
-  console.log("All test cases passed!");
-} else {
-  console.log("Some test cases failed.");
-}
-
-console.log(JSON.stringify({ allPassed, results }, null, 2));
+console.log(JSON.stringify({ allPassed, results }));
 ` : sourceCode;
 
-    const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
+    const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -80,7 +72,7 @@ console.log(JSON.stringify({ allPassed, results }, null, 2));
         'X-RapidAPI-Key': JUDGE0_API_KEY,
       },
       body: JSON.stringify({
-        source_code: processedCode,
+        source_code: btoa(processedCode),
         language_id: languageId,
         stdin: '',
         expected_output: '',
@@ -90,34 +82,14 @@ console.log(JSON.stringify({ allPassed, results }, null, 2));
     });
 
     if (!submitResponse.ok) {
-      const errorText = await submitResponse.text();
-      console.error('Judge0 API error:', submitResponse.status, errorText);
-      throw new Error(`Judge0 API error: ${submitResponse.status} ${errorText}`);
+      throw new Error(`Judge0 API error: ${submitResponse.status}`);
     }
 
     const result = await submitResponse.json();
     console.log('Judge0 execution result:', result);
 
-    // For submissions, parse test results
-    let testResults;
-    if (isSubmission && result.stdout) {
-      try {
-        const match = result.stdout.match(/{.*}/s);
-        if (match) {
-          const outputJson = JSON.parse(match[0]);
-          result.isCorrect = outputJson.allPassed === true;
-          testResults = outputJson.results;
-        }
-      } catch (e) {
-        console.error('Error parsing test results:', e);
-      }
-    }
-
     return new Response(
-      JSON.stringify({
-        ...result,
-        testResults
-      }),
+      JSON.stringify(result),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
@@ -136,3 +108,4 @@ console.log(JSON.stringify({ allPassed, results }, null, 2));
     );
   }
 });
+

@@ -42,77 +42,82 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const handleJudge0Response = (data: any, isSubmission: boolean) => {
-    if (data.status?.id === 6) { // Compilation error
-      const errorMessage = data.compile_output || 'Compilation Error';
-      toast.error(errorMessage, {
-        description: "Please check your code syntax",
+    if (data.status?.id === 6) {
+      const errorMessage = atob(data.compile_output || '');
+      toast.error("Compilation Error", {
+        description: errorMessage,
         duration: 10000,
       });
       return false;
     }
 
-    if (data.status?.id === 11 || data.status?.id === 12) { // Runtime error
-      const errorMessage = data.stderr || 'Runtime Error';
-      toast.error(errorMessage, {
-        description: "Your code encountered a runtime error",
+    if (data.status?.id === 11 || data.status?.id === 12) {
+      const errorMessage = atob(data.stderr || '');
+      toast.error("Runtime Error", {
+        description: errorMessage,
         duration: 10000,
       });
       return false;
     }
 
-    if (data.status?.id === 4) { // Wrong Answer
-      if (isSubmission && data.testResults) {
-        const failedTests = data.testResults.filter((test: any) => !test.passed);
-        const firstFailedTest = failedTests[0];
-        if (firstFailedTest) {
-          toast.error("Wrong Answer", {
-            description: `Failed test case:
-Input: nums = [${firstFailedTest.input.nums}], target = ${firstFailedTest.input.target}
-Expected: [${firstFailedTest.input.expected}]
-Output: [${firstFailedTest.output}]`,
-            duration: 10000,
-          });
-        } else {
-          toast.error("Wrong Answer", {
-            description: "Your solution produced incorrect output. Please check your logic.",
-            duration: 5000,
-          });
-        }
-      }
-      return false;
-    }
-
-    if (data.status?.id === 3) { // Accepted
-      if (isSubmission) {
-        toast.success('Solution Accepted! All test cases passed.', {
-          duration: 5000,
-        });
-      } else {
-        toast.success('Code ran successfully!', {
-          description: data.stdout ? `Output:\n${data.stdout}` : undefined,
-          duration: 5000,
-        });
-      }
+    if (!isSubmission && data.status?.id === 3) {
+      const output = atob(data.stdout || '');
+      toast.success('Code ran successfully!', {
+        description: `Output:\n${output}`,
+        duration: 5000,
+      });
       return true;
     }
 
-    toast.error(`Execution Error: ${data.status?.description || 'Unknown error'}`, {
-      duration: 5000,
-    });
-    return false;
+    if (isSubmission) {
+      try {
+        const stdout = atob(data.stdout || '');
+        const results = JSON.parse(stdout);
+        
+        if (results.allPassed) {
+          toast.success('Solution Accepted! All test cases passed.', {
+            duration: 5000,
+          });
+          return true;
+        } else {
+          const failedTest = results.results.find((test: any) => !test.passed);
+          if (failedTest) {
+            toast.error("Wrong Answer", {
+              description: `Failed test case:
+Input: nums = [${failedTest.input.nums}], target = ${failedTest.input.target}
+Expected: [${failedTest.input.expected}]
+Your Output: [${failedTest.output}]`,
+              duration: 10000,
+            });
+          }
+          return false;
+        }
+      } catch (error) {
+        console.error('Error parsing test results:', error);
+        toast.error('Error processing test results');
+        return false;
+      }
+    }
+
+    if (data.status?.id !== 3) {
+      toast.error(`Execution Error: ${data.status?.description || 'Unknown error'}`, {
+        duration: 5000,
+      });
+      return false;
+    }
+
+    return true;
   };
 
   const executeCode = async (operation: 'run' | 'submit') => {
     if (isExecuting || currentOperation) {
-      console.log('Operation in progress, ignoring click');
       return;
     }
 
+    setIsExecuting(true);
+    setCurrentOperation(operation);
+
     try {
-      setIsExecuting(true);
-      setCurrentOperation(operation);
-      console.log(`Starting ${operation} operation`);
-      
       const { data, error } = await supabase.functions.invoke('execute-code', {
         body: {
           sourceCode: code,
@@ -121,22 +126,16 @@ Output: [${firstFailedTest.output}]`,
         }
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       console.log('Judge0 response:', data);
       handleJudge0Response(data, operation === 'submit');
-      
     } catch (error) {
       console.error(`Error during ${operation}:`, error);
       toast.error(`Error executing code: ${(error as Error).message}`);
     } finally {
       setIsExecuting(false);
-      setTimeout(() => {
-        setCurrentOperation(null);
-      }, 1000);
+      setTimeout(() => setCurrentOperation(null), 1000);
     }
   };
 
