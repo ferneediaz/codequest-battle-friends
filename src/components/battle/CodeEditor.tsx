@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Language } from '@/types/battle';
 import { LanguageSelector } from './LanguageSelector';
@@ -54,10 +53,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return false;
     }
 
-    // Check status
+    // If the code ran successfully, check if the answer is correct
+    if (data.status?.id === 3) {
+      return data.isCorrect === true;
+    }
+
+    // Handle other status codes
     switch (data.status?.id) {
-      case 3: // Accepted
-        return true;
       case 4: // Wrong Answer
         toast.error("Wrong Answer");
         return false;
@@ -106,8 +108,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       const success = handleJudge0Response(data);
       if (success) {
-        toast.success(isSubmission ? 'Solution submitted successfully!' : 'Code ran successfully!');
+        toast.success(isSubmission ? 'Solution submitted successfully!' : 'Code ran successfully and passed the test case!');
         console.log('Output:', data.stdout);
+      } else if (data.status?.id === 3 && !data.isCorrect) {
+        toast.error('Code executed successfully but the answer is incorrect');
       }
     } catch (error) {
       toast.error('Error executing code: ' + (error as Error).message);

@@ -24,6 +24,13 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
+    // Test case for the two sum problem
+    const stdin = JSON.stringify({
+      nums: [2, 7, 11, 15],
+      target: 9
+    });
+    const expectedOutput = JSON.stringify([0, 1]);
+
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
       method: 'POST',
       headers: {
@@ -34,10 +41,10 @@ serve(async (req) => {
       body: JSON.stringify({
         source_code: sourceCode,
         language_id: languageId,
-        stdin: '',
-        expected_output: '',
-        cpu_time_limit: 2, // 2 seconds
-        memory_limit: 128000, // 128MB
+        stdin: stdin,
+        expected_output: expectedOutput,
+        cpu_time_limit: 2,
+        memory_limit: 128000,
       }),
     });
 
@@ -50,6 +57,18 @@ serve(async (req) => {
     const result = await submitResponse.json();
     console.log('Judge0 execution result:', result);
 
+    // Compare the actual output with expected output
+    let isCorrect = false;
+    if (result.stdout) {
+      try {
+        const actualOutput = JSON.parse(result.stdout.trim());
+        const expected = JSON.parse(expectedOutput);
+        isCorrect = JSON.stringify(actualOutput) === JSON.stringify(expected);
+      } catch (e) {
+        console.error('Error parsing output:', e);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         stdout: result.stdout,
@@ -58,6 +77,7 @@ serve(async (req) => {
         status: result.status,
         memory: result.memory,
         time: result.time,
+        isCorrect
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
