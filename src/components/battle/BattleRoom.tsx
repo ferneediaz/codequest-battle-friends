@@ -32,21 +32,21 @@ export function BattleRoom({
           description: "Please sign in to create a battle room",
           variant: "destructive",
         });
-        navigate('/auth');
         return;
       }
 
       const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
+      // First, create the battle
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .insert({
           room_code: newRoomCode,
-          question_id: '00000000-0000-0000-0000-000000000000',
           status: 'waiting',
           current_participants: 0,
           max_participants: 2,
-          document_content: initialCode
+          document_content: initialCode,
+          question_id: '00000000-0000-0000-0000-000000000000'
         })
         .select()
         .single();
@@ -56,6 +56,7 @@ export function BattleRoom({
         throw battleError;
       }
 
+      // Then, add the participant
       const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
@@ -78,6 +79,7 @@ export function BattleRoom({
         title: "Room Created Successfully! 🎉",
         description: `Room code ${newRoomCode} has been copied to your clipboard. Share it with your friend!`,
       });
+
     } catch (error: any) {
       console.error('Error creating room:', error);
       toast({
