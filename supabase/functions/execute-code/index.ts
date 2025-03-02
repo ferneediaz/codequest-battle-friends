@@ -23,15 +23,22 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // For submissions, wrap the solution function with test case execution
+    // For submissions, wrap the solution function with test case validation
     const processedCode = isSubmission ? `
 ${sourceCode}
 
-// Test case
-const nums = [2, 7, 11, 15];
-const target = 9;
-const result = solution(nums, target);
-console.log(JSON.stringify(result));
+// Test cases
+const testCases = [
+  { nums: [2, 7, 11, 15], target: 9 },
+  { nums: [3, 2, 4], target: 6 }
+];
+
+const results = testCases.map(test => {
+  const result = solution(test.nums, test.target);
+  return JSON.stringify(result);
+}).join('\\n');
+
+console.log(results);
 ` : sourceCode;
 
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
@@ -45,7 +52,7 @@ console.log(JSON.stringify(result));
         source_code: processedCode,
         language_id: languageId,
         stdin: '',
-        expected_output: '[0,1]',
+        expected_output: isSubmission ? '[0,1]\n[1,2]' : '',
         cpu_time_limit: 2,
         memory_limit: 128000,
       }),
@@ -60,12 +67,13 @@ console.log(JSON.stringify(result));
     const result = await submitResponse.json();
     console.log('Judge0 execution result:', result);
 
-    // For submissions, check if the output matches expected output
+    // For submissions, check if all test cases pass
     let isCorrect = false;
     if (isSubmission && result.stdout) {
       const output = result.stdout.trim();
-      isCorrect = output === '[0,1]';
-      console.log('Comparing output:', { output, expected: '[0,1]', isCorrect });
+      const expected = '[0,1]\n[1,2]';
+      isCorrect = output === expected;
+      console.log('Comparing output:', { output, expected, isCorrect });
     }
 
     return new Response(

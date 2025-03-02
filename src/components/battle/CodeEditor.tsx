@@ -26,7 +26,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   textareaRef
 }) => {
   const [isExecuting, setIsExecuting] = React.useState(false);
-  const [lastOperation, setLastOperation] = React.useState<'run' | 'submit' | null>(null);
+  const [currentOperation, setCurrentOperation] = React.useState<'run' | 'submit' | null>(null);
 
   const getLanguageId = (lang: Language): number => {
     switch (lang) {
@@ -52,62 +52,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return false;
     }
 
-    if (data.status?.id === 3) { // Accepted
-      if (isSubmission) {
-        console.log('Submission result:', data.isCorrect);
-        return data.isCorrect;
-      }
-      return true;
+    if (isSubmission) {
+      return data.isCorrect;
     }
 
-    switch (data.status?.id) {
-      case 4: // Wrong Answer
-        toast.error("Wrong Answer");
-        return false;
-      case 5: // Time Limit Exceeded
-        toast.error("Time Limit Exceeded");
-        return false;
-      case 6: // Compilation Error
-        toast.error(`Compilation Error: ${data.compile_output || "Unknown error"}`);
-        return false;
-      case 7: // Runtime Error (SIGSEGV)
-        toast.error(`Runtime Error: ${data.stderr || "Segmentation fault"}`);
-        return false;
-      case 8: // Runtime Error (SIGXFSZ)
-        toast.error("Runtime Error: Output Limit Exceeded");
-        return false;
-      case 9: // Runtime Error (SIGFPE)
-        toast.error("Runtime Error: Floating Point Error");
-        return false;
-      case 10: // Runtime Error (SIGABRT)
-        toast.error("Runtime Error: Aborted");
-        return false;
-      case 11: // Runtime Error (NZEC)
-        toast.error("Runtime Error: Non-Zero Exit Code");
-        return false;
-      case 12: // Runtime Error (Other)
-        toast.error(`Runtime Error: ${data.stderr || "Unknown error"}`);
-        return false;
-      default:
-        toast.error("Execution failed with unknown status");
-        return false;
-    }
+    return data.status?.id === 3;
   };
 
-  const executeCode = async (isSubmission: boolean = false) => {
-    if (isExecuting) {
-      console.log('Already executing, ignoring click');
+  const executeCode = async (operation: 'run' | 'submit') => {
+    if (isExecuting || currentOperation) {
+      console.log('Operation in progress, ignoring click');
       return;
     }
 
-    if ((lastOperation === 'run' && isSubmission) || (lastOperation === 'submit' && !isSubmission)) {
-      console.log('Ignoring duplicate operation');
-      return;
-    }
-
+    const isSubmission = operation === 'submit';
+    
     try {
       setIsExecuting(true);
-      setLastOperation(isSubmission ? 'submit' : 'run');
+      setCurrentOperation(operation);
       
       const { data, error } = await supabase.functions.invoke('execute-code', {
         body: {
@@ -125,14 +87,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         if (!isSubmission) {
           console.log('Output:', data.stdout);
         }
-      } else if (isSubmission && data.status?.id === 3) {
-        toast.error('Code executed successfully but the answer is incorrect');
+      } else {
+        toast.error(isSubmission ? 'Incorrect solution' : 'Code execution failed');
       }
     } catch (error) {
       toast.error('Error executing code: ' + (error as Error).message);
     } finally {
       setIsExecuting(false);
-      setTimeout(() => setLastOperation(null), 100);
+      setTimeout(() => setCurrentOperation(null), 500);
     }
   };
 
@@ -151,20 +113,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <div className="flex gap-4">
             <Button 
               className="gap-2" 
-              onClick={() => executeCode(false)}
-              disabled={isExecuting}
+              onClick={() => executeCode('run')}
+              disabled={isExecuting || currentOperation !== null}
             >
               <Play className="w-4 h-4" />
-              {isExecuting ? 'Running...' : 'Run Code'}
+              {currentOperation === 'run' ? 'Running...' : 'Run Code'}
             </Button>
             <Button 
               variant="secondary" 
               className="gap-2"
-              onClick={() => executeCode(true)}
-              disabled={isExecuting}
+              onClick={() => executeCode('submit')}
+              disabled={isExecuting || currentOperation !== null}
             >
               <Send className="w-4 h-4" />
-              {isExecuting ? 'Submitting...' : 'Submit Solution'}
+              {currentOperation === 'submit' ? 'Submitting...' : 'Submit Solution'}
             </Button>
           </div>
         </div>
