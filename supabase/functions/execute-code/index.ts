@@ -73,15 +73,17 @@ console.log(JSON.stringify({ allPassed, results }));
 ` : `
 // Single test case for run mode
 const test = { nums: [2, 7, 11, 15], target: 9, expected: [0, 1] };
-const result = solution(test.nums, test.target);
+const userResult = solution(test.nums, test.target);
 const passed = validateSolution(test.nums, test.target, test.expected);
 
 console.log(JSON.stringify({
   input: test,
-  output: result,
+  output: userResult,
   passed
 }));
 `}`;
+
+    console.log('Sending code to Judge0:', processedCode);
 
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true', {
       method: 'POST',
@@ -123,7 +125,7 @@ console.log(JSON.stringify({
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Changed from 500 to 200 to avoid the non-2xx error
+        status: 200
       }
     );
   }

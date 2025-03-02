@@ -42,6 +42,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const handleJudge0Response = (data: any, isSubmission: boolean) => {
+    if (!data || data.error) {
+      toast.error('Execution Error', {
+        description: data.error || 'Unknown error occurred',
+        duration: 5000,
+      });
+      return false;
+    }
+
     if (data.status?.id === 6) {
       const errorMessage = atob(data.compile_output || '');
       toast.error("Compilation Error", {
@@ -63,6 +71,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     try {
       if (data.status?.id === 3) {
         const stdout = atob(data.stdout || '');
+        console.log('Parsed stdout:', stdout);
         const results = JSON.parse(stdout);
 
         if (!isSubmission) {
@@ -115,7 +124,7 @@ Your Output: [${failedTest.output}]`,
       return false;
     }
 
-    return true;
+    return false;
   };
 
   const executeCode = async (operation: 'run' | 'submit') => {
@@ -127,7 +136,7 @@ Your Output: [${failedTest.output}]`,
     setCurrentOperation(operation);
 
     try {
-      const { data, error } = await supabase.functions.invoke('execute-code', {
+      const response = await supabase.functions.invoke('execute-code', {
         body: {
           sourceCode: code,
           languageId: getLanguageId(language),
@@ -135,10 +144,12 @@ Your Output: [${failedTest.output}]`,
         }
       });
 
-      if (error) throw error;
+      if (response.error) {
+        throw response.error;
+      }
 
-      console.log('Judge0 response:', data);
-      handleJudge0Response(data, operation === 'submit');
+      console.log('Judge0 response:', response.data);
+      handleJudge0Response(response.data, operation === 'submit');
     } catch (error) {
       console.error(`Error during ${operation}:`, error);
       toast.error(`Error executing code: ${(error as Error).message}`);
