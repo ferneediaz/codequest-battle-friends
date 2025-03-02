@@ -46,12 +46,25 @@ const Battle = () => {
       }
       
       if (data) {
-        data.examples = typeof data.examples === 'string' 
-          ? JSON.parse(data.examples) 
-          : data.examples;
+        const parsedData = {
+          ...data,
+          examples: Array.isArray(data.examples) 
+            ? data.examples 
+            : typeof data.examples === 'string'
+              ? JSON.parse(data.examples)
+              : []
+        };
+        
+        parsedData.examples = parsedData.examples.map((example: any) => ({
+          input: String(example.input || ''),
+          output: String(example.output || ''),
+          explanation: String(example.explanation || '')
+        }));
+        
+        return parsedData;
       }
       
-      return data;
+      return null;
     },
     enabled: !!questionId,
   });
