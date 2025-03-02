@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MessageCircleQuestion, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,17 +47,19 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
           <h4 className="text-md font-semibold text-primary mb-2">Example:</h4>
           <pre className="bg-black/30 p-4 rounded-md">
             <code className="text-sm text-gray-300">
-              Input: nums = [2, 7, 11, 15], target = 9{"\n"}
-              Output: [0, 1]{"\n"}
-              Explanation: nums[0] + nums[1] = 2 + 7 = 9
+              Input: "{'{'}[]}" {"\n"}
+              Output: true {"\n"}
+              Explanation: The runes are properly sealed in the correct order.{"\n\n"}
+              Input: "([)]" {"\n"}
+              Output: false {"\n"}
+              Explanation: The runes must be sealed in the proper order.
             </code>
           </pre>
 
           <h4 className="text-md font-semibold text-primary mt-4 mb-2">Constraints:</h4>
           <ul className="list-disc list-inside text-gray-300 space-y-1">
-            <li>2 ≤ nums.length ≤ 104</li>
-            <li>-109 ≤ nums[i] ≤ 109</li>
-            <li>Only one valid solution exists</li>
+            <li>1 ≤ s.length ≤ 104</li>
+            <li>s consists of parentheses, square brackets and curly brackets only '()[]{}'</li>
           </ul>
         </div>
 
