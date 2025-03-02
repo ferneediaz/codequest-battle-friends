@@ -23,6 +23,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -88,320 +90,63 @@ const QUESTS = [
   },
 ];
 
+interface Battle {
+  id: string;
+  status: string;
+  max_participants: number;
+  current_participants: number;
+  min_rank: string;
+  max_rank: string;
+  questions: {
+    title: string;
+    difficulty: "Easy" | "Medium" | "Hard";
+    category: string;
+  };
+  battle_participants: {
+    user_id: string;
+    profiles: {
+      username: string;
+    };
+  }[];
+}
+
 const Index = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
-  const [battles] = useState([
-    { 
-      id: 1, 
-      difficulty: "Easy", 
-      title: "Two Crystal Merger", 
-      players: 4,
-      category: "Forest of Arrays",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player1"],
+  
+  const { data: battles = [], isLoading } = useQuery({
+    queryKey: ['battles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('battles')
+        .select(`
+          *,
+          questions (
+            title,
+            difficulty,
+            category
+          ),
+          battle_participants (
+            user_id,
+            profiles (
+              username
+            )
+          )
+        `)
+        .eq('status', 'waiting');
+      
+      if (error) {
+        toast({
+          title: "Error loading battles",
+          description: error.message,
+          variant: "destructive",
+        });
+        return [];
+      }
+      
+      return data as Battle[];
     },
-    { 
-      id: 2, 
-      difficulty: "Medium", 
-      title: "Mystic Array Rotation", 
-      players: 2,
-      category: "Forest of Arrays",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player2"],
-    },
-    { 
-      id: 3, 
-      difficulty: "Hard", 
-      title: "Crystal Matrix Challenge", 
-      players: 3,
-      category: "Forest of Arrays",
-      minRank: "ancient",
-      maxRank: "immortal",
-      currentPlayers: ["Player3"],
-    },
-    
-    { 
-      id: 4, 
-      difficulty: "Easy", 
-      title: "Treasure Map Decoder", 
-      players: 2,
-      category: "Hashmap Dungeons",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player4"],
-    },
-    { 
-      id: 5, 
-      difficulty: "Medium", 
-      title: "Potion Ingredients Counter", 
-      players: 3,
-      category: "Hashmap Dungeons",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player5"],
-    },
-    { 
-      id: 6, 
-      difficulty: "Hard", 
-      title: "Magical Items Inventory", 
-      players: 4,
-      category: "Hashmap Dungeons",
-      minRank: "ancient",
-      maxRank: "divine",
-      currentPlayers: ["Player6"],
-    },
-
-    { 
-      id: 7, 
-      difficulty: "Easy", 
-      title: "Castle Guard Search", 
-      players: 2,
-      category: "Binary Search Castle",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player7"],
-    },
-    { 
-      id: 8, 
-      difficulty: "Medium", 
-      title: "Royal Treasury Quest", 
-      players: 3,
-      category: "Binary Search Castle",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player8"],
-    },
-    { 
-      id: 9, 
-      difficulty: "Hard", 
-      title: "Dragon's Lair Search", 
-      players: 4,
-      category: "Binary Search Castle",
-      minRank: "legend",
-      maxRank: "immortal",
-      currentPlayers: ["Player9"],
-    },
-
-    { 
-      id: 10, 
-      difficulty: "Easy", 
-      title: "Garden Path Traversal", 
-      players: 2,
-      category: "Linked List Gardens",
-      minRank: "herald",
-      maxRank: "guardian",
-      currentPlayers: ["Player10"],
-    },
-    { 
-      id: 11, 
-      difficulty: "Medium", 
-      title: "Enchanted Garden Cycle", 
-      players: 3,
-      category: "Linked List Gardens",
-      minRank: "crusader",
-      maxRank: "archon",
-      currentPlayers: ["Player11"],
-    },
-    { 
-      id: 12, 
-      difficulty: "Hard", 
-      title: "Magical Garden Merge", 
-      players: 4,
-      category: "Linked List Gardens",
-      minRank: "legend",
-      maxRank: "divine",
-      currentPlayers: ["Player12"],
-    },
-
-    { 
-      id: 13, 
-      difficulty: "Easy", 
-      title: "Sacred Tree Path", 
-      players: 2,
-      category: "Tree of Wisdom",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player13"],
-    },
-    { 
-      id: 14, 
-      difficulty: "Medium", 
-      title: "Wisdom Tree Balance", 
-      players: 3,
-      category: "Tree of Wisdom",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player14"],
-    },
-    { 
-      id: 15, 
-      difficulty: "Hard", 
-      title: "Ancient Tree Transformation", 
-      players: 4,
-      category: "Tree of Wisdom",
-      minRank: "ancient",
-      maxRank: "immortal",
-      currentPlayers: ["Player15"],
-    },
-
-    { 
-      id: 16, 
-      difficulty: "Easy", 
-      title: "Village Connections", 
-      players: 2,
-      category: "Graph Adventures",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player16"],
-    },
-    { 
-      id: 17, 
-      difficulty: "Medium", 
-      title: "Enchanted Path Finder", 
-      players: 3,
-      category: "Graph Adventures",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player17"],
-    },
-    { 
-      id: 18, 
-      difficulty: "Hard", 
-      title: "Magical Network Flow", 
-      players: 4,
-      category: "Graph Adventures",
-      minRank: "ancient",
-      maxRank: "immortal",
-      currentPlayers: ["Player18"],
-    },
-
-    { 
-      id: 19, 
-      difficulty: "Easy", 
-      title: "Mountain Treasure Path", 
-      players: 2,
-      category: "Dynamic Programming Peaks",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player19"],
-    },
-    { 
-      id: 20, 
-      difficulty: "Medium", 
-      title: "Dragon's Gold Distribution", 
-      players: 3,
-      category: "Dynamic Programming Peaks",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player20"],
-    },
-    { 
-      id: 21, 
-      difficulty: "Hard", 
-      title: "Legendary Quest Optimizer", 
-      players: 4,
-      category: "Dynamic Programming Peaks",
-      minRank: "ancient",
-      maxRank: "immortal",
-      currentPlayers: ["Player21"],
-    },
-
-    { 
-      id: 22, 
-      difficulty: "Easy", 
-      title: "Tavern Order System", 
-      players: 2,
-      category: "Stack & Queue Tavern",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player22"],
-    },
-    { 
-      id: 23, 
-      difficulty: "Medium", 
-      title: "Potion Brewing Queue", 
-      players: 3,
-      category: "Stack & Queue Tavern",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player23"],
-    },
-    { 
-      id: 24, 
-      difficulty: "Hard", 
-      title: "Enchanted Stack Challenge", 
-      players: 4,
-      category: "Stack & Queue Tavern",
-      minRank: "ancient",
-      maxRank: "divine",
-      currentPlayers: ["Player24"],
-    },
-
-    { 
-      id: 25, 
-      difficulty: "Easy", 
-      title: "Temple Maze Explorer", 
-      players: 2,
-      category: "Recursion Temple",
-      minRank: "guardian",
-      maxRank: "crusader",
-      currentPlayers: ["Player25"],
-    },
-    { 
-      id: 26, 
-      difficulty: "Medium", 
-      title: "Mystical Pattern Builder", 
-      players: 3,
-      category: "Recursion Temple",
-      minRank: "archon",
-      maxRank: "legend",
-      currentPlayers: ["Player26"],
-    },
-    { 
-      id: 27, 
-      difficulty: "Hard", 
-      title: "Ancient Puzzle Solver", 
-      players: 4,
-      category: "Recursion Temple",
-      minRank: "legend",
-      maxRank: "immortal",
-      currentPlayers: ["Player27"],
-    },
-
-    { 
-      id: 28, 
-      difficulty: "Easy", 
-      title: "Crystal Sorter", 
-      players: 2,
-      category: "Sorting Sanctuary",
-      minRank: "herald",
-      maxRank: "guardian",
-      currentPlayers: ["Player28"],
-    },
-    { 
-      id: 29, 
-      difficulty: "Medium", 
-      title: "Artifact Arrangement", 
-      players: 3,
-      category: "Sorting Sanctuary",
-      minRank: "crusader",
-      maxRank: "archon",
-      currentPlayers: ["Player29"],
-    },
-    { 
-      id: 30, 
-      difficulty: "Hard", 
-      title: "Elemental Matrix Sort", 
-      players: 4,
-      category: "Sorting Sanctuary",
-      minRank: "legend",
-      maxRank: "divine",
-      currentPlayers: ["Player30"],
-    },
-  ]);
+  });
 
   const [userProfile] = useState({
     name: "CodeWarrior",
@@ -498,8 +243,15 @@ const Index = () => {
     });
   };
 
+  const handleJoin = (battleId: string) => {
+    toast({
+      title: "Joining Battle",
+      description: `Joining battle with ID: ${battleId}`,
+    });
+  };
+
   const filteredBattles = battles.filter(
-    battle => selectedCategory === "All Realms" || battle.category === selectedCategory
+    battle => selectedCategory === "All Realms" || battle.questions.category === selectedCategory
   );
 
   return (
@@ -764,16 +516,23 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBattles.map((battle) => (
+          {isLoading ? (
+            // Add loading state
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="relative group animate-pulse">
+                <div className="h-[300px] bg-black/50 rounded-lg border border-white/10"></div>
+              </div>
+            ))
+          ) : filteredBattles.map((battle) => (
             <BattleCard
               key={battle.id}
-              difficulty={battle.difficulty as "Easy" | "Medium" | "Hard"}
-              title={battle.title}
-              players={battle.players}
-              onJoin={handleJoinBattle}
-              minRank={RANKS[battle.minRank].name}
-              maxRank={RANKS[battle.maxRank].name}
-              currentPlayers={battle.currentPlayers}
+              difficulty={battle.questions.difficulty}
+              title={battle.questions.title}
+              players={battle.max_participants}
+              minRank={RANKS[battle.min_rank].name}
+              maxRank={RANKS[battle.max_rank].name}
+              currentPlayers={battle.battle_participants.map(bp => bp.profiles.username)}
+              onJoin={() => handleJoin(battle.id)}
             />
           ))}
         </div>
