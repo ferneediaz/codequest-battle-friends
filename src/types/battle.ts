@@ -1,11 +1,6 @@
 
 export type Language = "javascript" | "python" | "cpp";
 
-export type Token = {
-  text: string;
-  type?: 'comment' | 'keyword' | 'type' | 'function' | 'string' | 'number';
-};
-
 export interface Skill {
   id: string;
   name: string;
@@ -61,8 +56,6 @@ export const INITIAL_BATTLE_STATE: BattleState = {
   ],
   usedHints: [],
 };
-
-export const HINT_COST = 100;
 
 export const INITIAL_CODE = {
   javascript: `// JavaScript Solution
