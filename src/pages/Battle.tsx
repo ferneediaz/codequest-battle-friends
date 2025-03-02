@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { BattleHealthBar } from "@/components/BattleHealthBar";
 import { BattleRoom } from "@/components/battle/BattleRoom";
@@ -11,19 +11,55 @@ import { BattleSkills } from "@/components/battle/BattleSkills";
 import { useBattleState } from "@/hooks/useBattleState";
 import { useCodeEditor } from "@/hooks/useCodeEditor";
 import { INITIAL_CODE, Language } from "@/types/battle";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Battle = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const questionId = searchParams.get('questionId');
+  const { toast } = useToast();
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("javascript");
   const { battleState, useSkill, buyHint } = useBattleState();
   const { code, setCode, textareaRef, handleKeyDown, handleChange } = useCodeEditor(currentRoom, user?.id);
 
+  const { data: question, isLoading } = useQuery({
+    queryKey: ['question', questionId],
+    queryFn: async () => {
+      if (!questionId) return null;
+      
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('id', questionId)
+        .single();
+      
+      if (error) {
+        toast({
+          title: "Error loading question",
+          description: error.message,
+          variant: "destructive",
+        });
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!questionId,
+  });
+
   // Initialize code when language changes
   React.useEffect(() => {
     setCode(INITIAL_CODE[language]);
   }, [language, setCode]);
+
+  if (!questionId || (!isLoading && !question)) {
+    navigate('/');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
@@ -52,6 +88,7 @@ const Battle = () => {
               battleState={battleState}
               useSkill={useSkill}
               buyHint={buyHint}
+              question={question}
             />
             
             <CodeEditor

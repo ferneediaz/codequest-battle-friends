@@ -226,12 +226,12 @@ const Index = () => {
     }
   };
 
-  const handleJoinBattle = () => {
+  const handleJoinBattle = (questionId: string) => {
     toast({
       title: "Challenge Accepted",
       description: "Loading the code editor...",
     });
-    navigate('/battle');
+    navigate(`/battle?questionId=${questionId}`);
   };
 
   const handleJoin = (battleId: string) => {
@@ -531,7 +531,7 @@ const Index = () => {
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
                   <span className="text-sm text-gray-400">{question.category}</span>
                   <Button
-                    onClick={() => handleJoinBattle()}
+                    onClick={() => handleJoinBattle(question.id)}
                     className="bg-primary hover:bg-primary/90"
                   >
                     Accept Challenge
