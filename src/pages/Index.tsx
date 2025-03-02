@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -114,37 +115,24 @@ const Index = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
   
-  const { data: battles = [], isLoading } = useQuery({
-    queryKey: ['battles'],
+  const { data: questions = [], isLoading } = useQuery({
+    queryKey: ['questions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('battles')
-        .select(`
-          *,
-          questions (
-            title,
-            difficulty,
-            category
-          ),
-          battle_participants (
-            user_id,
-            profiles (
-              username
-            )
-          )
-        `)
-        .eq('status', 'waiting');
+        .from('questions')
+        .select('*')
+        .order('created_at');
       
       if (error) {
         toast({
-          title: "Error loading battles",
+          title: "Error loading questions",
           description: error.message,
           variant: "destructive",
         });
         return [];
       }
       
-      return data as Battle[];
+      return data;
     },
   });
 
@@ -250,8 +238,8 @@ const Index = () => {
     });
   };
 
-  const filteredBattles = battles.filter(
-    battle => selectedCategory === "All Realms" || battle.questions.category === selectedCategory
+  const filteredQuestions = questions.filter(
+    question => selectedCategory === "All Realms" || question.category === selectedCategory
   );
 
   return (
@@ -498,7 +486,7 @@ const Index = () => {
         </div>
 
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Active Battles</h2>
+          <h2 className="text-2xl font-bold text-white">Challenges</h2>
           <div className="w-64">
             <Select onValueChange={setSelectedCategory} defaultValue={selectedCategory}>
               <SelectTrigger className="bg-black/50 border-white/10">
@@ -517,23 +505,37 @@ const Index = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            // Add loading state
+            // Loading state
             Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="relative group animate-pulse">
                 <div className="h-[300px] bg-black/50 rounded-lg border border-white/10"></div>
               </div>
             ))
-          ) : filteredBattles.map((battle) => (
-            <BattleCard
-              key={battle.id}
-              difficulty={battle.questions.difficulty}
-              title={battle.questions.title}
-              players={battle.max_participants}
-              minRank={RANKS[battle.min_rank].name}
-              maxRank={RANKS[battle.max_rank].name}
-              currentPlayers={battle.battle_participants.map(bp => bp.profiles.username)}
-              onJoin={() => handleJoin(battle.id)}
-            />
+          ) : filteredQuestions.map((question) => (
+            <div
+              key={question.id}
+              className="relative group"
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
+              <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">{question.title}</h3>
+                  <span className="px-2 py-1 text-sm rounded bg-primary/20 text-primary">
+                    {question.difficulty}
+                  </span>
+                </div>
+                <p className="text-gray-300 mb-4 line-clamp-3">{question.description}</p>
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                  <span className="text-sm text-gray-400">{question.category}</span>
+                  <Button
+                    onClick={() => handleJoinBattle()}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    Accept Challenge
+                  </Button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
