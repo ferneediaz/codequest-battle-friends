@@ -35,9 +35,20 @@ export function BattleRoom({
         return;
       }
 
+      // First, get a valid question ID
+      const { data: questionData, error: questionError } = await supabase
+        .from('questions')
+        .select('id')
+        .single();
+
+      if (questionError) {
+        console.error('Error fetching question:', questionError);
+        throw new Error('Failed to fetch question');
+      }
+
       const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
-      // First create the battle with a valid question_id
+      // Create the battle with the valid question_id
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .insert({
@@ -48,7 +59,7 @@ export function BattleRoom({
           document_content: initialCode,
           min_rank: 'herald',
           max_rank: 'immortal',
-          question_id: '00000000-0000-0000-0000-000000000000'
+          question_id: questionData.id
         })
         .select()
         .single();
