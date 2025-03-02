@@ -5,8 +5,19 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { generateSocraticQuestion, getStoredApiKey, setStoredApiKey } from "@/functions/socratic-questions";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-export const Socrates = () => {
+interface Questions {
+  id: string;
+  title: string;
+  description: string;
+}
+
+interface SocratesProps {
+  questionId: string;
+}
+export const Socrates = ({ questionId }: SocratesProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
   const [input, setInput] = useState("");
@@ -15,6 +26,20 @@ export const Socrates = () => {
   const [apiKey, setApiKey] = useState(getStoredApiKey() || "");
   const [isSettingKey, setIsSettingKey] = useState(!getStoredApiKey());
 
+  const { data: questionData, isLoading: isLoadingQuestion } = useQuery({
+    queryKey: ['question', questionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('id', questionId)
+        .single();
+      
+      if (error) throw error;
+      return data as Questions;
+    }
+  });
+  
   const handleSetApiKey = () => {
     if (!apiKey.trim()) {
       toast({
@@ -54,8 +79,8 @@ export const Socrates = () => {
     try {
       const question = await generateSocraticQuestion(
         userMessage, 
-        "Two Sum", // Default title since this component is specifically for Two Sum
-        "Given an array of integers nums and an integer target, return indices of the two numbers in nums such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice." // Description of Two Sum problem
+        questionData.title, 
+        questionData.description
       );
       setMessages(prev => [...prev, { role: 'assistant', content: question }]);
     } catch (error) {

@@ -1,3 +1,4 @@
+
 // Groq API endpoint
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -13,7 +14,7 @@ export const validateApiKey = (key: string) => {
   return key && key.startsWith('gsk_') && key.length > 20;
 };
 
-export async function generateSocraticQuestion(userMessage: string, questionTitle: string, questionDescription: string) {
+export async function generateSocraticQuestion(userMessage: string, title: string, description: string) {
   const apiKey = getStoredApiKey();
   if (!apiKey) {
     throw new Error("Please set your Groq API key first");
@@ -35,23 +36,19 @@ export async function generateSocraticQuestion(userMessage: string, questionTitl
         messages: [
           {
             role: "system",
-            content: `You are a mentor helping students understand the ${questionTitle} problem. 
-
-Problem Description:
-${questionDescription}
-
-Your responses must:
-- Be brief (1-2 questions max)
-- Focus on the immediate step they're stuck on
-- Never hint at specific data structures or solutions
-- Ask questions that help them understand what their code is doing
-
-Examples of good responses:
-- "What does your code do when it finds the first number?"
-- "What information do you currently have at this point in your code?"
-- "What happens if you run your code with [1,2,3] and target 5?"
-
-Remember: Help them understand their current approach rather than guiding them to a specific solution.`
+            content: `You are a mentor helping students understand the  ${title}. Your responses must:
+            - Be brief (1-2 questions max)
+            - Focus on the immediate step they're stuck on
+            - Never hint at specific data structures or solutions
+            - Ask questions that help them understand what their code is doing
+            Problem Description:
+            ${description}
+            Examples of good responses:
+            - "What does your code do when it finds the first number?"
+            - "What information do you currently have at this point in your code?"
+            - "What happens if you run your code with [1,2,3] and target 5?"
+            
+            Remember: Help them understand their current approach rather than guiding them to a specific solution.`
           },
           {
             role: "user",
