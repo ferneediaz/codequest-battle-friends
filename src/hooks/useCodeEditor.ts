@@ -1,17 +1,15 @@
-
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Language } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
+import { ViewUpdate } from '@codemirror/view';
 
 export function useCodeEditor(currentRoom: string | null, userId: string | undefined) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [code, setCode] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const broadcastCodeUpdate = async (newCode: string) => {
     if (!currentRoom || !userId) return;
-
     try {
       await supabase
         .from('battle_participants')
@@ -29,57 +27,18 @@ export function useCodeEditor(currentRoom: string | null, userId: string | undef
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      
-      const textarea = e.currentTarget;
-      const { selectionStart, selectionEnd } = textarea;
-      const currentValue = textarea.value;
-      
-      const newValue = 
-        currentValue.substring(0, selectionStart) + 
-        "  " + 
-        currentValue.substring(selectionEnd);
-      
-      setCode(newValue);
-      
-      const newCursorPos = selectionStart + 2;
-      
-      textarea.selectionStart = textarea.selectionEnd = newCursorPos;
-    }
+  // New change handler for CodeMirror. Optionally you can use viewUpdate if needed.
+  const handleCodeChange = (value: string, viewUpdate?: ViewUpdate) => {
+    setCode(value);
 
-    if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      if (historyIndex > 0) {
-        const newIndex = historyIndex - 1;
-        setHistoryIndex(newIndex);
-        setCode(history[newIndex]);
-      }
-    }
-
-    if ((e.key === 'z' && e.shiftKey && (e.ctrlKey || e.metaKey)) || 
-        (e.key === 'y' && (e.ctrlKey || e.metaKey))) {
-      e.preventDefault();
-      if (historyIndex < history.length - 1) {
-        const newIndex = historyIndex + 1;
-        setHistoryIndex(newIndex);
-        setCode(history[newIndex]);
-      }
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newCode = e.target.value;
-    setCode(newCode);
-    
-    if (newCode !== history[history.length - 1]) {
-      setHistory([...history, newCode]);
+    // Maintain history for undo/redo if needed.
+    if (history[history.length - 1] !== value) {
+      setHistory([...history, value]);
       setHistoryIndex(history.length);
     }
-    
+
     if (currentRoom) {
-      broadcastCodeUpdate(newCode);
+      broadcastCodeUpdate(value);
     }
   };
 
@@ -102,8 +61,6 @@ export function useCodeEditor(currentRoom: string | null, userId: string | undef
   return {
     code,
     setCode,
-    textareaRef,
-    handleKeyDown,
-    handleChange
+    handleCodeChange
   };
 }

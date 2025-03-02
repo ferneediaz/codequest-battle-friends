@@ -1,7 +1,10 @@
-
-import React from 'react';
+import React, { useCallback } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { python } from '@codemirror/lang-python';
+import { cpp } from '@codemirror/lang-cpp';
+import { java } from '@codemirror/lang-java';
 import { Language } from '@/types/battle';
-import { TokenizedCode } from './TokenizedCode';
 import { EditorToolbar } from './EditorToolbar';
 import { useCodeExecution } from '@/hooks/useCodeExecution';
 
@@ -10,23 +13,43 @@ interface CodeEditorProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   currentRoom: string | null;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
 }
+
+const getExtensionsForLanguage = (language: Language) => {
+  switch (language) {
+    case 'javascript':
+      return [javascript({ jsx: true })];
+    case 'python':
+      return [python()];
+    case 'cpp':
+      return [cpp()];
+    case 'java':
+      return [java()];
+    default:
+      return [javascript({ jsx: true })];
+  }
+};
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   code,
   language,
   onLanguageChange,
-  onChange,
-  onKeyDown,
-  textareaRef
+  onChange
 }) => {
   const { isExecuting, currentOperation, executeCode } = useCodeExecution();
 
   const handleRunCode = () => executeCode('run', code, language);
   const handleSubmitCode = () => executeCode('submit', code, language);
+
+  // Adapting CodeMirror's onChange to match the expected event shape.
+  const handleCodeMirrorChange = useCallback(
+    (val: string) => {
+      const syntheticEvent = { target: { value: val } } as React.ChangeEvent<HTMLTextAreaElement>;
+      onChange(syntheticEvent);
+    },
+    [onChange]
+  );
 
   return (
     <div className="relative group">
@@ -41,21 +64,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           currentOperation={currentOperation}
         />
         <div className="relative w-full h-[500px]">
-          <textarea
-            ref={textareaRef}
+          <CodeMirror
             value={code}
-            onChange={onChange}
-            onKeyDown={onKeyDown}
-            className="absolute inset-0 w-full h-full bg-[#1E1E1E] font-mono p-4 text-[#D4D4D4] text-sm leading-6 resize-none outline-none"
-            style={{ 
-              tabSize: 2,
-              color: 'transparent',
-              caretColor: '#D4D4D4',
-              whiteSpace: 'pre',
-              fontFamily: 'monospace'
-            }}
+            height="725px "
+            extensions={getExtensionsForLanguage(language)}
+            theme="dark"
+            onChange={handleCodeMirrorChange}
           />
-          <TokenizedCode code={code} />
         </div>
       </div>
     </div>

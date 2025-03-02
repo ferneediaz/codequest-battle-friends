@@ -1,4 +1,4 @@
-export type Language = "javascript" | "python" | "cpp";
+export type Language = "javascript" | "python" | "cpp" | "java";
 
 export interface Skill {
   id: string;
