@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { BattleHealthBar } from "@/components/BattleHealthBar";
 import {
   Select,
   SelectContent,
@@ -771,203 +772,204 @@ int main() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-      <div className="container px-4 py-8">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate("/")}
-            className="text-gray-400 hover:text-white flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Lobby
-          </button>
-          
-          {/* Room Controls */}
-          <div className="flex items-center gap-4">
-            {!currentRoom ? (
-              <>
-                <Button onClick={createBattleRoom} variant="outline">
-                  Create Room
-                </Button>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={roomCode}
-                    onChange={(e) => setRoomCode(e.target.value)}
-                    placeholder="Enter room code"
-                    className="px-3 py-1 bg-black/30 border border-white/10 rounded text-white"
-                  />
-                  <Button onClick={() => joinBattleRoom(roomCode)} variant="outline">
-                    Join Room
+      <div className="pt-16">
+        <BattleHealthBar />
+        <div className="container px-4 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => navigate("/")}
+              className="text-gray-400 hover:text-white flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Lobby
+            </button>
+            
+            <div className="flex items-center gap-4">
+              {!currentRoom ? (
+                <>
+                  <Button onClick={createBattleRoom} variant="outline">
+                    Create Room
                   </Button>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={roomCode}
+                      onChange={(e) => setRoomCode(e.target.value)}
+                      placeholder="Enter room code"
+                      className="px-3 py-1 bg-black/30 border border-white/10 rounded text-white"
+                    />
+                    <Button onClick={() => joinBattleRoom(roomCode)} variant="outline">
+                      Join Room
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-white">
+                  Room Active
                 </div>
-              </>
-            ) : (
-              <div className="text-white">
-                Room Active
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
-            <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
-              <h2 className="text-2xl font-bold text-white mb-4">Forest of Arrays</h2>
-              <div className="prose prose-invert max-w-none">
-                <h3 className="text-lg font-semibold text-primary mb-2">Problem Description</h3>
-                <p className="text-gray-300 mb-4">
-                  Given an array of integers, find the two numbers that add up to the target sum.
-                  Return their indices in an array.
-                </p>
-                
-                <h4 className="text-md font-semibold text-primary mb-2">Example:</h4>
-                <pre className="bg-black/30 p-4 rounded-md">
-                  <code className="text-sm text-gray-300">
-                    Input: nums = [2, 7, 11, 15], target = 9{"\n"}
-                    Output: [0, 1]{"\n"}
-                    Explanation: nums[0] + nums[1] = 2 + 7 = 9
-                  </code>
-                </pre>
-
-                <h4 className="text-md font-semibold text-primary mt-4 mb-2">Constraints:</h4>
-                <ul className="list-disc list-inside text-gray-300 space-y-1">
-                  <li>2 ≤ nums.length ≤ 104</li>
-                  <li>-109 ≤ nums[i] ≤ 109</li>
-                  <li>Only one valid solution exists</li>
-                </ul>
-              </div>
-
-              <div className="mt-6 border-t border-white/10 pt-6">
-                <h3 className="text-lg font-semibold text-primary mb-4">Battle Skills</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <TooltipProvider>
-                    {battleState.skills.map((skill) => (
-                      <Tooltip key={skill.id}>
-                        <TooltipTrigger asChild>
-                          <Button
-                            onClick={() => useSkill(skill)}
-                            className="relative h-10 w-full flex items-center justify-between gap-2 px-3"
-                            variant={skill.isOnCooldown ? "secondary" : "default"}
-                            disabled={skill.isOnCooldown || battleState.mana < skill.manaCost}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Wand className="w-4 h-4 shrink-0" />
-                              <span className="font-medium">{skill.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-blue-400">{skill.manaCost} MP</span>
-                              <Info className="w-4 h-4 opacity-50" />
-                            </div>
-                            {skill.isOnCooldown && (
-                              <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
-                                Recharging...
-                              </div>
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[200px]">
-                          <p>{skill.description}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </TooltipProvider>
-                </div>
-              </div>
-
-              <div className="mt-6 border-t border-white/10 pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-primary">Hints</h3>
-                  <Button onClick={buyHint} variant="outline" className="gap-2">
-                    <MessageCircleQuestion className="w-4 h-4" />
-                    Buy Hint ({HINT_COST} <Coins className="w-4 h-4 text-yellow-400" />)
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {battleState.usedHints.map((hint, index) => (
-                    <div key={index} className="p-3 bg-black/30 rounded-md text-gray-300">
-                      <Star className="w-4 h-4 text-yellow-400 inline-block mr-2" />
-                      {hint}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
-            <div className="relative h-full bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
-              <div className="flex items-center justify-between p-4 border-b border-white/10">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-lg font-semibold text-white">Code Editor</h3>
-                  <Select value={language} onValueChange={(value: Language) => handleLanguageChange(value)}>
-                    <SelectTrigger className="w-[140px] bg-black/30">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-900 border border-white/10">
-                      <SelectItem value="javascript" className="text-white hover:bg-gray-800">JavaScript</SelectItem>
-                      <SelectItem value="python" className="text-white hover:bg-gray-800">Python</SelectItem>
-                      <SelectItem value="cpp" className="text-white hover:bg-gray-800">C++</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
+              <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
+                <h2 className="text-2xl font-bold text-white mb-4">Forest of Arrays</h2>
+                <div className="prose prose-invert max-w-none">
+                  <h3 className="text-lg font-semibold text-primary mb-2">Problem Description</h3>
+                  <p className="text-gray-300 mb-4">
+                    Given an array of integers, find the two numbers that add up to the target sum.
+                    Return their indices in an array.
+                  </p>
+                  
+                  <h4 className="text-md font-semibold text-primary mb-2">Example:</h4>
+                  <pre className="bg-black/30 p-4 rounded-md">
+                    <code className="text-sm text-gray-300">
+                      Input: nums = [2, 7, 11, 15], target = 9{"\n"}
+                      Output: [0, 1]{"\n"}
+                      Explanation: nums[0] + nums[1] = 2 + 7 = 9
+                    </code>
+                  </pre>
+
+                  <h4 className="text-md font-semibold text-primary mt-4 mb-2">Constraints:</h4>
+                  <ul className="list-disc list-inside text-gray-300 space-y-1">
+                    <li>2 ≤ nums.length ≤ 104</li>
+                    <li>-109 ≤ nums[i] ≤ 109</li>
+                    <li>Only one valid solution exists</li>
+                  </ul>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    className="px-4 py-2 bg-muted hover:bg-muted/90 text-muted-foreground rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
-                    onClick={handleRun}
-                    disabled={isRunning || isSubmitting}
-                  >
-                    <svg className={`w-4 h-4 ${isRunning ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                    {isRunning ? 'Running...' : 'Run'}
-                  </button>
-                  <button 
-                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
-                    onClick={handleSubmit}
-                    disabled={isRunning || isSubmitting}
-                  >
-                    <Check className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`} />
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                  </button>
+
+                <div className="mt-6 border-t border-white/10 pt-6">
+                  <h3 className="text-lg font-semibold text-primary mb-4">Battle Skills</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <TooltipProvider>
+                      {battleState.skills.map((skill) => (
+                        <Tooltip key={skill.id}>
+                          <TooltipTrigger asChild>
+                            <Button
+                              onClick={() => useSkill(skill)}
+                              className="relative h-10 w-full flex items-center justify-between gap-2 px-3"
+                              variant={skill.isOnCooldown ? "secondary" : "default"}
+                              disabled={skill.isOnCooldown || battleState.mana < skill.manaCost}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Wand className="w-4 h-4 shrink-0" />
+                                <span className="font-medium">{skill.name}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-blue-400">{skill.manaCost} MP</span>
+                                <Info className="w-4 h-4 opacity-50" />
+                              </div>
+                              {skill.isOnCooldown && (
+                                <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
+                                  Recharging...
+                                </div>
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[200px]">
+                            <p>{skill.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </TooltipProvider>
+                  </div>
+                </div>
+
+                <div className="mt-6 border-t border-white/10 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-primary">Hints</h3>
+                    <Button onClick={buyHint} variant="outline" className="gap-2">
+                      <MessageCircleQuestion className="w-4 h-4" />
+                      Buy Hint ({HINT_COST} <Coins className="w-4 h-4 text-yellow-400" />)
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {battleState.usedHints.map((hint, index) => (
+                      <div key={index} className="p-3 bg-black/30 rounded-md text-gray-300">
+                        <Star className="w-4 h-4 text-yellow-400 inline-block mr-2" />
+                        {hint}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="relative w-full h-[500px]">
-                <textarea
-                  ref={textareaRef}
-                  value={code}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  className="absolute inset-0 w-full h-full bg-[#1E1E1E] font-mono p-4 text-[#D4D4D4] text-sm leading-6 resize-none outline-none"
-                  style={{ 
-                    tabSize: 2,
-                    color: 'transparent',
-                    caretColor: '#D4D4D4',
-                    whiteSpace: 'pre',
-                    fontFamily: 'monospace'
-                  }}
-                />
-                <div
-                  className="absolute inset-0 w-full h-full pointer-events-none font-mono p-4 text-sm leading-6"
-                  style={{
-                    whiteSpace: 'pre',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  {code.split('\n').map((line, i) => (
-                    <div key={i} className="relative">
-                      {tokenizeLine(line).map((token, j) => (
-                        <span
-                          key={`${i}-${j}`}
-                          style={{ color: getTokenColor(token.type) }}
-                        >
-                          {token.text}
-                        </span>
-                      ))}
-                    </div>
-                  ))}
+            </div>
+
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
+              <div className="relative h-full bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
+                <div className="flex items-center justify-between p-4 border-b border-white/10">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-lg font-semibold text-white">Code Editor</h3>
+                    <Select value={language} onValueChange={(value: Language) => handleLanguageChange(value)}>
+                      <SelectTrigger className="w-[140px] bg-black/30">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border border-white/10">
+                        <SelectItem value="javascript" className="text-white hover:bg-gray-800">JavaScript</SelectItem>
+                        <SelectItem value="python" className="text-white hover:bg-gray-800">Python</SelectItem>
+                        <SelectItem value="cpp" className="text-white hover:bg-gray-800">C++</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      className="px-4 py-2 bg-muted hover:bg-muted/90 text-muted-foreground rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
+                      onClick={handleRun}
+                      disabled={isRunning || isSubmitting}
+                    >
+                      <svg className={`w-4 h-4 ${isRunning ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                      {isRunning ? 'Running...' : 'Run'}
+                    </button>
+                    <button 
+                      className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
+                      onClick={handleSubmit}
+                      disabled={isRunning || isSubmitting}
+                    >
+                      <Check className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`} />
+                      {isSubmitting ? 'Submitting...' : 'Submit'}
+                    </button>
+                  </div>
+                </div>
+                <div className="relative w-full h-[500px]">
+                  <textarea
+                    ref={textareaRef}
+                    value={code}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    className="absolute inset-0 w-full h-full bg-[#1E1E1E] font-mono p-4 text-[#D4D4D4] text-sm leading-6 resize-none outline-none"
+                    style={{ 
+                      tabSize: 2,
+                      color: 'transparent',
+                      caretColor: '#D4D4D4',
+                      whiteSpace: 'pre',
+                      fontFamily: 'monospace'
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0 w-full h-full pointer-events-none font-mono p-4 text-sm leading-6"
+                    style={{
+                      whiteSpace: 'pre',
+                      fontFamily: 'monospace'
+                    }}
+                  >
+                    {code.split('\n').map((line, i) => (
+                      <div key={i} className="relative">
+                        {tokenizeLine(line).map((token, j) => (
+                          <span
+                            key={`${i}-${j}`}
+                            style={{ color: getTokenColor(token.type) }}
+                          >
+                            {token.text}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
