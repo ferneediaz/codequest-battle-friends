@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Language } from '@/types/battle';
 import { LanguageSelector } from './LanguageSelector';
@@ -43,47 +42,68 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const handleJudge0Response = (data: any, isSubmission: boolean) => {
-    if (data.compile_output) {
-      // Show detailed compilation error
-      const errorMessage = `Compilation Error:\n${data.compile_output}`;
+    if (data.status?.id === 6) { // Compilation error
+      const errorMessage = data.compile_output || 'Compilation Error';
       toast.error(errorMessage, {
-        duration: 5000,
+        description: "Please check your code syntax",
+        duration: 10000,
       });
       return false;
     }
 
-    if (data.stderr) {
-      // Show detailed runtime error
-      const errorMessage = `Runtime Error:\n${data.stderr}`;
+    if (data.status?.id === 11 || data.status?.id === 12) { // Runtime error
+      const errorMessage = data.stderr || 'Runtime Error';
       toast.error(errorMessage, {
-        duration: 5000,
+        description: "Your code encountered a runtime error",
+        duration: 10000,
       });
       return false;
     }
 
-    if (data.status?.description === "Wrong Answer") {
-      toast.error("Your solution produced incorrect output. Please check your logic and try again.", {
-        duration: 5000,
-      });
+    if (data.status?.id === 4) { // Wrong Answer
+      if (isSubmission && data.testResults) {
+        const failedTests = data.testResults.filter((test: any) => !test.passed);
+        const firstFailedTest = failedTests[0];
+        if (firstFailedTest) {
+          toast.error("Wrong Answer", {
+            description: `Failed test case:
+Input: nums = [${firstFailedTest.input.nums}], target = ${firstFailedTest.input.target}
+Expected: [${firstFailedTest.input.expected}]
+Output: [${firstFailedTest.output}]`,
+            duration: 10000,
+          });
+        } else {
+          toast.error("Wrong Answer", {
+            description: "Your solution produced incorrect output. Please check your logic.",
+            duration: 5000,
+          });
+        }
+      }
       return false;
     }
 
-    if (isSubmission) {
-      if (!data.isCorrect) {
-        toast.error("Your solution didn't pass all test cases. Make sure your function handles all possible inputs correctly.", {
+    if (data.status?.id === 3) { // Accepted
+      if (isSubmission) {
+        toast.success('Solution Accepted! All test cases passed.', {
           duration: 5000,
         });
-        return false;
+      } else {
+        toast.success('Code ran successfully!', {
+          description: data.stdout ? `Output:\n${data.stdout}` : undefined,
+          duration: 5000,
+        });
       }
       return true;
     }
 
-    return data.status?.id === 3; // Accepted status
+    toast.error(`Execution Error: ${data.status?.description || 'Unknown error'}`, {
+      duration: 5000,
+    });
+    return false;
   };
 
   const executeCode = async (operation: 'run' | 'submit') => {
-    // Prevent execution if already running or if trying to trigger multiple operations
-    if (isExecuting) {
+    if (isExecuting || currentOperation) {
       console.log('Operation in progress, ignoring click');
       return;
     }
@@ -107,31 +127,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       }
 
       console.log('Judge0 response:', data);
-      const success = handleJudge0Response(data, operation === 'submit');
+      handleJudge0Response(data, operation === 'submit');
       
-      if (success) {
-        if (operation === 'submit') {
-          toast.success('Solution submitted successfully! All test cases passed.');
-        } else {
-          toast.success('Code ran successfully!');
-          if (data.stdout) {
-            console.log('Output:', data.stdout);
-            toast.message('Execution Output', {
-              description: data.stdout,
-              duration: 5000,
-            });
-          }
-        }
-      }
     } catch (error) {
       console.error(`Error during ${operation}:`, error);
       toast.error(`Error executing code: ${(error as Error).message}`);
     } finally {
       setIsExecuting(false);
-      // Add a small delay before clearing the operation state to prevent rapid re-clicks
       setTimeout(() => {
         setCurrentOperation(null);
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -149,7 +154,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
           <div className="flex gap-4">
             <Button 
-              className={`gap-2 ${currentOperation === 'run' ? 'opacity-50' : ''}`}
+              className={`gap-2 ${isExecuting && currentOperation === 'run' ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={() => executeCode('run')}
               disabled={isExecuting || currentOperation !== null}
             >
@@ -158,7 +163,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </Button>
             <Button 
               variant="secondary" 
-              className={`gap-2 ${currentOperation === 'submit' ? 'opacity-50' : ''}`}
+              className={`gap-2 ${isExecuting && currentOperation === 'submit' ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={() => executeCode('submit')}
               disabled={isExecuting || currentOperation !== null}
             >
@@ -188,4 +193,3 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     </div>
   );
 };
-

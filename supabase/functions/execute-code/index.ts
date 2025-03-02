@@ -31,7 +31,8 @@ ${sourceCode}
 const testCases = [
   { nums: [2, 7, 11, 15], target: 9, expected: [0, 1] },
   { nums: [3, 2, 4], target: 6, expected: [1, 2] },
-  { nums: [3, 3], target: 6, expected: [0, 1] }
+  { nums: [3, 3], target: 6, expected: [0, 1] },
+  { nums: [-1, -2, -3, -4, -5], target: -8, expected: [2, 4] }
 ];
 
 let allPassed = true;
@@ -39,15 +40,27 @@ const results = [];
 
 for (const test of testCases) {
   const result = solution(test.nums, test.target);
-  const passed = JSON.stringify(result.sort()) === JSON.stringify(test.expected.sort());
+  // Sort both arrays to handle different valid solutions
+  const sortedResult = result.sort((a, b) => a - b);
+  const sortedExpected = test.expected.sort((a, b) => a - b);
+  const passed = JSON.stringify(sortedResult) === JSON.stringify(sortedExpected);
+  
   if (!passed) {
     allPassed = false;
-    console.log(\`Test failed:
-    Input: nums = [\${test.nums}], target = \${test.target}
-    Expected: [\${test.expected}]
-    Got: [\${result}]\`);
   }
-  results.push({ input: test, output: result, passed });
+  results.push({ 
+    input: test,
+    output: result,
+    passed
+  });
+  
+  if (!passed) {
+    console.log(\`Test failed:
+Input: nums = [\${test.nums}], target = \${test.target}
+Expected: [\${test.expected}]
+Got: [\${result}]\`);
+    break; // Stop at first failure
+  }
 }
 
 if (allPassed) {
@@ -71,7 +84,7 @@ console.log(JSON.stringify({ allPassed, results }, null, 2));
         language_id: languageId,
         stdin: '',
         expected_output: '',
-        cpu_time_limit: 2,
+        cpu_time_limit: 5,
         memory_limit: 128000,
       }),
     });
@@ -85,17 +98,15 @@ console.log(JSON.stringify({ allPassed, results }, null, 2));
     const result = await submitResponse.json();
     console.log('Judge0 execution result:', result);
 
-    // For submissions, check if all test cases pass
-    let isCorrect = false;
+    // For submissions, parse test results
+    let testResults;
     if (isSubmission && result.stdout) {
       try {
-        const outputJson = JSON.parse(result.stdout.match(/{.*}/s)?.[0] || '{}');
-        isCorrect = outputJson.allPassed === true;
-        console.log('Test results:', outputJson);
-        
-        if (!isCorrect && outputJson.results) {
-          // Include detailed test case results in the response
-          result.testResults = outputJson.results;
+        const match = result.stdout.match(/{.*}/s);
+        if (match) {
+          const outputJson = JSON.parse(match[0]);
+          result.isCorrect = outputJson.allPassed === true;
+          testResults = outputJson.results;
         }
       } catch (e) {
         console.error('Error parsing test results:', e);
@@ -104,14 +115,8 @@ console.log(JSON.stringify({ allPassed, results }, null, 2));
 
     return new Response(
       JSON.stringify({
-        stdout: result.stdout,
-        stderr: result.stderr,
-        compile_output: result.compile_output,
-        status: result.status,
-        memory: result.memory,
-        time: result.time,
-        isCorrect,
-        testResults: result.testResults
+        ...result,
+        testResults
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
