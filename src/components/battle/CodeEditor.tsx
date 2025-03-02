@@ -35,8 +35,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         return 63; // Node.js
       case 'python':
         return 71; // Python 3
-      case 'java':
-        return 62; // Java
+      case 'cpp':
+        return 54; // C++
       default:
         return 63; // Default to Node.js
     }
