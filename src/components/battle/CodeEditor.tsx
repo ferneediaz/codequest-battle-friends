@@ -26,6 +26,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   textareaRef
 }) => {
   const [isExecuting, setIsExecuting] = React.useState(false);
+  const [lastOperation, setLastOperation] = React.useState<'run' | 'submit' | null>(null);
 
   const getLanguageId = (lang: Language): number => {
     switch (lang) {
@@ -41,13 +42,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const handleJudge0Response = (data: any, isSubmission: boolean) => {
-    // Check for compilation errors first
     if (data.compile_output) {
       toast.error(`Compilation Error: ${data.compile_output}`);
       return false;
     }
 
-    // Check runtime errors
     if (data.stderr) {
       toast.error(`Runtime Error: ${data.stderr}`);
       return false;
@@ -55,13 +54,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
     if (data.status?.id === 3) { // Accepted
       if (isSubmission) {
+        console.log('Submission result:', data.isCorrect);
         return data.isCorrect;
       }
-      // For run only, if it executed successfully it's a success
       return true;
     }
 
-    // Handle other status codes
     switch (data.status?.id) {
       case 4: // Wrong Answer
         toast.error("Wrong Answer");
@@ -97,10 +95,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const executeCode = async (isSubmission: boolean = false) => {
-    if (isExecuting) return; // Prevent multiple executions
+    if (isExecuting) {
+      console.log('Already executing, ignoring click');
+      return;
+    }
+
+    if ((lastOperation === 'run' && isSubmission) || (lastOperation === 'submit' && !isSubmission)) {
+      console.log('Ignoring duplicate operation');
+      return;
+    }
 
     try {
       setIsExecuting(true);
+      setLastOperation(isSubmission ? 'submit' : 'run');
       
       const { data, error } = await supabase.functions.invoke('execute-code', {
         body: {
@@ -125,6 +132,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       toast.error('Error executing code: ' + (error as Error).message);
     } finally {
       setIsExecuting(false);
+      setTimeout(() => setLastOperation(null), 100);
     }
   };
 
