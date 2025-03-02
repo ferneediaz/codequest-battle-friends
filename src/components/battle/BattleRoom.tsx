@@ -35,20 +35,18 @@ export function BattleRoom({
         return;
       }
 
-      // First, get a valid question ID
-      const { data: questionData, error: questionError } = await supabase
+      const { data: questions, error: questionError } = await supabase
         .from('questions')
         .select('id')
-        .single();
+        .limit(1);
 
-      if (questionError) {
+      if (questionError || !questions || questions.length === 0) {
         console.error('Error fetching question:', questionError);
-        throw new Error('Failed to fetch question');
+        throw new Error('No questions available');
       }
 
       const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
-      // Create the battle with the valid question_id
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .insert({
@@ -59,7 +57,7 @@ export function BattleRoom({
           document_content: initialCode,
           min_rank: 'herald',
           max_rank: 'immortal',
-          question_id: questionData.id
+          question_id: questions[0].id
         })
         .select()
         .single();
@@ -69,7 +67,6 @@ export function BattleRoom({
         throw battleError;
       }
 
-      // Then add the participant
       const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
@@ -97,7 +94,6 @@ export function BattleRoom({
       console.error('Error creating room:', error);
       const errorMessage = error.message || "Failed to create room. Please try again.";
       
-      // Copy error to clipboard for easy sharing
       await navigator.clipboard.writeText(
         `Error creating room: ${errorMessage}\nDetails: ${JSON.stringify(error, null, 2)}`
       );
