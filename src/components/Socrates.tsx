@@ -52,7 +52,11 @@ export const Socrates = () => {
     setIsThinking(true);
 
     try {
-      const question = await generateSocraticQuestion(userMessage);
+      const question = await generateSocraticQuestion(
+        userMessage, 
+        "Two Sum", // Default title since this component is specifically for Two Sum
+        "Given an array of integers nums and an integer target, return indices of the two numbers in nums such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice." // Description of Two Sum problem
+      );
       setMessages(prev => [...prev, { role: 'assistant', content: question }]);
     } catch (error) {
       console.error('Error:', error);
