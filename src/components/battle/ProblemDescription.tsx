@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MessageCircleQuestion, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,12 @@ interface ProblemDescriptionProps {
     description: string;
     difficulty: string;
     category: string;
+    examples: Array<{
+      input: string;
+      output: string;
+      explanation: string;
+    }>;
+    constraints: string[];
   };
   hintCost?: number;
 }
@@ -44,23 +51,29 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
             {question.description}
           </p>
           
-          <h4 className="text-md font-semibold text-primary mb-2">Example:</h4>
-          <pre className="bg-black/30 p-4 rounded-md">
-            <code className="text-sm text-gray-300">
-              Input: "{'{'}[]}" {"\n"}
-              Output: true {"\n"}
-              Explanation: The runes are properly sealed in the correct order.{"\n\n"}
-              Input: "([)]" {"\n"}
-              Output: false {"\n"}
-              Explanation: The runes must be sealed in the proper order.
-            </code>
-          </pre>
+          <h4 className="text-md font-semibold text-primary mb-2">Examples:</h4>
+          {question.examples?.map((example, index) => (
+            <div key={index} className="mb-4">
+              <pre className="bg-black/30 p-4 rounded-md">
+                <code className="text-sm text-gray-300">
+                  Input: {example.input} {"\n"}
+                  Output: {example.output} {"\n"}
+                  {example.explanation && `Explanation: ${example.explanation}`}
+                </code>
+              </pre>
+            </div>
+          ))}
 
-          <h4 className="text-md font-semibold text-primary mt-4 mb-2">Constraints:</h4>
-          <ul className="list-disc list-inside text-gray-300 space-y-1">
-            <li>1 ≤ s.length ≤ 104</li>
-            <li>s consists of parentheses, square brackets and curly brackets only '()[]{}'</li>
-          </ul>
+          {question.constraints && question.constraints.length > 0 && (
+            <>
+              <h4 className="text-md font-semibold text-primary mt-4 mb-2">Constraints:</h4>
+              <ul className="list-disc list-inside text-gray-300 space-y-1">
+                {question.constraints.map((constraint, index) => (
+                  <li key={index}>{constraint}</li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
 
         <div className="mt-6 border-t border-white/10 pt-6">

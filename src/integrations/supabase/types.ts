@@ -137,25 +137,31 @@ export type Database = {
       questions: {
         Row: {
           category: string
+          constraints: string[] | null
           created_at: string | null
           description: string
           difficulty: string
+          examples: Json | null
           id: string
           title: string
         }
         Insert: {
           category: string
+          constraints?: string[] | null
           created_at?: string | null
           description: string
           difficulty: string
+          examples?: Json | null
           id?: string
           title: string
         }
         Update: {
           category?: string
+          constraints?: string[] | null
           created_at?: string | null
           description?: string
           difficulty?: string
+          examples?: Json | null
           id?: string
           title?: string
         }
