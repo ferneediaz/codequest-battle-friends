@@ -7,15 +7,18 @@ import { ViewUpdate } from '@codemirror/view';
 export function useCodeEditor(currentRoom: string | null, userId: string | undefined) {
   const [code, setCode] = useState("");
 
+  // Broadcast code changes to other users in the same room
   const broadcastCodeUpdate = async (newCode: string) => {
     if (!currentRoom || !userId) return;
     try {
+      // Save the current code to the database
       await supabase
         .from('battle_participants')
         .update({ current_code: newCode })
         .eq('battle_id', currentRoom)
         .eq('user_id', userId);
 
+      // Broadcast the change to other users in real-time
       await supabase.channel(`battle:${currentRoom}`).send({
         type: 'broadcast',
         event: 'code_update',
@@ -26,7 +29,7 @@ export function useCodeEditor(currentRoom: string | null, userId: string | undef
     }
   };
 
-  // New change handler for CodeMirror
+  // Handle code changes from the editor
   const handleCodeChange = (value: string, viewUpdate?: ViewUpdate) => {
     setCode(value);
     if (currentRoom) {
@@ -34,10 +37,12 @@ export function useCodeEditor(currentRoom: string | null, userId: string | undef
     }
   };
 
+  // Listen for code updates from other users
   useEffect(() => {
     if (currentRoom) {
       const channel = supabase.channel(`battle:${currentRoom}`)
         .on('broadcast', { event: 'code_update' }, ({ payload }) => {
+          // Only update if the change came from another user
           if (payload.userId !== userId) {
             setCode(payload.code);
           }
