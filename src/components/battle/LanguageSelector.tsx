@@ -26,6 +26,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <SelectContent className="bg-gray-900 border border-white/10">
         <SelectItem value="javascript" className="text-white hover:bg-gray-800">JavaScript</SelectItem>
         <SelectItem value="python" className="text-white hover:bg-gray-800">Python</SelectItem>
+        <SelectItem value="java" className="text-white hover:bg-gray-800">Java</SelectItem>
         <SelectItem value="cpp" className="text-white hover:bg-gray-800">C++</SelectItem>
       </SelectContent>
     </Select>

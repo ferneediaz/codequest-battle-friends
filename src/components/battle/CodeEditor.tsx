@@ -63,10 +63,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           isExecuting={isExecuting}
           currentOperation={currentOperation}
         />
-        <div className="relative w-full h-[500px]">
-          <CodeMirror
+        <div className="relative w-full h-auto overflow-auto">
+        <CodeMirror
             value={code}
-            height="725px "
+            height="100%"
             extensions={getExtensionsForLanguage(language)}
             theme="dark"
             onChange={handleCodeMirrorChange}
