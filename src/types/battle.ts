@@ -1,4 +1,3 @@
-
 export type Language = "javascript" | "python" | "cpp";
 
 export interface Skill {
@@ -124,3 +123,8 @@ export const TEST_CASES = [
     expected: [1, 2]
   }
 ];
+
+export interface Token {
+  text: string;
+  type?: 'comment' | 'keyword' | 'type' | 'function' | 'string' | 'number';
+}

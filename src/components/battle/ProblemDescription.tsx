@@ -2,17 +2,20 @@
 import React from 'react';
 import { MessageCircleQuestion, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BattleState } from '@/types/battle';
 
 interface ProblemDescriptionProps {
-  usedHints: string[];
-  onBuyHint: () => void;
-  hintCost: number;
+  battleState: BattleState;
+  useSkill: (skillId: string) => void;
+  buyHint: () => void;
+  hintCost?: number;
 }
 
 export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
-  usedHints,
-  onBuyHint,
-  hintCost
+  battleState,
+  useSkill,
+  buyHint,
+  hintCost = 100
 }) => {
   return (
     <div className="relative group">
@@ -46,13 +49,13 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
         <div className="mt-6 border-t border-white/10 pt-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-primary">Hints</h3>
-            <Button onClick={onBuyHint} variant="outline" className="gap-2">
+            <Button onClick={buyHint} variant="outline" className="gap-2">
               <MessageCircleQuestion className="w-4 h-4" />
               Buy Hint ({hintCost} <Coins className="w-4 h-4 text-yellow-400" />)
             </Button>
           </div>
           <div className="space-y-2">
-            {usedHints.map((hint, index) => (
+            {battleState.usedHints.map((hint, index) => (
               <div key={index} className="p-3 bg-black/30 rounded-md text-gray-300">
                 <Star className="w-4 h-4 text-yellow-400 inline-block mr-2" />
                 {hint}

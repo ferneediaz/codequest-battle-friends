@@ -1,5 +1,4 @@
-
-import React, { useRef } from 'react';
+import React from 'react';
 import { Language, Token } from '@/types/battle';
 import {
   Select,
@@ -15,12 +14,10 @@ interface CodeEditorProps {
   code: string;
   language: Language;
   onLanguageChange: (lang: Language) => void;
-  onChange: (value: string) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-  onRun: () => void;
-  onSubmit: () => void;
-  isRunning: boolean;
-  isSubmitting: boolean;
+  currentRoom: string | null;
+  textareaRef: React.RefObject<HTMLTextAreaElement>;
 }
 
 const tokenizeLine = (line: string): Token[] => {
@@ -112,13 +109,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onLanguageChange,
   onChange,
   onKeyDown,
-  onRun,
-  onSubmit,
-  isRunning,
-  isSubmitting
+  currentRoom,
+  textareaRef
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
@@ -137,32 +130,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <button 
-              className="px-4 py-2 bg-muted hover:bg-muted/90 text-muted-foreground rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
-              onClick={onRun}
-              disabled={isRunning || isSubmitting}
-            >
-              <svg className={`w-4 h-4 ${isRunning ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              {isRunning ? 'Running...' : 'Run'}
-            </button>
-            <button 
-              className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
-              onClick={onSubmit}
-              disabled={isRunning || isSubmitting}
-            >
-              <Check className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`} />
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </button>
-          </div>
         </div>
         <div className="relative w-full h-[500px]">
           <textarea
             ref={textareaRef}
             value={code}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onChange(e)}
             onKeyDown={onKeyDown}
             className="absolute inset-0 w-full h-full bg-[#1E1E1E] font-mono p-4 text-[#D4D4D4] text-sm leading-6 resize-none outline-none"
             style={{ 

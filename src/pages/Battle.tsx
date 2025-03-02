@@ -49,7 +49,7 @@ const Battle = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ProblemDescription 
-              battleState={battleState} 
+              battleState={battleState}
               useSkill={useSkill}
               buyHint={buyHint}
             />
@@ -57,10 +57,10 @@ const Battle = () => {
             <CodeEditor
               code={code}
               language={language}
-              setLanguage={setLanguage}
+              onLanguageChange={setLanguage}
               textareaRef={textareaRef}
-              handleKeyDown={handleKeyDown}
-              handleChange={handleChange}
+              onKeyDown={handleKeyDown}
+              onChange={handleChange}
               currentRoom={currentRoom}
             />
           </div>
