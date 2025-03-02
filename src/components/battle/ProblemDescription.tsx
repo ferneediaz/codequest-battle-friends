@@ -3,6 +3,8 @@ import React from 'react';
 import { MessageCircleQuestion, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BattleState } from '@/types/battle';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 interface ProblemDescriptionProps {
   battleState: BattleState;
@@ -11,22 +13,55 @@ interface ProblemDescriptionProps {
   hintCost?: number;
 }
 
+async function fetchQuestion() {
+  // For now, we'll fetch a random question
+  const { data, error } = await supabase
+    .from('questions')
+    .select('*')
+    .limit(1)
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
 export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
   battleState,
   useSkill,
   buyHint,
   hintCost = 100
 }) => {
+  const { data: question, isLoading } = useQuery({
+    queryKey: ['question'],
+    queryFn: fetchQuestion,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="relative group animate-pulse">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
+        <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
+          <div className="h-8 w-48 bg-gray-700 rounded mb-4"></div>
+          <div className="h-24 w-full bg-gray-700 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
       <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
-        <h2 className="text-2xl font-bold text-white mb-4">Forest of Arrays</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-white">{question?.title}</h2>
+          <span className="px-2 py-1 text-sm rounded bg-primary/20 text-primary">
+            {question?.difficulty}
+          </span>
+        </div>
+        
         <div className="prose prose-invert max-w-none">
-          <h3 className="text-lg font-semibold text-primary mb-2">Problem Description</h3>
           <p className="text-gray-300 mb-4">
-            Given an array of integers, find the two numbers that add up to the target sum.
-            Return their indices in an array.
+            {question?.description}
           </p>
           
           <h4 className="text-md font-semibold text-primary mb-2">Example:</h4>
