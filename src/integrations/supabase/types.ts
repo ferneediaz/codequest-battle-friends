@@ -51,6 +51,8 @@ export type Database = {
           document_content: string | null
           id: string
           max_participants: number | null
+          max_rank: string
+          min_rank: string
           question_id: string
           room_code: string | null
           shared_document_id: string | null
@@ -64,6 +66,8 @@ export type Database = {
           document_content?: string | null
           id?: string
           max_participants?: number | null
+          max_rank?: string
+          min_rank?: string
           question_id: string
           room_code?: string | null
           shared_document_id?: string | null
@@ -77,6 +81,8 @@ export type Database = {
           document_content?: string | null
           id?: string
           max_participants?: number | null
+          max_rank?: string
+          min_rank?: string
           question_id?: string
           room_code?: string | null
           shared_document_id?: string | null
