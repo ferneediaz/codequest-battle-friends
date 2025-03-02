@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MessageCircleQuestion, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,11 +14,11 @@ interface ProblemDescriptionProps {
 }
 
 async function fetchQuestion() {
-  // For now, we'll fetch a random question
   const { data, error } = await supabase
     .from('questions')
     .select('*')
-    .limit(1)
+    .order('created_at')  // Order by creation date
+    .limit(1)  // Still limit to 1 question
     .single();
   
   if (error) throw error;
@@ -101,3 +102,4 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
     </div>
   );
 };
+
