@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -139,7 +140,30 @@ export function BattleRoom({
         throw new Error('Room not found');
       }
 
-      if (battleData.current_participants >= battleData.max_participants) {
+      // Check if user is already a participant
+      const { data: existingParticipant } = await supabase
+        .from('battle_participants')
+        .select('*')
+        .eq('battle_id', battleData.id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (existingParticipant) {
+        setCurrentRoom(battleData.id);
+        toast({
+          title: "Welcome back!",
+          description: "You've rejoined the battle.",
+        });
+        return;
+      }
+
+      // Get current participants count directly from participants table
+      const { count: participantsCount } = await supabase
+        .from('battle_participants')
+        .select('*', { count: 'exact' })
+        .eq('battle_id', battleData.id);
+
+      if (participantsCount && participantsCount >= (battleData.max_participants || 2)) {
         throw new Error('Room is full');
       }
 
