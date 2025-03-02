@@ -61,12 +61,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     }
 
     if (!isSubmission && data.status?.id === 3) {
-      const output = atob(data.stdout || '');
-      toast.success('Code ran successfully!', {
-        description: `Output:\n${output}`,
-        duration: 5000,
-      });
-      return true;
+      try {
+        const output = atob(data.stdout || '');
+        const result = JSON.parse(output);
+        toast.success('Code ran successfully!', {
+          description: `Input: nums = [${result.input.nums}], target = ${result.input.target}
+Output: [${result.output}]`,
+          duration: 5000,
+        });
+        return true;
+      } catch (error) {
+        console.error('Error parsing run output:', error);
+        toast.error('Error processing run output');
+        return false;
+      }
     }
 
     if (isSubmission) {

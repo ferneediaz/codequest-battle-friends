@@ -62,7 +62,18 @@ for (const test of testCases) {
 }
 
 console.log(JSON.stringify({ allPassed, results }));
-` : sourceCode;
+` : `
+${sourceCode}
+
+// Sample test case for run mode
+const nums = [2, 7, 11, 15];
+const target = 9;
+const result = solution(nums, target);
+console.log(JSON.stringify({
+  input: { nums, target },
+  output: result
+}));
+`;
 
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true', {
       method: 'POST',
@@ -108,4 +119,3 @@ console.log(JSON.stringify({ allPassed, results }));
     );
   }
 });
-
