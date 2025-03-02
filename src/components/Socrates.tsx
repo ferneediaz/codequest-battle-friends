@@ -1,10 +1,12 @@
-
 import { useState } from "react";
 import { Send, Brain, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { generateSocraticQuestion, getStoredApiKey, setStoredApiKey } from "@/functions/socratic-questions";
+import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Socrates = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,9 +44,33 @@ export const Socrates = () => {
     });
   };
 
+  const [searchParams] = useSearchParams();
+  const questionId = searchParams.get('questionId');
+
+  const { data: question } = useQuery({
+    queryKey: ['question', questionId],
+    queryFn: async () => {
+      if (!questionId) return null;
+      
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('id', questionId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching question:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!questionId,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !question) return;
 
     const userMessage = input.trim();
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -52,12 +78,12 @@ export const Socrates = () => {
     setIsThinking(true);
 
     try {
-      const question = await generateSocraticQuestion(
-        userMessage, 
-        "Two Sum", // Default title since this component is specifically for Two Sum
-        "Given an array of integers nums and an integer target, return indices of the two numbers in nums such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice." // Description of Two Sum problem
+      const response = await generateSocraticQuestion(
+        userMessage,
+        question.title,
+        question.description
       );
-      setMessages(prev => [...prev, { role: 'assistant', content: question }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
       console.error('Error:', error);
       if (!getStoredApiKey()) {
