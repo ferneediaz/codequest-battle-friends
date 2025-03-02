@@ -102,7 +102,21 @@ console.log(JSON.stringify({
       }),
     });
 
+    if (submitResponse.status === 429) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Rate limit exceeded. Please wait a moment before trying again.',
+          status: { id: 429, description: 'Too Many Requests' }
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      );
+    }
+
     if (!submitResponse.ok) {
+      console.error('Judge0 API error:', submitResponse.status, await submitResponse.text());
       throw new Error(`Judge0 API error: ${submitResponse.status}`);
     }
 

@@ -27,6 +27,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
   const [isExecuting, setIsExecuting] = React.useState(false);
   const [currentOperation, setCurrentOperation] = React.useState<'run' | 'submit' | null>(null);
+  const [lastExecutionTime, setLastExecutionTime] = React.useState(0);
 
   const getLanguageId = (lang: Language): number => {
     switch (lang) {
@@ -45,6 +46,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     if (!data || data.error) {
       toast.error('Execution Error', {
         description: data.error || 'Unknown error occurred',
+        duration: 5000,
+      });
+      return false;
+    }
+
+    if (data.status?.id === 429) {
+      toast.error('Too Many Requests', {
+        description: 'Please wait a moment before trying again.',
         duration: 5000,
       });
       return false;
@@ -132,8 +141,18 @@ Your Output: [${failedTest.output}]`,
       return;
     }
 
+    const now = Date.now();
+    if (now - lastExecutionTime < 2000) { // 2 seconds cooldown
+      toast.error('Please wait', {
+        description: 'Please wait a couple of seconds between attempts.',
+        duration: 3000,
+      });
+      return;
+    }
+
     setIsExecuting(true);
     setCurrentOperation(operation);
+    setLastExecutionTime(now);
 
     try {
       const response = await supabase.functions.invoke('execute-code', {
