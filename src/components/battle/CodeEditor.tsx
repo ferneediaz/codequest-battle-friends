@@ -60,38 +60,29 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return false;
     }
 
-    if (!isSubmission && data.status?.id === 3) {
-      try {
-        const output = atob(data.stdout || '');
-        const result = JSON.parse(output);
-        
-        if (result.passed) {
-          toast.success('Code ran successfully!', {
-            description: `Input: nums = [${result.input.nums}], target = ${result.input.target}
-Output: [${result.output}]`,
-            duration: 5000,
-          });
-        } else {
-          toast.error('Wrong Answer', {
-            description: `Input: nums = [${result.input.nums}], target = ${result.input.target}
-Expected: [${result.input.expected}]
-Your Output: [${result.output}]`,
-            duration: 5000,
-          });
-        }
-        return result.passed;
-      } catch (error) {
-        console.error('Error parsing run output:', error);
-        toast.error('Error processing run output');
-        return false;
-      }
-    }
-
-    if (isSubmission) {
-      try {
+    try {
+      if (data.status?.id === 3) {
         const stdout = atob(data.stdout || '');
         const results = JSON.parse(stdout);
-        
+
+        if (!isSubmission) {
+          if (results.passed) {
+            toast.success('Code ran successfully!', {
+              description: `Input: nums = [${results.input.nums}], target = ${results.input.target}
+Output: [${results.output}]`,
+              duration: 5000,
+            });
+          } else {
+            toast.error('Wrong Answer', {
+              description: `Input: nums = [${results.input.nums}], target = ${results.input.target}
+Expected: [${results.input.expected}]
+Your Output: [${results.output}]`,
+              duration: 5000,
+            });
+          }
+          return results.passed;
+        }
+
         if (results.allPassed) {
           toast.success('Solution Accepted! All test cases passed.', {
             duration: 5000,
@@ -110,11 +101,11 @@ Your Output: [${failedTest.output}]`,
           }
           return false;
         }
-      } catch (error) {
-        console.error('Error parsing test results:', error);
-        toast.error('Error processing test results');
-        return false;
       }
+    } catch (error) {
+      console.error('Error parsing test results:', error);
+      toast.error('Error processing test results');
+      return false;
     }
 
     if (data.status?.id !== 3) {
