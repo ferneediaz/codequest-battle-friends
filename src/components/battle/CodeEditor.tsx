@@ -40,7 +40,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     }
   };
 
-  const handleJudge0Response = (data: any) => {
+  const handleJudge0Response = (data: any, isSubmission: boolean) => {
     // Check for compilation errors first
     if (data.compile_output) {
       toast.error(`Compilation Error: ${data.compile_output}`);
@@ -53,9 +53,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return false;
     }
 
-    // If the code ran successfully, check if the answer is correct
-    if (data.status?.id === 3) {
-      return data.isCorrect === true;
+    // For submissions, check if the answer is correct
+    if (isSubmission) {
+      if (data.status?.id === 3) { // Accepted
+        return data.isCorrect === true;
+      }
+    } else {
+      // For run only, we just need to check if it executed successfully
+      if (data.status?.id === 3) {
+        return true;
+      }
     }
 
     // Handle other status codes
@@ -100,17 +107,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       const { data, error } = await supabase.functions.invoke('execute-code', {
         body: {
           sourceCode: code,
-          languageId: getLanguageId(language)
+          languageId: getLanguageId(language),
+          isSubmission
         }
       });
 
       if (error) throw error;
 
-      const success = handleJudge0Response(data);
+      const success = handleJudge0Response(data, isSubmission);
       if (success) {
-        toast.success(isSubmission ? 'Solution submitted successfully!' : 'Code ran successfully and passed the test case!');
-        console.log('Output:', data.stdout);
-      } else if (data.status?.id === 3 && !data.isCorrect) {
+        toast.success(isSubmission ? 'Solution submitted successfully!' : 'Code ran successfully!');
+        if (!isSubmission) {
+          console.log('Output:', data.stdout);
+        }
+      } else if (isSubmission && data.status?.id === 3 && !data.isCorrect) {
         toast.error('Code executed successfully but the answer is incorrect');
       }
     } catch (error) {

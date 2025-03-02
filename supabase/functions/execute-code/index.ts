@@ -15,8 +15,8 @@ serve(async (req) => {
   }
 
   try {
-    const { sourceCode, languageId } = await req.json();
-    console.log('Received request:', { languageId });
+    const { sourceCode, languageId, isSubmission } = await req.json();
+    console.log('Received request:', { languageId, isSubmission });
     console.log('Source code:', sourceCode);
 
     if (!JUDGE0_API_KEY) {
@@ -24,12 +24,12 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // Test case for the two sum problem
-    const stdin = JSON.stringify({
+    // For submissions, we use test cases. For run, we just execute the code.
+    const stdin = isSubmission ? JSON.stringify({
       nums: [2, 7, 11, 15],
       target: 9
-    });
-    const expectedOutput = JSON.stringify([0, 1]);
+    }) : '';
+    const expectedOutput = isSubmission ? JSON.stringify([0, 1]) : '';
 
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
       method: 'POST',
@@ -57,9 +57,9 @@ serve(async (req) => {
     const result = await submitResponse.json();
     console.log('Judge0 execution result:', result);
 
-    // Compare the actual output with expected output
+    // For submissions, we need to check if the answer is correct
     let isCorrect = false;
-    if (result.stdout) {
+    if (isSubmission && result.stdout) {
       try {
         const actualOutput = JSON.parse(result.stdout.trim());
         const expected = JSON.parse(expectedOutput);
