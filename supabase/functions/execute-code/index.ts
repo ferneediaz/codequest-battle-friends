@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -23,16 +22,30 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // For submissions, wrap the solution function with test cases
-    const processedCode = isSubmission ? `
+    // Common validation function for both run and submit modes
+    const processedCode = `
 ${sourceCode}
 
-// Test cases
+function validateSolution(nums, target, expected) {
+  const result = solution(nums, target);
+  if (!Array.isArray(result)) return false;
+  if (result.length !== 2) return false;
+  
+  // Sort both arrays to handle different valid solutions
+  const sortedResult = [...result].sort((a, b) => a - b);
+  const sortedExpected = [...expected].sort((a, b) => a - b);
+  
+  return JSON.stringify(sortedResult) === JSON.stringify(sortedExpected);
+}
+
+${isSubmission ? `
+// Test cases for submit mode
 const testCases = [
   { nums: [2, 7, 11, 15], target: 9, expected: [0, 1] },
   { nums: [3, 2, 4], target: 6, expected: [1, 2] },
   { nums: [3, 3], target: 6, expected: [0, 1] },
-  { nums: [-1, -2, -3, -4, -5], target: -8, expected: [2, 4] }
+  { nums: [-1, -2, -3, -4, -5], target: -8, expected: [2, 4] },
+  { nums: [1, 5, 8, 10], target: 15, expected: [1, 3] }
 ];
 
 let allPassed = true;
@@ -40,13 +53,7 @@ const results = [];
 
 for (const test of testCases) {
   const userResult = solution(test.nums, test.target);
-  
-  // Sort both arrays to handle different valid solutions
-  const sortedResult = [...userResult].sort((a, b) => a - b);
-  const sortedExpected = [...test.expected].sort((a, b) => a - b);
-  
-  // Convert to strings for exact comparison
-  const passed = JSON.stringify(sortedResult) === JSON.stringify(sortedExpected);
+  const passed = validateSolution(test.nums, test.target, test.expected);
   
   if (!passed) {
     allPassed = false;
@@ -63,17 +70,17 @@ for (const test of testCases) {
 
 console.log(JSON.stringify({ allPassed, results }));
 ` : `
-${sourceCode}
+// Single test case for run mode
+const test = { nums: [2, 7, 11, 15], target: 9, expected: [0, 1] };
+const result = solution(test.nums, test.target);
+const passed = validateSolution(test.nums, test.target, test.expected);
 
-// Sample test case for run mode
-const nums = [2, 7, 11, 15];
-const target = 9;
-const result = solution(nums, target);
 console.log(JSON.stringify({
-  input: { nums, target },
-  output: result
+  input: test,
+  output: result,
+  passed
 }));
-`;
+`}`;
 
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true', {
       method: 'POST',

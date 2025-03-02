@@ -64,12 +64,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       try {
         const output = atob(data.stdout || '');
         const result = JSON.parse(output);
-        toast.success('Code ran successfully!', {
-          description: `Input: nums = [${result.input.nums}], target = ${result.input.target}
+        
+        if (result.passed) {
+          toast.success('Code ran successfully!', {
+            description: `Input: nums = [${result.input.nums}], target = ${result.input.target}
 Output: [${result.output}]`,
-          duration: 5000,
-        });
-        return true;
+            duration: 5000,
+          });
+        } else {
+          toast.error('Wrong Answer', {
+            description: `Input: nums = [${result.input.nums}], target = ${result.input.target}
+Expected: [${result.input.expected}]
+Your Output: [${result.output}]`,
+            duration: 5000,
+          });
+        }
+        return result.passed;
       } catch (error) {
         console.error('Error parsing run output:', error);
         toast.error('Error processing run output');
