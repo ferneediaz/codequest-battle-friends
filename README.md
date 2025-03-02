@@ -1,34 +1,9 @@
+
 # CodeQuest Battles
 
 ## About
 
 This application is designed to enhance both Data Structure & Algorithm (DSA) skills and communication abilities through an innovative AI-powered Socratic learning approach. Instead of providing direct solutions, the system engages students in a thoughtful dialogue about their problem-solving process.
-
-## Key Features
-
-### 1. Socratic AI Assistant
-- Asks targeted questions to guide understanding
-- Never provides direct solutions
-- Focuses on the immediate step you're stuck on
-- Helps students analyze their own code and thinking process
-
-### 2. Interactive Learning Environment
-- Fantasy-themed battles and quests make learning engaging
-- Real-time communication with AI mentor
-- Safe space to explore different approaches
-- Encourages self-discovery and deeper understanding
-- Transforms traditional DSA practice into an enjoyable adventure
-
-### 3. Collaborative Features
-- Party system for group learning (form your band of adventurers!)
-- Real-time collaboration capabilities
-- Learn from peer interactions and discussions
-- Only one person can submit a final solution, encouraging:
-  - Active discussion of different approaches
-  - Explanation and defense of solving strategies
-  - Understanding of alternative solutions
-  - Development of communication skills through code review
-  - Consensus building within the group
 
 ## Prerequisites
 
@@ -36,6 +11,7 @@ Before you begin, ensure you have the following installed:
 - Node.js (v18 or higher)
 - npm (v8 or higher)
 - A Supabase account (free tier works perfectly)
+- A RapidAPI account (for Judge0 API integration)
 
 ## Detailed Setup Guide
 
@@ -52,16 +28,25 @@ cd codequest-battles
 npm install
 ```
 
-### 2. Supabase Setup
+### 2. RapidAPI Setup
+
+1. Go to [RapidAPI](https://rapidapi.com/judge0-official/api/judge0-ce) and sign up
+2. Subscribe to the Judge0 CE API (the free tier is sufficient for testing)
+3. Copy your RapidAPI key from your dashboard
+
+### 3. Supabase Setup
 
 1. Create a new Supabase project at https://supabase.com
 2. Once created, go to Project Settings > API to find your:
    - Project URL
-   - Project API Keys (you'll need the anon/public key)
+   - Project anon/public key
 
-3. Set up the database schema by running these SQL commands in the Supabase SQL editor:
+3. Create the necessary database tables and types by running these SQL commands in your Supabase SQL editor:
 
 ```sql
+-- Create enum for room status
+CREATE TYPE room_status AS ENUM ('waiting', 'in_progress', 'completed');
+
 -- Create tables
 CREATE TABLE public.profiles (
     id uuid references auth.users on delete cascade not null primary key,
@@ -108,9 +93,6 @@ CREATE TABLE public.battle_participants (
     joined_at timestamp with time zone default timezone('utc'::text, now())
 );
 
--- Create enum for battle status
-CREATE TYPE room_status AS ENUM ('waiting', 'in_progress', 'completed');
-
 -- Create necessary functions
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
@@ -155,7 +137,7 @@ CREATE TRIGGER update_participants_count
   AFTER INSERT OR DELETE ON battle_participants
   FOR EACH ROW EXECUTE FUNCTION update_battle_participants_count();
 
--- Enable RLS
+-- Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.battles ENABLE ROW LEVEL SECURITY;
@@ -203,9 +185,11 @@ TO authenticated
 USING (auth.uid() = user_id);
 ```
 
-4. Set up Edge Functions:
-
-Create a new Edge Function called `execute-code` in your Supabase dashboard and add this code:
+4. Set up an Edge Function for code execution:
+   - Go to your Supabase Dashboard > Edge Functions
+   - Create a new function called `execute-code`
+   - Add your RapidAPI key as a secret with name `JUDGE0_RAPIDAPI_KEY`
+   - Deploy this code:
 
 ```typescript
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -264,12 +248,9 @@ serve(async (req) => {
 })
 ```
 
-5. Add the following secrets to your Edge Function:
-   - `JUDGE0_RAPIDAPI_KEY`: Get this from RapidAPI after subscribing to Judge0
+### 4. Environment Setup
 
-### 3. Environment Setup
-
-Create a new file called `.env.local` in the project root and add:
+Create a new file called `.env.local` in the project root with these variables:
 
 ```env
 VITE_SUPABASE_URL=your_project_url
@@ -278,15 +259,31 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 
 Replace `your_project_url` and `your_anon_key` with the values from your Supabase project settings.
 
-### 4. Auth Configuration
+### 5. Supabase Auth Configuration
 
 In your Supabase project:
 1. Go to Authentication > Settings
 2. Set your Site URL to `http://localhost:8080` (for development)
 3. Add `http://localhost:8080/*` to Additional Redirect URLs
-4. Disable "Confirm email" for easier testing (optional)
+4. Optional: Disable "Confirm email" for easier testing
 
-### 5. Run the Project
+### 6. Add Sample Question Data
+
+Run this SQL in your Supabase SQL editor to add a sample question:
+
+```sql
+INSERT INTO public.questions (title, description, difficulty, category, constraints, examples)
+VALUES (
+  'Two Sum',
+  'Given an array of integers nums and an integer target, return indices of the two numbers in nums such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.',
+  'easy',
+  'arrays',
+  ARRAY['2 <= nums.length <= 104', '-109 <= nums[i] <= 109', '-109 <= target <= 109'],
+  '[{"input":"nums = [2,7,11,15], target = 9","output":"[0,1]","explanation":"Because nums[0] + nums[1] == 9, we return [0, 1]"},{"input":"nums = [3,2,4], target = 6","output":"[1,2]","explanation":"Because nums[1] + nums[2] == 6, we return [1, 2]"}]'::jsonb
+);
+```
+
+### 7. Run the Project
 
 ```bash
 # Start the development server
@@ -295,9 +292,24 @@ npm run dev
 
 The application will be available at `http://localhost:8080`
 
-## Deployment
+## Development Tips
 
-To deploy the application:
+1. **Testing Auth Flow**: 
+   - Create a test user through Supabase Auth UI or programmatically
+   - Use the email/password combination to log in
+   - Check the `profiles` table to ensure the trigger created a profile
+
+2. **Adding Questions**:
+   - Questions can be added through SQL or the Supabase dashboard
+   - Make sure to format the `examples` field as proper JSONB
+   - Test the question by creating a new battle
+
+3. **Debugging Edge Functions**:
+   - Use the Supabase Dashboard to view Edge Function logs
+   - Test the code execution with different languages
+   - Monitor the RapidAPI dashboard for API usage
+
+## Deployment
 
 1. Build the project:
 ```bash
@@ -306,45 +318,20 @@ npm run build
 
 2. Deploy the `dist` folder to your preferred hosting service (Vercel, Netlify, etc.)
 
-3. Update your Supabase authentication settings with your production URL
+3. Update your Supabase authentication settings:
+   - Update Site URL to your production URL
+   - Add your production URL to Additional Redirect URLs
+   - Update any environment variables
 
 ## Contributing
 
-Want to contribute? Great! You can:
 1. Fork the repository
-2. Create a new branch
-3. Make your changes
-4. Submit a pull request
-
-## Learn More
-
-Visit [Lovable](https://lovable.dev) to learn more about creating interactive learning experiences.
-
-## Technologies Used
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Groq API for AI interactions
-
-## Project Setup
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
