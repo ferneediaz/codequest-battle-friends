@@ -26,6 +26,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const RANKS = {
   immortal: { name: "Immortal", color: "#9b87f5", minMMR: 6000 },
@@ -114,7 +115,8 @@ interface Battle {
 const Index = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Realms");
-  
+  const navigate = useNavigate();
+
   const { data: questions = [], isLoading } = useQuery({
     queryKey: ['questions'],
     queryFn: async () => {
@@ -226,9 +228,10 @@ const Index = () => {
 
   const handleJoinBattle = () => {
     toast({
-      title: "Joining Battle",
-      description: "Finding your perfect match...",
+      title: "Challenge Accepted",
+      description: "Loading the code editor...",
     });
+    navigate('/battle');
   };
 
   const handleJoin = (battleId: string) => {
