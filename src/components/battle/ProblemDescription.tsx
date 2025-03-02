@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { MessageCircleQuestion, Star, Coins, Play, Send } from "lucide-react";
+import { MessageCircleQuestion, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BattleState } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,17 +96,6 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="mt-6 border-t border-white/10 pt-6 flex gap-4">
-          <Button className="gap-2">
-            <Play className="w-4 h-4" />
-            Run Code
-          </Button>
-          <Button variant="secondary" className="gap-2">
-            <Send className="w-4 h-4" />
-            Submit Solution
-          </Button>
         </div>
       </div>
     </div>

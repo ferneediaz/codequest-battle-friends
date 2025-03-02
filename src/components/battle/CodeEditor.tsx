@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { Language } from '@/types/battle';
 import { LanguageSelector } from './LanguageSelector';
 import { TokenizedCode } from './TokenizedCode';
+import { Button } from "@/components/ui/button";
+import { Play, Send } from "lucide-react";
 
 interface CodeEditorProps {
   code: string;
@@ -33,6 +34,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               language={language}
               onLanguageChange={onLanguageChange}
             />
+          </div>
+          <div className="flex gap-4">
+            <Button className="gap-2">
+              <Play className="w-4 h-4" />
+              Run Code
+            </Button>
+            <Button variant="secondary" className="gap-2">
+              <Send className="w-4 h-4" />
+              Submit Solution
+            </Button>
           </div>
         </div>
         <div className="relative w-full h-[500px]">
