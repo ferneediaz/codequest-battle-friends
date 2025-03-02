@@ -28,7 +28,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
   const [isExecuting, setIsExecuting] = React.useState(false);
 
-  // Map our language types to Judge0 language IDs
   const getLanguageId = (lang: Language): number => {
     switch (lang) {
       case 'javascript':
@@ -39,6 +38,56 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         return 54; // C++
       default:
         return 63; // Default to Node.js
+    }
+  };
+
+  const handleJudge0Response = (data: any) => {
+    // Check for compilation errors first
+    if (data.compile_output) {
+      toast.error(`Compilation Error: ${data.compile_output}`);
+      return false;
+    }
+
+    // Check runtime errors
+    if (data.stderr) {
+      toast.error(`Runtime Error: ${data.stderr}`);
+      return false;
+    }
+
+    // Check status
+    switch (data.status?.id) {
+      case 3: // Accepted
+        return true;
+      case 4: // Wrong Answer
+        toast.error("Wrong Answer");
+        return false;
+      case 5: // Time Limit Exceeded
+        toast.error("Time Limit Exceeded");
+        return false;
+      case 6: // Compilation Error
+        toast.error(`Compilation Error: ${data.compile_output || "Unknown error"}`);
+        return false;
+      case 7: // Runtime Error (SIGSEGV)
+        toast.error(`Runtime Error: ${data.stderr || "Segmentation fault"}`);
+        return false;
+      case 8: // Runtime Error (SIGXFSZ)
+        toast.error("Runtime Error: Output Limit Exceeded");
+        return false;
+      case 9: // Runtime Error (SIGFPE)
+        toast.error("Runtime Error: Floating Point Error");
+        return false;
+      case 10: // Runtime Error (SIGABRT)
+        toast.error("Runtime Error: Aborted");
+        return false;
+      case 11: // Runtime Error (NZEC)
+        toast.error("Runtime Error: Non-Zero Exit Code");
+        return false;
+      case 12: // Runtime Error (Other)
+        toast.error(`Runtime Error: ${data.stderr || "Unknown error"}`);
+        return false;
+      default:
+        toast.error("Execution failed with unknown status");
+        return false;
     }
   };
 
@@ -55,12 +104,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       if (error) throw error;
 
-      if (data.status.id === 3) { // Accepted
+      const success = handleJudge0Response(data);
+      if (success) {
         toast.success(isSubmission ? 'Solution submitted successfully!' : 'Code ran successfully!');
         console.log('Output:', data.stdout);
-      } else {
-        const errorMessage = data.stderr || data.compile_output || 'Execution failed';
-        toast.error(errorMessage);
       }
     } catch (error) {
       toast.error('Error executing code: ' + (error as Error).message);

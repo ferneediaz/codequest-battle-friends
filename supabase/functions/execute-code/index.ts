@@ -10,7 +10,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -25,7 +24,6 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // Submit code to Judge0
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
       method: 'POST',
       headers: {
@@ -37,6 +35,9 @@ serve(async (req) => {
         source_code: sourceCode,
         language_id: languageId,
         stdin: '',
+        expected_output: '',
+        cpu_time_limit: 2, // 2 seconds
+        memory_limit: 128000, // 128MB
       }),
     });
 
@@ -54,10 +55,9 @@ serve(async (req) => {
         stdout: result.stdout,
         stderr: result.stderr,
         compile_output: result.compile_output,
-        status: {
-          id: result.status?.id || -1,
-          description: result.status?.description || 'Unknown'
-        }
+        status: result.status,
+        memory: result.memory,
+        time: result.time,
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
