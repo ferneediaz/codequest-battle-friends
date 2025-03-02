@@ -529,8 +529,8 @@ const Index = () => {
               difficulty={battle.questions.difficulty}
               title={battle.questions.title}
               players={battle.max_participants}
-              minRank={RANKS[battle.min_rank as keyof typeof RANKS].name}
-              maxRank={RANKS[battle.max_rank as keyof typeof RANKS].name}
+              minRank={RANKS[battle.min_rank].name}
+              maxRank={RANKS[battle.max_rank].name}
               currentPlayers={battle.battle_participants.map(bp => bp.profiles.username)}
               onJoin={() => handleJoin(battle.id)}
             />
