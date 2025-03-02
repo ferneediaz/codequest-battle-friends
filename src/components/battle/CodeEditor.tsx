@@ -7,12 +7,13 @@ import { java } from '@codemirror/lang-java';
 import { Language } from '@/types/battle';
 import { EditorToolbar } from './EditorToolbar';
 import { useCodeExecution } from '@/hooks/useCodeExecution';
+import { ViewUpdate } from '@codemirror/view';
 
 interface CodeEditorProps {
   code: string;
   language: Language;
   onLanguageChange: (lang: Language) => void;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (value: string, viewUpdate?: ViewUpdate) => void;
   currentRoom: string | null;
 }
 
@@ -35,21 +36,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   code,
   language,
   onLanguageChange,
-  onChange
+  onChange,
+  currentRoom
 }) => {
   const { isExecuting, currentOperation, executeCode } = useCodeExecution();
 
   const handleRunCode = () => executeCode('run', code, language);
   const handleSubmitCode = () => executeCode('submit', code, language);
-
-  // Adapting CodeMirror's onChange to match the expected event shape.
-  const handleCodeMirrorChange = useCallback(
-    (val: string) => {
-      const syntheticEvent = { target: { value: val } } as React.ChangeEvent<HTMLTextAreaElement>;
-      onChange(syntheticEvent);
-    },
-    [onChange]
-  );
 
   return (
     <div className="relative group">
@@ -64,12 +57,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           currentOperation={currentOperation}
         />
         <div className="relative w-full h-auto overflow-auto">
-        <CodeMirror
+          <CodeMirror
             value={code}
             height="100%"
             extensions={getExtensionsForLanguage(language)}
             theme="dark"
-            onChange={handleCodeMirrorChange}
+            onChange={onChange}
           />
         </div>
       </div>

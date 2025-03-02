@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -24,7 +23,7 @@ const Battle = () => {
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("javascript");
   const { battleState, useSkill, buyHint } = useBattleState();
-  const { code, setCode, textareaRef, handleKeyDown, handleChange } = useCodeEditor(currentRoom, user?.id);
+  const { code, setCode, handleCodeChange } = useCodeEditor(currentRoom, user?.id);
 
   const { data: question, isLoading } = useQuery({
     queryKey: ['question', questionId],
@@ -46,12 +45,17 @@ const Battle = () => {
         return null;
       }
       
+      if (data) {
+        data.examples = typeof data.examples === 'string' 
+          ? JSON.parse(data.examples) 
+          : data.examples;
+      }
+      
       return data;
     },
     enabled: !!questionId,
   });
 
-  // Initialize code when language changes
   React.useEffect(() => {
     setCode(INITIAL_CODE[language]);
   }, [language, setCode]);
@@ -84,20 +88,20 @@ const Battle = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ProblemDescription 
-              battleState={battleState}
-              useSkill={useSkill}
-              buyHint={buyHint}
-              question={question}
-            />
+            {question && (
+              <ProblemDescription 
+                battleState={battleState}
+                useSkill={useSkill}
+                buyHint={buyHint}
+                question={question}
+              />
+            )}
             
             <CodeEditor
               code={code}
               language={language}
               onLanguageChange={setLanguage}
-              textareaRef={textareaRef}
-              onKeyDown={handleKeyDown}
-              onChange={handleChange}
+              onChange={handleCodeChange}
               currentRoom={currentRoom}
             />
           </div>
