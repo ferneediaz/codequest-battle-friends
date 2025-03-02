@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Language } from '@/types/battle';
 import { LanguageSelector } from './LanguageSelector';
@@ -43,58 +44,94 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const handleJudge0Response = (data: any, isSubmission: boolean) => {
     if (data.compile_output) {
-      toast.error(`Compilation Error: ${data.compile_output}`);
+      // Show detailed compilation error
+      const errorMessage = `Compilation Error:\n${data.compile_output}`;
+      toast.error(errorMessage, {
+        duration: 5000,
+      });
       return false;
     }
 
     if (data.stderr) {
-      toast.error(`Runtime Error: ${data.stderr}`);
+      // Show detailed runtime error
+      const errorMessage = `Runtime Error:\n${data.stderr}`;
+      toast.error(errorMessage, {
+        duration: 5000,
+      });
+      return false;
+    }
+
+    if (data.status?.description === "Wrong Answer") {
+      toast.error("Your solution produced incorrect output. Please check your logic and try again.", {
+        duration: 5000,
+      });
       return false;
     }
 
     if (isSubmission) {
-      return data.isCorrect;
+      if (!data.isCorrect) {
+        toast.error("Your solution didn't pass all test cases. Make sure your function handles all possible inputs correctly.", {
+          duration: 5000,
+        });
+        return false;
+      }
+      return true;
     }
 
-    return data.status?.id === 3;
+    return data.status?.id === 3; // Accepted status
   };
 
   const executeCode = async (operation: 'run' | 'submit') => {
-    if (isExecuting || currentOperation) {
+    // Prevent execution if already running or if trying to trigger multiple operations
+    if (isExecuting) {
       console.log('Operation in progress, ignoring click');
       return;
     }
 
-    const isSubmission = operation === 'submit';
-    
     try {
       setIsExecuting(true);
       setCurrentOperation(operation);
+      console.log(`Starting ${operation} operation`);
       
       const { data, error } = await supabase.functions.invoke('execute-code', {
         body: {
           sourceCode: code,
           languageId: getLanguageId(language),
-          isSubmission
+          isSubmission: operation === 'submit'
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
-      const success = handleJudge0Response(data, isSubmission);
+      console.log('Judge0 response:', data);
+      const success = handleJudge0Response(data, operation === 'submit');
+      
       if (success) {
-        toast.success(isSubmission ? 'Solution submitted successfully!' : 'Code ran successfully!');
-        if (!isSubmission) {
-          console.log('Output:', data.stdout);
+        if (operation === 'submit') {
+          toast.success('Solution submitted successfully! All test cases passed.');
+        } else {
+          toast.success('Code ran successfully!');
+          if (data.stdout) {
+            console.log('Output:', data.stdout);
+            toast.message('Execution Output', {
+              description: data.stdout,
+              duration: 5000,
+            });
+          }
         }
-      } else {
-        toast.error(isSubmission ? 'Incorrect solution' : 'Code execution failed');
       }
     } catch (error) {
-      toast.error('Error executing code: ' + (error as Error).message);
+      console.error(`Error during ${operation}:`, error);
+      toast.error(`Error executing code: ${(error as Error).message}`);
     } finally {
       setIsExecuting(false);
-      setTimeout(() => setCurrentOperation(null), 500);
+      // Add a small delay before clearing the operation state to prevent rapid re-clicks
+      setTimeout(() => {
+        setCurrentOperation(null);
+      }, 500);
     }
   };
 
@@ -112,7 +149,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
           <div className="flex gap-4">
             <Button 
-              className="gap-2" 
+              className={`gap-2 ${currentOperation === 'run' ? 'opacity-50' : ''}`}
               onClick={() => executeCode('run')}
               disabled={isExecuting || currentOperation !== null}
             >
@@ -121,7 +158,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </Button>
             <Button 
               variant="secondary" 
-              className="gap-2"
+              className={`gap-2 ${currentOperation === 'submit' ? 'opacity-50' : ''}`}
               onClick={() => executeCode('submit')}
               disabled={isExecuting || currentOperation !== null}
             >
@@ -151,3 +188,4 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     </div>
   );
 };
+

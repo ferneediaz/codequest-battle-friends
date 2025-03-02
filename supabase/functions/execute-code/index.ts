@@ -29,16 +29,34 @@ ${sourceCode}
 
 // Test cases
 const testCases = [
-  { nums: [2, 7, 11, 15], target: 9 },
-  { nums: [3, 2, 4], target: 6 }
+  { nums: [2, 7, 11, 15], target: 9, expected: [0, 1] },
+  { nums: [3, 2, 4], target: 6, expected: [1, 2] },
+  { nums: [3, 3], target: 6, expected: [0, 1] }
 ];
 
-const results = testCases.map(test => {
-  const result = solution(test.nums, test.target);
-  return JSON.stringify(result);
-}).join('\\n');
+let allPassed = true;
+const results = [];
 
-console.log(results);
+for (const test of testCases) {
+  const result = solution(test.nums, test.target);
+  const passed = JSON.stringify(result.sort()) === JSON.stringify(test.expected.sort());
+  if (!passed) {
+    allPassed = false;
+    console.log(\`Test failed:
+    Input: nums = [\${test.nums}], target = \${test.target}
+    Expected: [\${test.expected}]
+    Got: [\${result}]\`);
+  }
+  results.push({ input: test, output: result, passed });
+}
+
+if (allPassed) {
+  console.log("All test cases passed!");
+} else {
+  console.log("Some test cases failed.");
+}
+
+console.log(JSON.stringify({ allPassed, results }, null, 2));
 ` : sourceCode;
 
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
@@ -52,7 +70,7 @@ console.log(results);
         source_code: processedCode,
         language_id: languageId,
         stdin: '',
-        expected_output: isSubmission ? '[0,1]\n[1,2]' : '',
+        expected_output: '',
         cpu_time_limit: 2,
         memory_limit: 128000,
       }),
@@ -70,10 +88,18 @@ console.log(results);
     // For submissions, check if all test cases pass
     let isCorrect = false;
     if (isSubmission && result.stdout) {
-      const output = result.stdout.trim();
-      const expected = '[0,1]\n[1,2]';
-      isCorrect = output === expected;
-      console.log('Comparing output:', { output, expected, isCorrect });
+      try {
+        const outputJson = JSON.parse(result.stdout.match(/{.*}/s)?.[0] || '{}');
+        isCorrect = outputJson.allPassed === true;
+        console.log('Test results:', outputJson);
+        
+        if (!isCorrect && outputJson.results) {
+          // Include detailed test case results in the response
+          result.testResults = outputJson.results;
+        }
+      } catch (e) {
+        console.error('Error parsing test results:', e);
+      }
     }
 
     return new Response(
@@ -84,7 +110,8 @@ console.log(results);
         status: result.status,
         memory: result.memory,
         time: result.time,
-        isCorrect
+        isCorrect,
+        testResults: result.testResults
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
