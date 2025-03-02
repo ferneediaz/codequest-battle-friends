@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -32,20 +31,23 @@ export function BattleRoom({
           description: "Please sign in to create a battle room",
           variant: "destructive",
         });
+        navigate('/auth');
         return;
       }
 
       const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
-      // First, create the battle
+      // First create the battle with a valid question_id
       const { data: battleData, error: battleError } = await supabase
         .from('battles')
         .insert({
           room_code: newRoomCode,
           status: 'waiting',
-          current_participants: 0,
+          current_participants: 1,
           max_participants: 2,
           document_content: initialCode,
+          min_rank: 'herald',
+          max_rank: 'immortal',
           question_id: '00000000-0000-0000-0000-000000000000'
         })
         .select()
@@ -56,7 +58,7 @@ export function BattleRoom({
         throw battleError;
       }
 
-      // Then, add the participant
+      // Then add the participant
       const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
@@ -82,9 +84,16 @@ export function BattleRoom({
 
     } catch (error: any) {
       console.error('Error creating room:', error);
+      const errorMessage = error.message || "Failed to create room. Please try again.";
+      
+      // Copy error to clipboard for easy sharing
+      await navigator.clipboard.writeText(
+        `Error creating room: ${errorMessage}\nDetails: ${JSON.stringify(error, null, 2)}`
+      );
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to create room. Please try again.",
+        description: errorMessage + " (Error details copied to clipboard)",
         variant: "destructive",
       });
     }
