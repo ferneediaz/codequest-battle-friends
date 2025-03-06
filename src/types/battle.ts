@@ -1,3 +1,4 @@
+
 import { java } from "@codemirror/lang-java";
 
 export type Language = "javascript" | "python" | "cpp" | "java";
@@ -58,51 +59,6 @@ export const INITIAL_BATTLE_STATE: BattleState = {
   usedHints: [],
 };
 
-// Helper function to pad a code block to a total number of lines.
-function padToTotalLines(code: string, totalLines: number): string {
-  const currentLineCount = code.split("\n").length;
-  const emptyLinesNeeded = totalLines - currentLineCount;
-  return code + (emptyLinesNeeded > 0 ? "\n".repeat(emptyLinesNeeded) : "");
-}
-
-const totalLines = 31;
-
-// Define base code for each language.
-const baseJavascriptCode = `// JavaScript Solution
-function isValid(s) {
-    // Your solution here
-}`;
-
-const basePythonCode = `# Python Solution
-def is_valid(s):
-    # Your solution here
-    pass`;
-
-const baseCppCode = `// C++ Solution
-class Solution {
-public:
-    bool isValid(string s) {
-        // Your solution here
-    }
-};`;
-
-// (Optional) Define base Java code if needed.
-const baseJavaCode = `// Java Solution
-public class Solution {
-    public boolean isValid(String s) {
-        // Your solution here
-        return false;
-    }
-}`;
-
-// Pad each block to 31 lines.
-export const INITIAL_CODE = {
-  javascript: padToTotalLines(baseJavascriptCode, totalLines),
-  python: padToTotalLines(basePythonCode, totalLines),
-  cpp: padToTotalLines(baseCppCode, totalLines),
-  java: padToTotalLines(baseJavaCode, totalLines),
-};
-
 export const LANGUAGE_IDS = {
   javascript: 63,  // Node.js
   python: 71,      // Python 3
@@ -110,26 +66,23 @@ export const LANGUAGE_IDS = {
   java: 62,
 };
 
-export const TEST_CASES = [
-  {
-    input: "{}[]",
-    expected: true
-  },
-  {
-    input: "([)]",
-    expected: false
-  },
-  {
-    input: "{[()]}",
-    expected: true
-  },
-  {
-    input: "(]",
-    expected: false
-  }
-];
+export interface TestCase {
+  input: any;
+  expected: any;
+}
 
-export interface Token {
-  text: string;
-  type?: 'comment' | 'keyword' | 'type' | 'function' | 'string' | 'number';
+export interface QuestionData {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  category: string;
+  initial_code: Record<Language, string>;
+  test_cases: TestCase[];
+  examples: Array<{
+    input: string;
+    output: string;
+    explanation: string;
+  }>;
+  constraints: string[];
 }

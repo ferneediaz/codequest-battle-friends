@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,7 +9,7 @@ import { CodeEditor } from "@/components/battle/CodeEditor";
 import { BattleSkills } from "@/components/battle/BattleSkills";
 import { useBattleState } from "@/hooks/useBattleState";
 import { useCodeEditor } from "@/hooks/useCodeEditor";
-import { INITIAL_CODE, Language } from "@/types/battle";
+import { Language, QuestionData } from "@/types/battle";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +25,7 @@ const Battle = () => {
   const { battleState, useSkill, buyHint } = useBattleState();
   const { code, setCode, handleCodeChange } = useCodeEditor(currentRoom, user?.id);
 
-  const { data: question, isLoading } = useQuery({
+  const { data: question, isLoading } = useQuery<QuestionData>({
     queryKey: ['question', questionId],
     queryFn: async () => {
       if (!questionId) return null;
@@ -45,33 +45,16 @@ const Battle = () => {
         return null;
       }
       
-      if (data) {
-        const parsedData = {
-          ...data,
-          examples: Array.isArray(data.examples) 
-            ? data.examples 
-            : typeof data.examples === 'string'
-              ? JSON.parse(data.examples)
-              : []
-        };
-        
-        parsedData.examples = parsedData.examples.map((example: any) => ({
-          input: String(example.input || ''),
-          output: String(example.output || ''),
-          explanation: String(example.explanation || '')
-        }));
-        
-        return parsedData;
-      }
-      
-      return null;
+      return data;
     },
     enabled: !!questionId,
   });
 
-  React.useEffect(() => {
-    setCode(INITIAL_CODE[language]);
-  }, [language, setCode]);
+  useEffect(() => {
+    if (question?.initial_code?.[language]) {
+      setCode(question.initial_code[language]);
+    }
+  }, [question, language, setCode]);
 
   if (!questionId || (!isLoading && !question)) {
     navigate('/');

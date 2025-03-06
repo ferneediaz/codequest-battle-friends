@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Language } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +21,7 @@ export const useCodeExecution = () => {
     }
   };
 
-  const handleJudge0Response = (data: any, isSubmission: boolean) => {
+  const handleJudge0Response = (data: any, isSubmission: boolean, testCases: any[]) => {
     if (!data || data.error) {
       toast.error('Execution Error', {
         description: data.error || 'Unknown error occurred',
@@ -64,17 +63,15 @@ export const useCodeExecution = () => {
         const results = JSON.parse(stdout);
 
         if (!isSubmission) {
+          const testCase = testCases[0];
           if (results.passed) {
             toast.success('Code ran successfully!', {
-              description: `Input: nums = [${results.input.nums}], target = ${results.input.target}
-Output: [${results.output}]`,
+              description: `Test case passed!\nInput: ${JSON.stringify(testCase.input)}\nOutput: ${JSON.stringify(results.output)}`,
               duration: 5000,
             });
           } else {
             toast.error('Wrong Answer', {
-              description: `Input: nums = [${results.input.nums}], target = ${results.input.target}
-Expected: [${results.input.expected}]
-Your Output: [${results.output}]`,
+              description: `Input: ${JSON.stringify(testCase.input)}\nExpected: ${JSON.stringify(testCase.expected)}\nYour Output: ${JSON.stringify(results.output)}`,
               duration: 5000,
             });
           }
@@ -90,10 +87,7 @@ Your Output: [${results.output}]`,
           const failedTest = results.results.find((test: any) => !test.passed);
           if (failedTest) {
             toast.error("Wrong Answer", {
-              description: `Failed test case:
-Input: nums = [${failedTest.input.nums}], target = ${failedTest.input.target}
-Expected: [${failedTest.input.expected}]
-Your Output: [${failedTest.output}]`,
+              description: `Failed test case:\nInput: ${JSON.stringify(failedTest.input)}\nExpected: ${JSON.stringify(failedTest.expected)}\nYour Output: ${JSON.stringify(failedTest.output)}`,
               duration: 10000,
             });
           }
@@ -116,7 +110,12 @@ Your Output: [${failedTest.output}]`,
     return false;
   };
 
-  const executeCode = async (operation: 'run' | 'submit', code: string, language: Language) => {
+  const executeCode = async (
+    operation: 'run' | 'submit', 
+    code: string, 
+    language: Language,
+    testCases: any[]
+  ) => {
     if (isExecuting || currentOperation) {
       return;
     }
@@ -139,7 +138,8 @@ Your Output: [${failedTest.output}]`,
         body: {
           sourceCode: code,
           languageId: getLanguageId(language),
-          isSubmission: operation === 'submit'
+          isSubmission: operation === 'submit',
+          testCases: testCases
         }
       });
 
@@ -148,7 +148,7 @@ Your Output: [${failedTest.output}]`,
       }
 
       console.log('Judge0 response:', response.data);
-      handleJudge0Response(response.data, operation === 'submit');
+      handleJudge0Response(response.data, operation === 'submit', testCases);
     } catch (error) {
       console.error(`Error during ${operation}:`, error);
       toast.error(`Error executing code: ${(error as Error).message}`);
