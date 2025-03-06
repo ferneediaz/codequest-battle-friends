@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -28,7 +29,7 @@ const Battle = () => {
   const { data: question, isLoading } = useQuery<QuestionData>({
     queryKey: ['question', questionId],
     queryFn: async () => {
-      if (!questionId) return null;
+      if (!questionId) throw new Error('No question ID provided');
       
       const { data, error } = await supabase
         .from('questions')
@@ -42,9 +43,10 @@ const Battle = () => {
           description: error.message,
           variant: "destructive",
         });
-        return null;
+        throw error;
       }
       
+      // Transform the data to match QuestionData type
       return {
         ...data,
         initial_code: data.initial_code || {
@@ -53,8 +55,10 @@ const Battle = () => {
           cpp: "",
           java: ""
         },
-        test_cases: data.test_cases || []
-      };
+        test_cases: data.test_cases || [],
+        examples: data.examples || [],
+        constraints: data.constraints || []
+      } as QuestionData;
     },
     enabled: !!questionId,
   });

@@ -1,7 +1,19 @@
-
 import { java } from "@codemirror/lang-java";
 
 export type Language = "javascript" | "python" | "cpp" | "java";
+
+export type TokenType = 
+  | "keyword"
+  | "string"
+  | "number"
+  | "comment"
+  | "operator"
+  | "identifier";
+
+export interface Token {
+  type: TokenType;
+  text: string;
+}
 
 export interface Skill {
   id: string;
