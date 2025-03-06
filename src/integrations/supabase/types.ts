@@ -143,6 +143,8 @@ export type Database = {
           difficulty: string
           examples: Json | null
           id: string
+          initial_code: Json | null
+          test_cases: Json | null
           title: string
         }
         Insert: {
@@ -153,6 +155,8 @@ export type Database = {
           difficulty: string
           examples?: Json | null
           id?: string
+          initial_code?: Json | null
+          test_cases?: Json | null
           title: string
         }
         Update: {
@@ -163,6 +167,8 @@ export type Database = {
           difficulty?: string
           examples?: Json | null
           id?: string
+          initial_code?: Json | null
+          test_cases?: Json | null
           title?: string
         }
         Relationships: []

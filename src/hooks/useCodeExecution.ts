@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Language } from '@/types/battle';
+import { Language, QuestionData } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -114,9 +114,9 @@ export const useCodeExecution = () => {
     operation: 'run' | 'submit', 
     code: string, 
     language: Language,
-    testCases: any[]
+    question?: QuestionData | null
   ) => {
-    if (isExecuting || currentOperation) {
+    if (isExecuting || currentOperation || !question) {
       return;
     }
 
@@ -139,7 +139,7 @@ export const useCodeExecution = () => {
           sourceCode: code,
           languageId: getLanguageId(language),
           isSubmission: operation === 'submit',
-          testCases: testCases
+          testCases: question.test_cases || []
         }
       });
 
@@ -147,8 +147,7 @@ export const useCodeExecution = () => {
         throw response.error;
       }
 
-      console.log('Judge0 response:', response.data);
-      handleJudge0Response(response.data, operation === 'submit', testCases);
+      handleJudge0Response(response.data, operation === 'submit', question.test_cases || []);
     } catch (error) {
       console.error(`Error during ${operation}:`, error);
       toast.error(`Error executing code: ${(error as Error).message}`);

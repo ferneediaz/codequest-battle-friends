@@ -45,7 +45,16 @@ const Battle = () => {
         return null;
       }
       
-      return data;
+      return {
+        ...data,
+        initial_code: data.initial_code || {
+          javascript: "",
+          python: "",
+          cpp: "",
+          java: ""
+        },
+        test_cases: data.test_cases || []
+      };
     },
     enabled: !!questionId,
   });
@@ -79,7 +88,7 @@ const Battle = () => {
               currentRoom={currentRoom}
               setCurrentRoom={setCurrentRoom}
               setCode={setCode}
-              initialCode={INITIAL_CODE[language]}
+              initialCode={question?.initial_code?.[language] || ""}
             />
           </div>
 
@@ -99,6 +108,7 @@ const Battle = () => {
               onLanguageChange={setLanguage}
               onChange={handleCodeChange}
               currentRoom={currentRoom}
+              question={question}
             />
           </div>
         </div>
