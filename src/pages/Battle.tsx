@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -77,6 +78,33 @@ public:
     }
 }`
       };
+
+      // Extract and validate test cases
+      const parsedTestCases = Array.isArray(data.test_cases) 
+        ? data.test_cases.map((tc: any) => ({
+            input: tc.input,
+            expected: tc.expected
+          }))
+        : [];
+
+      // Extract and validate examples
+      const parsedExamples = Array.isArray(data.examples)
+        ? data.examples.map((ex: any) => ({
+            input: ex.input,
+            output: ex.output,
+            explanation: ex.explanation
+          }))
+        : [];
+
+      // Parse initial code
+      const initialCode = typeof data.initial_code === 'object' && data.initial_code
+        ? {
+            javascript: String(data.initial_code.javascript || defaultInitialCode.javascript),
+            python: String(data.initial_code.python || defaultInitialCode.python),
+            cpp: String(data.initial_code.cpp || defaultInitialCode.cpp),
+            java: String(data.initial_code.java || defaultInitialCode.java)
+          }
+        : defaultInitialCode;
       
       const transformedData: QuestionData = {
         id: data.id,
@@ -84,22 +112,10 @@ public:
         description: data.description,
         difficulty: data.difficulty,
         category: data.category,
-        initial_code: data.initial_code || {
-          javascript: defaultInitialCode.javascript,
-          python: defaultInitialCode.python,
-          cpp: defaultInitialCode.cpp,
-          java: defaultInitialCode.java
-        },
-        test_cases: (data.test_cases || []).map((tc: any) => ({
-          input: tc.input,
-          expected: tc.expected
-        })),
-        examples: (data.examples || []).map((ex: any) => ({
-          input: ex.input,
-          output: ex.output,
-          explanation: ex.explanation
-        })),
-        constraints: data.constraints || []
+        initial_code: initialCode,
+        test_cases: parsedTestCases,
+        examples: parsedExamples,
+        constraints: Array.isArray(data.constraints) ? data.constraints : []
       };
       
       return transformedData;
