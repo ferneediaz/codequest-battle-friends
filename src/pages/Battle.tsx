@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -46,39 +45,6 @@ const Battle = () => {
         throw error;
       }
 
-      const defaultInitialCode = {
-        javascript: `function solution(nums, target) {
-  // Write your solution here
-  // nums: number[] - Array of integers
-  // target: number - Target sum to find
-  // return: number[] - Array of two indices that sum to target
-}`,
-        python: `def solution(nums, target):
-    # Write your solution here
-    # nums: List[int] - Array of integers
-    # target: int - Target sum to find
-    # return: List[int] - Array of two indices that sum to target
-    pass`,
-        cpp: `class Solution {
-public:
-    vector<int> solution(vector<int>& nums, int target) {
-        // Write your solution here
-        // nums: vector<int> - Array of integers
-        // target: int - Target sum to find
-        // return: vector<int> - Array of two indices that sum to target
-    }
-};`,
-        java: `class Solution {
-    public int[] solution(int[] nums, int target) {
-        // Write your solution here
-        // nums: int[] - Array of integers
-        // target: int - Target sum to find
-        // return: int[] - Array of two indices that sum to target
-        return new int[]{};
-    }
-}`
-      };
-
       // Extract and validate test cases
       const parsedTestCases = Array.isArray(data.test_cases) 
         ? data.test_cases.map((tc: any) => ({
@@ -96,15 +62,25 @@ public:
           }))
         : [];
 
-      // Parse initial code
-      const initialCode = typeof data.initial_code === 'object' && data.initial_code
-        ? {
-            javascript: String(data.initial_code.javascript || defaultInitialCode.javascript),
-            python: String(data.initial_code.python || defaultInitialCode.python),
-            cpp: String(data.initial_code.cpp || defaultInitialCode.cpp),
-            java: String(data.initial_code.java || defaultInitialCode.java)
-          }
-        : defaultInitialCode;
+      // Parse initial code with proper type checking
+      let initialCode: QuestionData['initial_code'];
+
+      if (data.initial_code && typeof data.initial_code === 'object' && !Array.isArray(data.initial_code)) {
+        initialCode = {
+          javascript: String(data.initial_code.javascript || ''),
+          python: String(data.initial_code.python || ''),
+          cpp: String(data.initial_code.cpp || ''),
+          java: String(data.initial_code.java || '')
+        };
+      } else {
+        // If no initial code is provided, leave empty strings
+        initialCode = {
+          javascript: '',
+          python: '',
+          cpp: '',
+          java: ''
+        };
+      }
       
       const transformedData: QuestionData = {
         id: data.id,
