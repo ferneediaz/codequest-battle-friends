@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MessageCircleQuestion, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,9 +35,9 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
   }
 
   return (
-    <div className="relative group">
+    <div className="relative group h-[650px]">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
-      <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10">
+      <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 h-full overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-white">{question.title}</h2>
           <span className="px-2 py-1 text-sm rounded bg-primary/20 text-primary">

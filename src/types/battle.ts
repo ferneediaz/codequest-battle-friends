@@ -65,19 +65,17 @@ function padToTotalLines(code: string, totalLines: number): string {
   return code + (emptyLinesNeeded > 0 ? "\n".repeat(emptyLinesNeeded) : "");
 }
 
-const totalLines = 40;
+const totalLines = 31;
 
 // Define base code for each language.
 const baseJavascriptCode = `// JavaScript Solution
 function isValid(s) {
     // Your solution here
-    // Return true if the brackets are valid, false otherwise
 }`;
 
 const basePythonCode = `# Python Solution
 def is_valid(s):
     # Your solution here
-    # Return True if the brackets are valid, False otherwise
     pass`;
 
 const baseCppCode = `// C++ Solution
@@ -85,7 +83,6 @@ class Solution {
 public:
     bool isValid(string s) {
         // Your solution here
-        // Return true if the brackets are valid, false otherwise
     }
 };`;
 
@@ -94,7 +91,6 @@ const baseJavaCode = `// Java Solution
 public class Solution {
     public boolean isValid(String s) {
         // Your solution here
-        // Return true if the brackets are valid, false otherwise
         return false;
     }
 }`;
