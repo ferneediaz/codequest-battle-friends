@@ -78,13 +78,31 @@ public:
 }`
       };
       
-      return {
-        ...data,
-        initial_code: data.initial_code || defaultInitialCode,
-        test_cases: data.test_cases || [],
-        examples: data.examples || [],
+      const transformedData: QuestionData = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        difficulty: data.difficulty,
+        category: data.category,
+        initial_code: data.initial_code || {
+          javascript: defaultInitialCode.javascript,
+          python: defaultInitialCode.python,
+          cpp: defaultInitialCode.cpp,
+          java: defaultInitialCode.java
+        },
+        test_cases: (data.test_cases || []).map((tc: any) => ({
+          input: tc.input,
+          expected: tc.expected
+        })),
+        examples: (data.examples || []).map((ex: any) => ({
+          input: ex.input,
+          output: ex.output,
+          explanation: ex.explanation
+        })),
         constraints: data.constraints || []
-      } as QuestionData;
+      };
+      
+      return transformedData;
     },
     enabled: !!questionId,
   });

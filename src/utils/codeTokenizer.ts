@@ -1,14 +1,14 @@
 
-import { Token } from '@/types/battle';
+import { TokenType, Token } from '@/types/battle';
 
-export const getTokenColor = (type?: Token['type']): string => {
+export const getTokenColor = (type: TokenType | undefined): string => {
   switch (type) {
     case 'comment': return '#6A9955';
     case 'keyword': return '#C586C0';
-    case 'type': return '#4EC9B0';
-    case 'function': return '#DCDCAA';
     case 'string': return '#CE9178';
     case 'number': return '#B5CEA8';
+    case 'operator': return '#D4D4D4';
+    case 'identifier': return '#9CDCFE';
     default: return '#D4D4D4';
   }
 };
@@ -17,9 +17,9 @@ export const tokenizeLine = (line: string): Token[] => {
   const tokens: Token[] = [];
   let currentToken = '';
 
-  const addToken = (type?: Token['type']) => {
+  const addToken = (type?: TokenType) => {
     if (currentToken) {
-      tokens.push({ text: currentToken, type });
+      tokens.push({ text: currentToken, type: type || 'identifier' });
       currentToken = '';
     }
   };
@@ -52,17 +52,13 @@ export const tokenizeLine = (line: string): Token[] => {
       if (currentToken) {
         if (/^(function|class|return|const|let|var|for|if|in|of|public|include|vector)$/.test(currentToken)) {
           addToken('keyword');
-        } else if (/^(Map|unordered_map|vector|int|void)$/.test(currentToken)) {
-          addToken('type');
-        } else if (/^(solution|enumerate|find|size|has|get|set)$/.test(currentToken)) {
-          addToken('function');
         } else if (/^\d+$/.test(currentToken)) {
           addToken('number');
         } else {
-          addToken();
+          addToken('identifier');
         }
       }
-      tokens.push({ text: char });
+      tokens.push({ text: char, type: 'operator' });
       currentToken = '';
     }
   }
@@ -70,14 +66,10 @@ export const tokenizeLine = (line: string): Token[] => {
   if (currentToken) {
     if (/^(function|class|return|const|let|var|for|if|in|of|public|include|vector)$/.test(currentToken)) {
       addToken('keyword');
-    } else if (/^(Map|unordered_map|vector|int|void)$/.test(currentToken)) {
-      addToken('type');
-    } else if (/^(solution|enumerate|find|size|has|get|set)$/.test(currentToken)) {
-      addToken('function');
     } else if (/^\d+$/.test(currentToken)) {
       addToken('number');
     } else {
-      addToken();
+      addToken('identifier');
     }
   }
 
