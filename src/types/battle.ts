@@ -89,7 +89,12 @@ export interface QuestionData {
   description: string;
   difficulty: string;
   category: string;
-  initial_code: Record<Language, string>;
+  initial_code: {
+    javascript: string;
+    python: string;
+    cpp: string;
+    java: string;
+  };
   test_cases: TestCase[];
   examples: Array<{
     input: string;
