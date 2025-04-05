@@ -82,7 +82,7 @@ export function BattleRoom({
       }
 
       // For communication mode, set creator as explainer
-      const userRole = commMode ? 'explainer' : null;
+      const userRole: BattleRole = commMode ? 'explainer' : null;
       
       const { error: participantError } = await supabase
         .from('battle_participants')
@@ -194,11 +194,16 @@ export function BattleRoom({
         throw new Error('Room is full');
       }
 
-      const { data: participantData } = await supabase
+      // Get data from the first participant
+      const { data: participantData, error: participantDataError } = await supabase
         .from('battle_participants')
         .select('current_code, role')
         .eq('battle_id', battleData.id)
         .single();
+      
+      if (participantDataError) {
+        console.error('Error getting participant data:', participantDataError);
+      }
       
       // If this is a communication challenge room, set second user as coder
       let newUserRole: BattleRole = null;

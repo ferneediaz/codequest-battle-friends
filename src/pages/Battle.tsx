@@ -21,7 +21,7 @@ const Battle = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const questionId = searchParams.get('questionId');
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("javascript");
   const { battleState, useSkill, buyHint } = useBattleState();
@@ -41,7 +41,7 @@ const Battle = () => {
         .single();
       
       if (error) {
-        toast({
+        uiToast({
           title: "Error loading question",
           description: error.message,
           variant: "destructive",
@@ -126,7 +126,9 @@ const Battle = () => {
           setUserRole(currentUserParticipant.role);
           
           // Notify user of their role
-          toast.success(`You are the ${currentUserParticipant.role}`, {
+          toast(currentUserParticipant.role === 'explainer' 
+            ? "You are the explainer" 
+            : "You are the coder", {
             description: currentUserParticipant.role === 'explainer' 
               ? "Explain the problem to your teammate who can't see it!" 
               : "Your teammate will explain the problem to you. Listen carefully!"

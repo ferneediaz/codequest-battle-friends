@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -167,6 +168,38 @@ function toast({ ...props }: Toast) {
     update,
   }
 }
+
+toast.success = (title: string, options?: Omit<Toast, "title">) => {
+  return toast({
+    title,
+    variant: "default",
+    ...options,
+  });
+};
+
+toast.error = (title: string, options?: Omit<Toast, "title">) => {
+  return toast({
+    title,
+    variant: "destructive",
+    ...options,
+  });
+};
+
+toast.warning = (title: string, options?: Omit<Toast, "title">) => {
+  return toast({
+    title,
+    variant: "warning",
+    ...options,
+  });
+};
+
+toast.info = (title: string, options?: Omit<Toast, "title">) => {
+  return toast({
+    title,
+    variant: "info",
+    ...options,
+  });
+};
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
