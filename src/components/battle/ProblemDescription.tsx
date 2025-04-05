@@ -1,7 +1,9 @@
+
 import React from 'react';
-import { MessageCircleQuestion, Star, Coins } from "lucide-react";
+import { MessageCircleQuestion, Star, Coins, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BattleState } from '@/types/battle';
+import { BattleRole, BattleState } from '@/types/battle';
+import { AlertCircle } from 'lucide-react';
 
 interface ProblemDescriptionProps {
   battleState: BattleState;
@@ -21,6 +23,7 @@ interface ProblemDescriptionProps {
     constraints: string[];
   };
   hintCost?: number;
+  userRole?: BattleRole;
 }
 
 export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
@@ -28,7 +31,8 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
   useSkill,
   buyHint,
   question,
-  hintCost = 100
+  hintCost = 100,
+  userRole
 }) => {
   if (!question) {
     return null;
@@ -38,6 +42,19 @@ export const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
     <div className="relative group h-[650px]">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
       <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 h-full overflow-y-auto">
+        {userRole === 'explainer' && (
+          <div className="bg-accent/10 border border-accent/30 rounded-md p-3 mb-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-accent mb-1">Communication Challenge</h4>
+              <p className="text-sm text-gray-300">
+                Your teammate cannot see this problem description. 
+                You need to explain the problem clearly so they can help solve it.
+              </p>
+            </div>
+          </div>
+        )}
+      
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-white">{question.title}</h2>
           <span className="px-2 py-1 text-sm rounded bg-primary/20 text-primary">

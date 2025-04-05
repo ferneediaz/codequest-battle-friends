@@ -1,33 +1,45 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { MessageCircleIcon, Code } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { BattleRole } from "@/types/battle";
+import { toast } from "sonner";
 
 interface BattleRoomProps {
   currentRoom: string | null;
   setCurrentRoom: (room: string | null) => void;
   setCode: (code: string) => void;
   initialCode: string;
+  userRole: BattleRole;
+  setUserRole: (role: BattleRole) => void;
+  participants: { userId: string, role: BattleRole }[];
+  setParticipants: (participants: { userId: string, role: BattleRole }[]) => void;
 }
 
 export function BattleRoom({ 
   currentRoom, 
   setCurrentRoom, 
   setCode, 
-  initialCode 
+  initialCode,
+  userRole,
+  setUserRole,
+  participants,
+  setParticipants
 }: BattleRoomProps) {
   const { user } = useAuth();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
-  const [roomCode, setRoomCode] = React.useState<string>("");
+  const [roomCode, setRoomCode] = useState<string>("");
+  const [commMode, setCommMode] = useState<boolean>(false);
 
   const createBattleRoom = async () => {
     try {
       if (!user) {
-        toast({
+        uiToast({
           title: "Authentication Required",
           description: "Please sign in to create a battle room",
           variant: "destructive",
@@ -58,7 +70,8 @@ export function BattleRoom({
           document_content: initialCode,
           min_rank: 'herald',
           max_rank: 'immortal',
-          question_id: questions[0].id
+          question_id: questions[0].id,
+          comm_challenge: commMode
         })
         .select()
         .single();
@@ -68,13 +81,17 @@ export function BattleRoom({
         throw battleError;
       }
 
+      // For communication mode, set creator as explainer
+      const userRole = commMode ? 'explainer' : null;
+      
       const { error: participantError } = await supabase
         .from('battle_participants')
         .insert({
           battle_id: battleData.id,
           user_id: user.id,
           team: 'A',
-          current_code: initialCode
+          current_code: initialCode,
+          role: userRole
         });
 
       if (participantError) {
@@ -84,9 +101,18 @@ export function BattleRoom({
 
       setCurrentRoom(battleData.id);
       
+      if (commMode) {
+        setUserRole('explainer');
+        setParticipants([{ userId: user.id, role: 'explainer' }]);
+        
+        toast.success("Communication Challenge Mode Activated", {
+          description: "You are the explainer. Your teammate won't see the problem description!"
+        });
+      }
+      
       await navigator.clipboard.writeText(newRoomCode);
       
-      toast({
+      uiToast({
         title: "Room Created Successfully! 🎉",
         description: `Room code ${newRoomCode} has been copied to your clipboard. Share it with your friend!`,
       });
@@ -99,7 +125,7 @@ export function BattleRoom({
         `Error creating room: ${errorMessage}\nDetails: ${JSON.stringify(error, null, 2)}`
       );
       
-      toast({
+      uiToast({
         title: "Error",
         description: errorMessage + " (Error details copied to clipboard)",
         variant: "destructive",
@@ -109,7 +135,7 @@ export function BattleRoom({
 
   const joinBattleRoom = async (code: string) => {
     if (!user) {
-      toast({
+      uiToast({
         title: "Authentication Required",
         description: "Please sign in to join a battle room",
         variant: "destructive",
@@ -119,7 +145,7 @@ export function BattleRoom({
     }
 
     if (!code) {
-      toast({
+      uiToast({
         title: "Error",
         description: "Please enter a room code",
         variant: "destructive",
@@ -150,7 +176,9 @@ export function BattleRoom({
 
       if (existingParticipant) {
         setCurrentRoom(battleData.id);
-        toast({
+        setUserRole(existingParticipant.role);
+        
+        uiToast({
           title: "Welcome back!",
           description: "You've rejoined the battle.",
         });
@@ -158,10 +186,9 @@ export function BattleRoom({
       }
 
       // Get current participants count directly from participants table
-      const { count: participantsCount } = await supabase
+      const { count: participantsCount, data: existingParticipants } = await supabase
         .from('battle_participants')
-        .select('*', { count: 'exact' })
-        .eq('battle_id', battleData.id);
+        .select('*', { count: 'exact' });
 
       if (participantsCount && participantsCount >= (battleData.max_participants || 2)) {
         throw new Error('Room is full');
@@ -169,9 +196,15 @@ export function BattleRoom({
 
       const { data: participantData } = await supabase
         .from('battle_participants')
-        .select('current_code')
+        .select('current_code, role')
         .eq('battle_id', battleData.id)
         .single();
+      
+      // If this is a communication challenge room, set second user as coder
+      let newUserRole: BattleRole = null;
+      if (battleData.comm_challenge) {
+        newUserRole = 'coder';
+      }
 
       const { error: participantError } = await supabase
         .from('battle_participants')
@@ -179,7 +212,8 @@ export function BattleRoom({
           battle_id: battleData.id,
           user_id: user.id,
           team: 'B',
-          current_code: participantData?.current_code || initialCode
+          current_code: participantData?.current_code || initialCode,
+          role: newUserRole
         });
 
       if (participantError) throw participantError;
@@ -189,15 +223,46 @@ export function BattleRoom({
       if (participantData?.current_code) {
         setCode(participantData.current_code);
       }
+      
+      // If communication challenge, update roles for all participants
+      if (battleData.comm_challenge && newUserRole) {
+        setUserRole(newUserRole);
+        
+        // Get all participants and their roles
+        const { data: allParticipants } = await supabase
+          .from('battle_participants')
+          .select('user_id, role')
+          .eq('battle_id', battleData.id);
+          
+        if (allParticipants) {
+          const formattedParticipants = allParticipants.map(p => ({
+            userId: p.user_id,
+            role: p.role
+          }));
+          
+          setParticipants(formattedParticipants);
+          
+          // Broadcast roles to all participants
+          await supabase.channel(`battle:${battleData.id}:roles`).send({
+            type: 'broadcast',
+            event: 'role_assigned',
+            payload: { participants: formattedParticipants }
+          });
+          
+          toast.success("Communication Challenge Mode", {
+            description: "You are the coder. Your teammate will explain the problem to you!"
+          });
+        }
+      }
 
-      toast({
+      uiToast({
         title: "Joined Room Successfully! 🎉",
         description: "You've joined the battle. Good luck!",
       });
 
     } catch (error: any) {
       console.error('Error joining room:', error);
-      toast({
+      uiToast({
         title: "Error",
         description: error.message || "Invalid room code or room is full",
         variant: "destructive",
@@ -209,6 +274,22 @@ export function BattleRoom({
     <div className="flex items-center gap-4">
       {!currentRoom ? (
         <>
+          <div className="flex items-center gap-2 mr-4">
+            <Button 
+              variant={commMode ? "default" : "outline"}
+              onClick={() => setCommMode(!commMode)}
+              className="flex items-center gap-2"
+            >
+              <MessageCircleIcon className="w-4 h-4" />
+              Communication Mode
+            </Button>
+            {commMode && (
+              <div className="text-xs text-primary">
+                Only you will see the problem description
+              </div>
+            )}
+          </div>
+          
           <Button onClick={createBattleRoom} variant="outline">
             Create Room
           </Button>
@@ -226,8 +307,25 @@ export function BattleRoom({
           </div>
         </>
       ) : (
-        <div className="text-white">
-          Room Active
+        <div className="flex items-center gap-2 text-white">
+          <div className="px-3 py-1 bg-primary/20 rounded">
+            Room Active
+          </div>
+          {userRole && (
+            <div className="flex items-center gap-1 px-3 py-1 bg-accent/20 rounded">
+              {userRole === 'explainer' ? (
+                <>
+                  <MessageCircleIcon className="w-4 h-4" />
+                  <span>Explainer</span>
+                </>
+              ) : (
+                <>
+                  <Code className="w-4 h-4" />
+                  <span>Coder</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

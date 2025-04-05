@@ -1,3 +1,4 @@
+
 import { java } from "@codemirror/lang-java";
 
 export type Language = "javascript" | "python" | "cpp" | "java";
@@ -14,6 +15,8 @@ export interface Token {
   type: TokenType;
   text: string;
 }
+
+export type BattleRole = "explainer" | "coder" | null;
 
 export interface Skill {
   id: string;

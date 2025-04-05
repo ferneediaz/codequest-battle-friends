@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -9,10 +10,11 @@ import { CodeEditor } from "@/components/battle/CodeEditor";
 import { BattleSkills } from "@/components/battle/BattleSkills";
 import { useBattleState } from "@/hooks/useBattleState";
 import { useCodeEditor } from "@/hooks/useCodeEditor";
-import { Language, QuestionData } from "@/types/battle";
+import { BattleRole, Language, QuestionData } from "@/types/battle";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const Battle = () => {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ const Battle = () => {
   const [language, setLanguage] = useState<Language>("javascript");
   const { battleState, useSkill, buyHint } = useBattleState();
   const { code, setCode, handleCodeChange } = useCodeEditor(currentRoom, user?.id);
+  const [userRole, setUserRole] = useState<BattleRole>(null);
+  const [participants, setParticipants] = useState<{ userId: string, role: BattleRole }[]>([]);
 
   const { data: question, isLoading } = useQuery<QuestionData>({
     queryKey: ['question', questionId],
@@ -105,10 +109,44 @@ const Battle = () => {
     }
   }, [question, language, setCode]);
 
+  // Listen for role assignments
+  useEffect(() => {
+    if (!currentRoom || !user?.id) return;
+
+    const channel = supabase.channel(`battle:${currentRoom}:roles`)
+      .on('broadcast', { event: 'role_assigned' }, ({ payload }) => {
+        setParticipants(payload.participants);
+        
+        // Find current user's role
+        const currentUserParticipant = payload.participants.find(
+          (p: { userId: string }) => p.userId === user.id
+        );
+        
+        if (currentUserParticipant) {
+          setUserRole(currentUserParticipant.role);
+          
+          // Notify user of their role
+          toast.success(`You are the ${currentUserParticipant.role}`, {
+            description: currentUserParticipant.role === 'explainer' 
+              ? "Explain the problem to your teammate who can't see it!" 
+              : "Your teammate will explain the problem to you. Listen carefully!"
+          });
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentRoom, user?.id]);
+
   if (!questionId || (!isLoading && !question)) {
     navigate('/');
     return null;
   }
+
+  // Determine if this user should see the problem description
+  const canSeeProblem = !currentRoom || !userRole || userRole === 'explainer';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
@@ -129,17 +167,38 @@ const Battle = () => {
               setCurrentRoom={setCurrentRoom}
               setCode={setCode}
               initialCode={question?.initial_code?.[language] || ""}
+              userRole={userRole}
+              setUserRole={setUserRole}
+              participants={participants}
+              setParticipants={setParticipants}
             />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {question && (
-              <ProblemDescription 
-                battleState={battleState}
-                useSkill={useSkill}
-                buyHint={buyHint}
-                question={question}
-              />
+            {canSeeProblem ? (
+              question && (
+                <ProblemDescription 
+                  battleState={battleState}
+                  useSkill={useSkill}
+                  buyHint={buyHint}
+                  question={question}
+                  userRole={userRole}
+                />
+              )
+            ) : (
+              <div className="relative group h-[650px]">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
+                <div className="relative p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10 h-full flex flex-col items-center justify-center text-center">
+                  <h2 className="text-2xl font-bold text-white mb-4">Communication Challenge</h2>
+                  <p className="text-lg text-gray-300 mb-6">
+                    Your teammate can see the problem, but you can't!
+                  </p>
+                  <p className="text-gray-400 max-w-md">
+                    This is a communication exercise. Your teammate must explain the problem to you clearly
+                    so you can help solve it together. Ask questions and collaborate through the code editor.
+                  </p>
+                </div>
+              </div>
             )}
             
             <CodeEditor
