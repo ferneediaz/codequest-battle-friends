@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Language, QuestionData } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,7 +58,12 @@ export const useCodeExecution = () => {
   };
 
   const handleJudge0Response = (data: any, isSubmission: boolean, testCases: any[]) => {
+    console.log('Raw Judge0 response:', data);
+    console.log('Submission type:', isSubmission ? 'SUBMIT' : 'RUN');
+    console.log('Status ID:', data?.status?.id, 'Description:', data?.status?.description);
+    
     if (!data || data.error) {
+      console.error('Execution Error:', data?.error || 'Unknown error occurred');
       toast.error('Execution Error', {
         description: data.error || 'Unknown error occurred',
         duration: 5000,
@@ -68,6 +72,7 @@ export const useCodeExecution = () => {
     }
 
     if (data.status?.id === 429) {
+      console.error('Rate limit exceeded (429)');
       toast.error('Too Many Requests', {
         description: 'Please wait a moment before trying again.',
         duration: 5000,
@@ -77,6 +82,7 @@ export const useCodeExecution = () => {
 
     if (data.status?.id === 6) {
       const errorMessage = atob(data.compile_output || '');
+      console.error('Compilation Error:', errorMessage);
       toast.error("Compilation Error", {
         description: errorMessage,
         duration: 10000,
@@ -86,6 +92,7 @@ export const useCodeExecution = () => {
 
     if (data.status?.id === 11 || data.status?.id === 12) {
       const errorMessage = atob(data.stderr || '');
+      console.error('Runtime Error:', errorMessage);
       toast.error("Runtime Error", {
         description: errorMessage,
         duration: 10000,
@@ -94,13 +101,23 @@ export const useCodeExecution = () => {
     }
 
     try {
-      if (data.status?.id === 3) {
+      // Handle both Accepted (3) and Wrong Answer (4) statuses
+      if (data.status?.id === 3 || data.status?.id === 4) {
         const stdout = atob(data.stdout || '');
-        console.log('Parsed stdout:', stdout);
-        const results = JSON.parse(stdout);
+        console.log('Raw stdout:', stdout);
+        let results;
+        try {
+          results = JSON.parse(stdout);
+          console.log('Parsed test results:', results);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.log('Problematic stdout content:', stdout);
+          throw parseError;
+        }
 
         if (!isSubmission) {
           const testCase = testCases[0];
+          console.log('Single test case run result:', results);
           if (results.passed) {
             toast.success('Code ran successfully!', {
               description: `Test case passed!\nInput: ${JSON.stringify(testCase.input)}\nOutput: ${JSON.stringify(results.output)}`,
@@ -115,6 +132,7 @@ export const useCodeExecution = () => {
           return results.passed;
         }
 
+        // For submissions, check our test results
         if (results.allPassed) {
           triggerConfetti();
           toast.success('Solution Accepted! All test cases passed.', {
@@ -122,8 +140,10 @@ export const useCodeExecution = () => {
           });
           return true;
         } else {
+          console.log('Not all tests passed. Results:', results.results);
           const failedTest = results.results.find((test: any) => !test.passed);
           if (failedTest) {
+            console.error('Failed test case:', failedTest);
             toast.error("Wrong Answer", {
               description: `Failed test case:\nInput: ${JSON.stringify(failedTest.input)}\nExpected: ${JSON.stringify(failedTest.expected)}\nYour Output: ${JSON.stringify(failedTest.output)}`,
               duration: 10000,
@@ -134,11 +154,14 @@ export const useCodeExecution = () => {
       }
     } catch (error) {
       console.error('Error parsing test results:', error);
+      console.error('Original response data:', data);
+      console.error('Stdout (if available):', data.stdout ? atob(data.stdout) : 'No stdout');
       toast.error('Error processing test results');
       return false;
     }
 
-    if (data.status?.id !== 3) {
+    if (data.status?.id !== 3 && data.status?.id !== 4) {
+      console.error(`Unexpected execution status: ${data.status?.id} - ${data.status?.description}`);
       toast.error(`Execution Error: ${data.status?.description || 'Unknown error'}`, {
         duration: 5000,
       });
@@ -154,12 +177,16 @@ export const useCodeExecution = () => {
     language: Language,
     question?: QuestionData | null
   ) => {
+    console.log(`Starting ${operation} operation for language: ${language}`);
+    
     if (isExecuting || currentOperation || !question) {
+      console.log('Execution blocked:', { isExecuting, currentOperation, hasQuestion: !!question });
       return;
     }
 
     const now = Date.now();
     if (now - lastExecutionTime < 2000) {
+      console.log('Rate limiting applied, last execution:', lastExecutionTime);
       toast.error('Please wait', {
         description: 'Please wait a couple of seconds between attempts.',
         duration: 3000,
@@ -182,6 +209,7 @@ export const useCodeExecution = () => {
       });
 
       if (response.error) {
+        console.error(`Error response from Supabase:`, response.error);
         throw response.error;
       }
 

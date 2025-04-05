@@ -49,7 +49,6 @@ Your responses must:
 Examples of good responses:
 - "What does your code do when it finds the first number?"
 - "What information do you currently have at this point in your code?"
-- "What happens if you run your code with [1,2,3] and target 5?"
 
 Remember: Help them understand their current approach rather than guiding them to a specific solution.`
           },
