@@ -1,4 +1,3 @@
-
 import * as React from "react"
 
 import type {
@@ -188,7 +187,7 @@ toast.error = (title: string, options?: Omit<Toast, "title">) => {
 toast.warning = (title: string, options?: Omit<Toast, "title">) => {
   return toast({
     title,
-    variant: "warning",
+    variant: "default",
     ...options,
   });
 };
@@ -196,7 +195,7 @@ toast.warning = (title: string, options?: Omit<Toast, "title">) => {
 toast.info = (title: string, options?: Omit<Toast, "title">) => {
   return toast({
     title,
-    variant: "info",
+    variant: "default",
     ...options,
   });
 };

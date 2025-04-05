@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -49,7 +48,6 @@ const Battle = () => {
         throw error;
       }
 
-      // Extract and validate test cases
       const parsedTestCases = Array.isArray(data.test_cases) 
         ? data.test_cases.map((tc: any) => ({
             input: tc.input,
@@ -57,7 +55,6 @@ const Battle = () => {
           }))
         : [];
 
-      // Extract and validate examples
       const parsedExamples = Array.isArray(data.examples)
         ? data.examples.map((ex: any) => ({
             input: ex.input,
@@ -66,7 +63,6 @@ const Battle = () => {
           }))
         : [];
 
-      // Parse initial code with proper type checking
       let initialCode: QuestionData['initial_code'];
 
       if (data.initial_code && typeof data.initial_code === 'object' && !Array.isArray(data.initial_code)) {
@@ -77,7 +73,6 @@ const Battle = () => {
           java: String(data.initial_code.java || '')
         };
       } else {
-        // If no initial code is provided, leave empty strings
         initialCode = {
           javascript: '',
           python: '',
@@ -109,7 +104,6 @@ const Battle = () => {
     }
   }, [question, language, setCode]);
 
-  // Listen for role assignments
   useEffect(() => {
     if (!currentRoom || !user?.id) return;
 
@@ -117,7 +111,6 @@ const Battle = () => {
       .on('broadcast', { event: 'role_assigned' }, ({ payload }) => {
         setParticipants(payload.participants);
         
-        // Find current user's role
         const currentUserParticipant = payload.participants.find(
           (p: { userId: string }) => p.userId === user.id
         );
@@ -125,7 +118,6 @@ const Battle = () => {
         if (currentUserParticipant) {
           setUserRole(currentUserParticipant.role);
           
-          // Notify user of their role
           toast(currentUserParticipant.role === 'explainer' 
             ? "You are the explainer" 
             : "You are the coder", {
@@ -147,7 +139,6 @@ const Battle = () => {
     return null;
   }
 
-  // Determine if this user should see the problem description
   const canSeeProblem = !currentRoom || !userRole || userRole === 'explainer';
 
   return (

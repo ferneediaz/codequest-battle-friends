@@ -176,7 +176,7 @@ export function BattleRoom({
 
       if (existingParticipant) {
         setCurrentRoom(battleData.id);
-        setUserRole(existingParticipant.role);
+        setUserRole(existingParticipant.role as BattleRole);
         
         uiToast({
           title: "Welcome back!",
@@ -186,11 +186,13 @@ export function BattleRoom({
       }
 
       // Get current participants count directly from participants table
-      const { count: participantsCount, data: existingParticipants } = await supabase
+      const { count: participantsCount } = await supabase
         .from('battle_participants')
-        .select('*', { count: 'exact' });
+        .select('*', { count: 'exact' })
+        .eq('battle_id', battleData.id);
 
-      if (participantsCount && participantsCount >= (battleData.max_participants || 2)) {
+      // Fix: check if current participants is less than max participants
+      if (participantsCount && participantsCount >= 2) {
         throw new Error('Room is full');
       }
 
@@ -242,7 +244,7 @@ export function BattleRoom({
         if (allParticipants) {
           const formattedParticipants = allParticipants.map(p => ({
             userId: p.user_id,
-            role: p.role
+            role: p.role as BattleRole
           }));
           
           setParticipants(formattedParticipants);
