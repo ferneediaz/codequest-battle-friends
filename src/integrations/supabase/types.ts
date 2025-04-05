@@ -15,6 +15,7 @@ export type Database = {
           current_code: string | null
           id: string
           joined_at: string
+          role: string | null
           team: string
           user_id: string
         }
@@ -23,6 +24,7 @@ export type Database = {
           current_code?: string | null
           id?: string
           joined_at?: string
+          role?: string | null
           team: string
           user_id: string
         }
@@ -31,6 +33,7 @@ export type Database = {
           current_code?: string | null
           id?: string
           joined_at?: string
+          role?: string | null
           team?: string
           user_id?: string
         }
@@ -53,6 +56,7 @@ export type Database = {
       }
       battles: {
         Row: {
+          comm_challenge: boolean | null
           created_at: string
           current_participants: number | null
           document_content: string | null
@@ -68,6 +72,7 @@ export type Database = {
           team_b_score: number | null
         }
         Insert: {
+          comm_challenge?: boolean | null
           created_at?: string
           current_participants?: number | null
           document_content?: string | null
@@ -83,6 +88,7 @@ export type Database = {
           team_b_score?: number | null
         }
         Update: {
+          comm_challenge?: boolean | null
           created_at?: string
           current_participants?: number | null
           document_content?: string | null
