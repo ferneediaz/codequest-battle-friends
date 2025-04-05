@@ -1,3 +1,4 @@
+
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -8,6 +9,7 @@ import { Language, QuestionData } from '@/types/battle';
 import { EditorToolbar } from './EditorToolbar';
 import { useCodeExecution } from '@/hooks/useCodeExecution';
 import { ViewUpdate } from '@codemirror/view';
+import { defaultInitialCode } from '@/constants/defaultCode';
 
 interface CodeEditorProps {
   code: string;
@@ -60,7 +62,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         />
         <div className="relative w-full h-auto overflow-auto">
           <CodeMirror
-            value={code}
+            value={code || defaultInitialCode[language]}
             height="100%"
             extensions={getExtensionsForLanguage(language)}
             theme="dark"

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -14,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
+import { defaultInitialCode } from "@/constants/defaultCode";
 
 const Battle = () => {
   const navigate = useNavigate();
@@ -67,17 +69,17 @@ const Battle = () => {
 
       if (data.initial_code && typeof data.initial_code === 'object' && !Array.isArray(data.initial_code)) {
         initialCode = {
-          javascript: String(data.initial_code.javascript || ''),
-          python: String(data.initial_code.python || ''),
-          cpp: String(data.initial_code.cpp || ''),
-          java: String(data.initial_code.java || '')
+          javascript: String(data.initial_code.javascript || defaultInitialCode.javascript),
+          python: String(data.initial_code.python || defaultInitialCode.python),
+          cpp: String(data.initial_code.cpp || defaultInitialCode.cpp),
+          java: String(data.initial_code.java || defaultInitialCode.java)
         };
       } else {
         initialCode = {
-          javascript: '',
-          python: '',
-          cpp: '',
-          java: ''
+          javascript: defaultInitialCode.javascript,
+          python: defaultInitialCode.python,
+          cpp: defaultInitialCode.cpp,
+          java: defaultInitialCode.java
         };
       }
       
@@ -101,6 +103,8 @@ const Battle = () => {
   useEffect(() => {
     if (question?.initial_code?.[language]) {
       setCode(question.initial_code[language]);
+    } else if (defaultInitialCode[language]) {
+      setCode(defaultInitialCode[language]);
     }
   }, [question, language, setCode]);
 
@@ -159,7 +163,7 @@ const Battle = () => {
               currentRoom={currentRoom}
               setCurrentRoom={setCurrentRoom}
               setCode={setCode}
-              initialCode={question?.initial_code?.[language] || ""}
+              initialCode={question?.initial_code?.[language] || defaultInitialCode[language]}
               userRole={userRole}
               setUserRole={setUserRole}
               participants={participants}

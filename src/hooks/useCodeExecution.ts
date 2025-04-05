@@ -1,7 +1,9 @@
+
 import { useState } from 'react';
 import { Language, QuestionData } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
 export const useCodeExecution = () => {
   const [isExecuting, setIsExecuting] = useState(false);
@@ -16,9 +18,44 @@ export const useCodeExecution = () => {
         return 71; // Python 3
       case 'cpp':
         return 54; // C++
+      case 'java':
+        return 62; // Java
       default:
         return 63; // Default to Node.js
     }
+  };
+
+  const triggerConfetti = () => {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+
+    const randomInRange = (min: number, max: number) => {
+      return Math.random() * (max - min) + min;
+    };
+
+    const interval = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      // Since particles fall down, make them start from the top
+      confetti({
+        startVelocity: 30,
+        spread: 360,
+        ticks: 60,
+        origin: {
+          x: randomInRange(0.1, 0.9),
+          y: Math.random() - 0.2
+        },
+        colors: ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'],
+        shapes: ['circle', 'square'],
+        scalar: randomInRange(0.4, 1)
+      });
+    }, 250);
   };
 
   const handleJudge0Response = (data: any, isSubmission: boolean, testCases: any[]) => {
@@ -79,6 +116,7 @@ export const useCodeExecution = () => {
         }
 
         if (results.allPassed) {
+          triggerConfetti();
           toast.success('Solution Accepted! All test cases passed.', {
             duration: 5000,
           });
