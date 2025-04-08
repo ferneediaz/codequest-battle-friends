@@ -15,8 +15,13 @@ serve(async (req) => {
   }
 
   try {
-    const { sourceCode, languageId, isSubmission } = await req.json();
-    console.log('Received request:', { languageId, isSubmission });
+    const { sourceCode, languageId, isSubmission, testCases } = await req.json();
+    console.log('Received request:', { languageId, isSubmission, testCasesCount: testCases?.length });
+
+    if (!testCases || !Array.isArray(testCases) || testCases.length === 0) {
+      console.error('No valid test cases provided');
+      throw new Error('Valid test cases must be provided');
+    }
 
     if (!JUDGE0_API_KEY) {
       console.error('JUDGE0_RAPIDAPI_KEY is not set');
@@ -27,63 +32,77 @@ serve(async (req) => {
     const processedCode = `
 ${sourceCode}
 
-function validateSolution(nums, target, expected) {
-  const result = solution(nums, target);
+// Function to validate if the solution is correct for the given test case
+function validateSolution(testCase) {
+  const result = solution(testCase.input.nums, testCase.input.target);
   if (!Array.isArray(result)) return false;
   if (result.length !== 2) return false;
   
   // Sort both arrays to handle different valid solutions
   const sortedResult = [...result].sort((a, b) => a - b);
-  const sortedExpected = [...expected].sort((a, b) => a - b);
+  const sortedExpected = [...testCase.expected].sort((a, b) => a - b);
   
   return JSON.stringify(sortedResult) === JSON.stringify(sortedExpected);
 }
 
 ${isSubmission ? `
-// Test cases for submit mode
-const testCases = [
-  { nums: [2, 7, 11, 15], target: 9, expected: [0, 1] },
-  { nums: [3, 2, 4], target: 6, expected: [1, 2] },
-  { nums: [3, 3], target: 6, expected: [0, 1] },
-  { nums: [-1, -2, -3, -4, -5], target: -8, expected: [2, 4] },
-  { nums: [1, 5, 8, 10], target: 15, expected: [1, 3] }
-];
-
+// Test all cases for submit mode
+const testCases = ${JSON.stringify(testCases)};
 let allPassed = true;
 const results = [];
 
 for (const test of testCases) {
-  const userResult = solution(test.nums, test.target);
-  const passed = validateSolution(test.nums, test.target, test.expected);
-  
-  if (!passed) {
+  try {
+    const userResult = solution(test.input.nums, test.input.target);
+    const passed = validateSolution(test);
+    
+    if (!passed) {
+      allPassed = false;
+    }
+    
+    results.push({
+      input: test.input,
+      output: userResult,
+      expected: test.expected,
+      passed
+    });
+    
+    if (!passed) break;
+  } catch (error) {
+    results.push({
+      input: test.input,
+      error: error.message,
+      passed: false
+    });
     allPassed = false;
+    break;
   }
-  
-  results.push({
-    input: test,
-    output: userResult,
-    passed
-  });
-  
-  if (!passed) break;
 }
 
 console.log(JSON.stringify({ allPassed, results }));
 ` : `
-// Single test case for run mode
-const test = { nums: [2, 7, 11, 15], target: 9, expected: [0, 1] };
-const userResult = solution(test.nums, test.target);
-const passed = validateSolution(test.nums, test.target, test.expected);
+// Single test case for run mode (just use the first test case)
+const test = ${JSON.stringify(testCases[0])};
+try {
+  const userResult = solution(test.input.nums, test.input.target);
+  const passed = validateSolution(test);
 
-console.log(JSON.stringify({
-  input: test,
-  output: userResult,
-  passed
-}));
+  console.log(JSON.stringify({
+    input: test.input,
+    output: userResult,
+    expected: test.expected,
+    passed
+  }));
+} catch (error) {
+  console.log(JSON.stringify({
+    input: test.input,
+    error: error.message,
+    passed: false
+  }));
+}
 `}`;
 
-    console.log('Sending code to Judge0:', processedCode);
+    console.log('Sending code to Judge0...');
 
     const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true', {
       method: 'POST',

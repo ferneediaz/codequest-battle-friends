@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Language, QuestionData } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
@@ -116,16 +117,22 @@ export const useCodeExecution = () => {
         }
 
         if (!isSubmission) {
-          const testCase = testCases[0];
+          // Single test case run
           console.log('Single test case run result:', results);
           if (results.passed) {
             toast.success('Code ran successfully!', {
-              description: `Test case passed!\nInput: ${JSON.stringify(testCase.input)}\nOutput: ${JSON.stringify(results.output)}`,
+              description: `Test case passed!\nInput: ${JSON.stringify(results.input)}\nOutput: ${JSON.stringify(results.output)}`,
               duration: 5000,
             });
           } else {
+            let errorMsg = `Input: ${JSON.stringify(results.input)}\nExpected: ${JSON.stringify(results.expected)}`;
+            if (results.error) {
+              errorMsg += `\nError: ${results.error}`;
+            } else {
+              errorMsg += `\nYour Output: ${JSON.stringify(results.output)}`;
+            }
             toast.error('Wrong Answer', {
-              description: `Input: ${JSON.stringify(testCase.input)}\nExpected: ${JSON.stringify(testCase.expected)}\nYour Output: ${JSON.stringify(results.output)}`,
+              description: errorMsg,
               duration: 5000,
             });
           }
@@ -144,8 +151,14 @@ export const useCodeExecution = () => {
           const failedTest = results.results.find((test: any) => !test.passed);
           if (failedTest) {
             console.error('Failed test case:', failedTest);
+            let errorMsg = `Failed test case:\nInput: ${JSON.stringify(failedTest.input)}\nExpected: ${JSON.stringify(failedTest.expected)}`;
+            if (failedTest.error) {
+              errorMsg += `\nError: ${failedTest.error}`;
+            } else {
+              errorMsg += `\nYour Output: ${JSON.stringify(failedTest.output)}`;
+            }
             toast.error("Wrong Answer", {
-              description: `Failed test case:\nInput: ${JSON.stringify(failedTest.input)}\nExpected: ${JSON.stringify(failedTest.expected)}\nYour Output: ${JSON.stringify(failedTest.output)}`,
+              description: errorMsg,
               duration: 10000,
             });
           }
@@ -184,6 +197,12 @@ export const useCodeExecution = () => {
       return;
     }
 
+    // Make sure we have test cases
+    if (!question.test_cases || !Array.isArray(question.test_cases) || question.test_cases.length === 0) {
+      toast.error('This question has no test cases defined');
+      return;
+    }
+
     const now = Date.now();
     if (now - lastExecutionTime < 2000) {
       console.log('Rate limiting applied, last execution:', lastExecutionTime);
@@ -199,6 +218,8 @@ export const useCodeExecution = () => {
     setLastExecutionTime(now);
 
     try {
+      console.log('Sending test cases:', question.test_cases);
+      
       const response = await supabase.functions.invoke('execute-code', {
         body: {
           sourceCode: code,
