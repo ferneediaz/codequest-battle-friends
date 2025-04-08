@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
@@ -10,6 +10,7 @@ import { EditorToolbar } from './EditorToolbar';
 import { useCodeExecution } from '@/hooks/useCodeExecution';
 import { ViewUpdate } from '@codemirror/view';
 import { defaultInitialCode } from '@/constants/defaultCode';
+import confetti from 'canvas-confetti';
 
 interface CodeEditorProps {
   code: string;
@@ -28,7 +29,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   currentRoom,
   question
 }) => {
-  const { isExecuting, currentOperation, executeCode } = useCodeExecution();
+  const { isExecuting, currentOperation, executeCode, lastExecutionResult } = useCodeExecution();
+
+  useEffect(() => {
+    // Trigger confetti when all test cases pass
+    if (lastExecutionResult && 
+        lastExecutionResult.operation === 'submit' && 
+        lastExecutionResult.success && 
+        lastExecutionResult.results?.allPassed) {
+      confetti({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+    }
+  }, [lastExecutionResult]);
 
   const handleRunCode = () => executeCode('run', code, language, question);
   const handleSubmitCode = () => executeCode('submit', code, language, question);
