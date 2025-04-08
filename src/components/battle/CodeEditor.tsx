@@ -9,7 +9,7 @@ import { Language, QuestionData } from '@/types/battle';
 import { EditorToolbar } from './EditorToolbar';
 import { useCodeExecution } from '@/hooks/useCodeExecution';
 import { ViewUpdate } from '@codemirror/view';
-import { defaultInitialCode } from '@/constants/defaultCode';
+import { defaultInitialCode, validParenthesesSolution, reverseStringSolution } from '@/constants/defaultCode';
 import confetti from 'canvas-confetti';
 
 interface CodeEditorProps {
@@ -72,9 +72,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   // Get the appropriate code based on question and language
   const getInitialCodeForQuestion = () => {
-    if (question?.initial_code && question.initial_code[language]) {
+    if (!question) {
+      return defaultInitialCode[language];
+    }
+
+    // Choose solution template based on question title
+    if (question.title.includes('Valid Parentheses')) {
+      return validParenthesesSolution[language];
+    } else if (question.title.includes('Reverse String')) {
+      return reverseStringSolution[language];
+    } else if (question.initial_code && question.initial_code[language]) {
       return question.initial_code[language];
     }
+    
     return defaultInitialCode[language];
   };
 
