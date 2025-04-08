@@ -45,8 +45,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     }
   }, [lastExecutionResult]);
 
-  const handleRunCode = () => executeCode('run', code, language, question);
-  const handleSubmitCode = () => executeCode('submit', code, language, question);
+  const handleRunCode = () => {
+    if (isExecuting) return;
+    executeCode('run', code, language, question);
+  };
+
+  const handleSubmitCode = () => {
+    if (isExecuting) return;
+    executeCode('submit', code, language, question);
+  };
 
   const getExtensionsForLanguage = (language: Language) => {
     switch (language) {

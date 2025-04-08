@@ -50,6 +50,7 @@ const Battle = () => {
         throw error;
       }
 
+      // Parse test cases and examples
       const parsedTestCases = Array.isArray(data.test_cases) 
         ? data.test_cases.map((tc: any) => ({
             input: tc.input,
@@ -65,9 +66,10 @@ const Battle = () => {
           }))
         : [];
       
+      // Initialize with default code
       let initialCodeObj = defaultInitialCode;
       
-      // Check if initial_code is an object first
+      // Check if initial_code is an object and process it
       if (data.initial_code && typeof data.initial_code === 'object' && !Array.isArray(data.initial_code)) {
         const initialCode = data.initial_code as Record<string, any>;
         
@@ -86,6 +88,7 @@ const Battle = () => {
         }
       }
       
+      // Return the transformed data
       const transformedData: QuestionData = {
         id: data.id,
         title: data.title,

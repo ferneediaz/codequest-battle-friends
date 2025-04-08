@@ -33,21 +33,21 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </div>
       <div className="flex gap-4">
         <Button 
-          className={`gap-2 ${isExecuting && currentOperation === 'run' ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className="gap-2"
           onClick={onRun}
-          disabled={isExecuting || currentOperation !== null}
+          disabled={isExecuting}
         >
           <Play className="w-4 h-4" />
-          {currentOperation === 'run' ? 'Running...' : 'Run Code'}
+          {isExecuting && currentOperation === 'run' ? 'Running...' : 'Run Code'}
         </Button>
         <Button 
           variant="secondary" 
-          className={`gap-2 ${isExecuting && currentOperation === 'submit' ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className="gap-2"
           onClick={onSubmit}
-          disabled={isExecuting || currentOperation !== null}
+          disabled={isExecuting}
         >
           <Send className="w-4 h-4" />
-          {currentOperation === 'submit' ? 'Submitting...' : 'Submit Solution'}
+          {isExecuting && currentOperation === 'submit' ? 'Submitting...' : 'Submit Solution'}
         </Button>
       </div>
     </div>
