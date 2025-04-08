@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
+import { defaultInitialCode, validParenthesesSolution, reverseStringSolution } from "@/constants/defaultCode";
 
 const Battle = () => {
   const navigate = useNavigate();
@@ -63,13 +64,30 @@ const Battle = () => {
           }))
         : [];
       
+      let initialCodeObj: { javascript: string; python: string; cpp: string; java: string; } = defaultInitialCode;
+      
+      if (data.initial_code && typeof data.initial_code === 'object') {
+        initialCodeObj = {
+          javascript: typeof data.initial_code.javascript === 'string' ? data.initial_code.javascript : defaultInitialCode.javascript,
+          python: typeof data.initial_code.python === 'string' ? data.initial_code.python : defaultInitialCode.python,
+          cpp: typeof data.initial_code.cpp === 'string' ? data.initial_code.cpp : defaultInitialCode.cpp,
+          java: typeof data.initial_code.java === 'string' ? data.initial_code.java : defaultInitialCode.java,
+        };
+      } else if (data.title) {
+        if (data.title.includes('Valid Parentheses')) {
+          initialCodeObj = validParenthesesSolution;
+        } else if (data.title.includes('Reverse String')) {
+          initialCodeObj = reverseStringSolution;
+        }
+      }
+      
       const transformedData: QuestionData = {
         id: data.id,
         title: data.title,
         description: data.description,
         difficulty: data.difficulty,
         category: data.category,
-        initial_code: data.initial_code || null,
+        initial_code: initialCodeObj,
         test_cases: parsedTestCases,
         examples: parsedExamples,
         constraints: Array.isArray(data.constraints) ? data.constraints : []
