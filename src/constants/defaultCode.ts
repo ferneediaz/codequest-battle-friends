@@ -94,3 +94,208 @@ public:
     }
 }`
 };
+
+// Solutions for Valid Parentheses problem
+export const validParenthesesSolution = {
+  javascript: `function solution(s) {
+  // Write your solution here
+  // s: string - String containing only the characters '(', ')', '{', '}', '[' and ']'
+  // return: boolean - Return true if the input string is valid, false otherwise
+  
+  /* SOLUTION - uncomment to see the answer
+  const stack = [];
+  const mapping = {
+    ')': '(',
+    '}': '{',
+    ']': '['
+  };
+  
+  for (let i = 0; i < s.length; i++) {
+    const char = s[i];
+    
+    if (char in mapping) {
+      const topElement = stack.pop() || '#';
+      
+      if (mapping[char] !== topElement) {
+        return false;
+      }
+    } else {
+      stack.push(char);
+    }
+  }
+  
+  return stack.length === 0;
+  */
+  
+  return false;
+}`,
+  python: `def solution(s):
+    # Write your solution here
+    # s: str - String containing only the characters '(', ')', '{', '}', '[' and ']'
+    # return: bool - Return true if the input string is valid, false otherwise
+    
+    ''' SOLUTION - uncomment to see the answer
+    stack = []
+    mapping = {")": "(", "}": "{", "]": "["}
+    
+    for char in s:
+        if char in mapping:
+            top_element = stack.pop() if stack else '#'
+            
+            if mapping[char] != top_element:
+                return False
+        else:
+            stack.append(char)
+    
+    return len(stack) == 0
+    '''
+    
+    return False`,
+  cpp: `class Solution {
+public:
+    bool solution(string s) {
+        // Write your solution here
+        // s: string - String containing only the characters '(', ')', '{', '}', '[' and ']'
+        // return: bool - Return true if the input string is valid, false otherwise
+        
+        /* SOLUTION - uncomment to see the answer
+        stack<char> stk;
+        map<char, char> mapping = {
+            {')', '('},
+            {'}', '{'},
+            {']', '['}
+        };
+        
+        for (char c : s) {
+            if (mapping.find(c) != mapping.end()) {
+                char top = stk.empty() ? '#' : stk.top();
+                
+                if (top != mapping[c]) {
+                    return false;
+                }
+                
+                stk.pop();
+            } else {
+                stk.push(c);
+            }
+        }
+        
+        return stk.empty();
+        */
+        
+        return false;
+    }
+};`,
+  java: `class Solution {
+    public boolean solution(String s) {
+        // Write your solution here
+        // s: String - String containing only the characters '(', ')', '{', '}', '[' and ']'
+        // return: boolean - Return true if the input string is valid, false otherwise
+        
+        /* SOLUTION - uncomment to see the answer
+        Stack<Character> stack = new Stack<>();
+        HashMap<Character, Character> mapping = new HashMap<>();
+        mapping.put(')', '(');
+        mapping.put('}', '{');
+        mapping.put(']', '[');
+        
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            
+            if (mapping.containsKey(c)) {
+                char topElement = stack.empty() ? '#' : stack.pop();
+                
+                if (topElement != mapping.get(c)) {
+                    return false;
+                }
+            } else {
+                stack.push(c);
+            }
+        }
+        
+        return stack.isEmpty();
+        */
+        
+        return false;
+    }
+}`
+};
+
+// Solutions for Reverse String problem
+export const reverseStringSolution = {
+  javascript: `function solution(s) {
+  // Write your solution here
+  // s: character[] - Array of characters (will be modified in-place)
+  // Do not return anything, modify s in-place instead
+  
+  /* SOLUTION - uncomment to see the answer
+  let left = 0;
+  let right = s.length - 1;
+  
+  while (left < right) {
+    // Swap characters
+    [s[left], s[right]] = [s[right], s[left]];
+    left++;
+    right--;
+  }
+  */
+}`,
+  python: `def solution(s):
+    # Write your solution here
+    # s: List[str] - Array of characters (will be modified in-place)
+    # Do not return anything, modify s in-place instead
+    
+    ''' SOLUTION - uncomment to see the answer
+    left, right = 0, len(s) - 1
+    
+    while left < right:
+        # Swap characters
+        s[left], s[right] = s[right], s[left]
+        left += 1
+        right -= 1
+    '''
+    pass`,
+  cpp: `class Solution {
+public:
+    void solution(vector<char>& s) {
+        // Write your solution here
+        // s: vector<char>& - Array of characters (will be modified in-place)
+        // Do not return anything, modify s in-place instead
+        
+        /* SOLUTION - uncomment to see the answer
+        int left = 0;
+        int right = s.size() - 1;
+        
+        while (left < right) {
+            // Swap characters
+            char temp = s[left];
+            s[left] = s[right];
+            s[right] = temp;
+            left++;
+            right--;
+        }
+        */
+    }
+};`,
+  java: `class Solution {
+    public void solution(char[] s) {
+        // Write your solution here
+        // s: char[] - Array of characters (will be modified in-place)
+        // Do not return anything, modify s in-place instead
+        
+        /* SOLUTION - uncomment to see the answer
+        int left = 0;
+        int right = s.length - 1;
+        
+        while (left < right) {
+            // Swap characters
+            char temp = s[left];
+            s[left] = s[right];
+            s[right] = temp;
+            left++;
+            right--;
+        }
+        */
+    }
+}`
+};

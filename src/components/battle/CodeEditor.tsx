@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -62,6 +63,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     }
   };
 
+  // Get the appropriate code based on question and language
+  const getInitialCodeForQuestion = () => {
+    if (question?.initial_code && question.initial_code[language]) {
+      return question.initial_code[language];
+    }
+    return defaultInitialCode[language];
+  };
+
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
@@ -76,7 +85,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         />
         <div className="relative w-full h-auto overflow-auto">
           <CodeMirror
-            value={code || defaultInitialCode[language]}
+            value={code || getInitialCodeForQuestion()}
             height="100%"
             extensions={getExtensionsForLanguage(language)}
             theme="dark"

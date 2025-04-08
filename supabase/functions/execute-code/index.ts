@@ -15,8 +15,13 @@ serve(async (req) => {
   }
 
   try {
-    const { sourceCode, languageId, isSubmission, testCases } = await req.json();
-    console.log('Received request:', { languageId, isSubmission, testCasesCount: testCases?.length });
+    const { sourceCode, languageId, isSubmission, testCases, questionTitle } = await req.json();
+    console.log('Received request:', { 
+      languageId, 
+      isSubmission, 
+      testCasesCount: testCases?.length,
+      questionTitle
+    });
 
     if (!testCases || !Array.isArray(testCases) || testCases.length === 0) {
       console.error('No valid test cases provided');
@@ -28,11 +33,11 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // Common validation function for both run and submit modes
-    const processedCode = `
-${sourceCode}
-
-// Function to validate if the solution is correct for the given test case
+    // Generate validation logic based on question title
+    let validationCode = '';
+    
+    // Default validation for Two Sum problem
+    validationCode = `
 function validateSolution(testCase) {
   const result = solution(testCase.input.nums, testCase.input.target);
   if (!Array.isArray(result)) return false;
@@ -43,7 +48,31 @@ function validateSolution(testCase) {
   const sortedExpected = [...testCase.expected].sort((a, b) => a - b);
   
   return JSON.stringify(sortedResult) === JSON.stringify(sortedExpected);
-}
+}`;
+
+    // Use the question title to determine which validation to use
+    if (questionTitle && questionTitle.includes('Valid Parentheses')) {
+      validationCode = `
+function validateSolution(testCase) {
+  const result = solution(testCase.input.s);
+  return result === testCase.expected;
+}`;
+    } else if (questionTitle && questionTitle.includes('Reverse String')) {
+      validationCode = `
+function validateSolution(testCase) {
+  const inputArray = [...testCase.input.s];
+  solution(inputArray);
+  return JSON.stringify(inputArray) === JSON.stringify(testCase.expected);
+}`;
+    }
+    // Add more question-specific validations here
+
+    // Common validation function for both run and submit modes
+    const processedCode = `
+${sourceCode}
+
+// Function to validate if the solution is correct for the given test case
+${validationCode}
 
 ${isSubmission ? `
 // Test all cases for submit mode
@@ -53,7 +82,12 @@ const results = [];
 
 for (const test of testCases) {
   try {
-    const userResult = solution(test.input.nums, test.input.target);
+    const userResult = ${questionTitle && questionTitle.includes('Reverse String') 
+      ? `(() => { const arr = [...test.input.s]; solution(arr); return arr; })()` 
+      : questionTitle && questionTitle.includes('Valid Parentheses')
+        ? `solution(test.input.s)` 
+        : `solution(test.input.nums, test.input.target)`};
+    
     const passed = validateSolution(test);
     
     if (!passed) {
@@ -84,7 +118,12 @@ console.log(JSON.stringify({ allPassed, results }));
 // Single test case for run mode (just use the first test case)
 const test = ${JSON.stringify(testCases[0])};
 try {
-  const userResult = solution(test.input.nums, test.input.target);
+  const userResult = ${questionTitle && questionTitle.includes('Reverse String') 
+    ? `(() => { const arr = [...test.input.s]; solution(arr); return arr; })()` 
+    : questionTitle && questionTitle.includes('Valid Parentheses')
+      ? `solution(test.input.s)` 
+      : `solution(test.input.nums, test.input.target)`};
+      
   const passed = validateSolution(test);
 
   console.log(JSON.stringify({

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -15,7 +14,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
-import { defaultInitialCode } from "@/constants/defaultCode";
 
 const Battle = () => {
   const navigate = useNavigate();
@@ -64,24 +62,6 @@ const Battle = () => {
             explanation: ex.explanation
           }))
         : [];
-
-      let initialCode: QuestionData['initial_code'];
-
-      if (data.initial_code && typeof data.initial_code === 'object' && !Array.isArray(data.initial_code)) {
-        initialCode = {
-          javascript: String(data.initial_code.javascript || defaultInitialCode.javascript),
-          python: String(data.initial_code.python || defaultInitialCode.python),
-          cpp: String(data.initial_code.cpp || defaultInitialCode.cpp),
-          java: String(data.initial_code.java || defaultInitialCode.java)
-        };
-      } else {
-        initialCode = {
-          javascript: defaultInitialCode.javascript,
-          python: defaultInitialCode.python,
-          cpp: defaultInitialCode.cpp,
-          java: defaultInitialCode.java
-        };
-      }
       
       const transformedData: QuestionData = {
         id: data.id,
@@ -89,7 +69,7 @@ const Battle = () => {
         description: data.description,
         difficulty: data.difficulty,
         category: data.category,
-        initial_code: initialCode,
+        initial_code: data.initial_code || null,
         test_cases: parsedTestCases,
         examples: parsedExamples,
         constraints: Array.isArray(data.constraints) ? data.constraints : []
@@ -101,10 +81,8 @@ const Battle = () => {
   });
 
   useEffect(() => {
-    if (question?.initial_code?.[language]) {
+    if (question && question.initial_code?.[language]) {
       setCode(question.initial_code[language]);
-    } else if (defaultInitialCode[language]) {
-      setCode(defaultInitialCode[language]);
     }
   }, [question, language, setCode]);
 
@@ -163,7 +141,7 @@ const Battle = () => {
               currentRoom={currentRoom}
               setCurrentRoom={setCurrentRoom}
               setCode={setCode}
-              initialCode={question?.initial_code?.[language] || defaultInitialCode[language]}
+              initialCode={question?.initial_code?.[language] || ""}
               userRole={userRole}
               setUserRole={setUserRole}
               participants={participants}
