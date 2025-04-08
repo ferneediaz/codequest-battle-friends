@@ -1,14 +1,23 @@
-
 import { useState } from 'react';
 import { Language, QuestionData } from '@/types/battle';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 
+export interface ExecutionResult {
+  operation: 'run' | 'submit';
+  success: boolean;
+  results?: {
+    allPassed?: boolean;
+    results?: Array<any>;
+  };
+}
+
 export const useCodeExecution = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentOperation, setCurrentOperation] = useState<'run' | 'submit' | null>(null);
   const [lastExecutionTime, setLastExecutionTime] = useState(0);
+  const [lastExecutionResult, setLastExecutionResult] = useState<ExecutionResult | null>(null);
 
   const getLanguageId = (lang: Language): number => {
     switch (lang) {
@@ -42,7 +51,6 @@ export const useCodeExecution = () => {
 
       const particleCount = 50 * (timeLeft / duration);
       
-      // Since particles fall down, make them start from the top
       confetti({
         startVelocity: 30,
         spread: 360,
@@ -69,7 +77,7 @@ export const useCodeExecution = () => {
         description: data.error || 'Unknown error occurred',
         duration: 5000,
       });
-      return false;
+      return { success: false };
     }
 
     if (data.status?.id === 429) {
@@ -78,7 +86,7 @@ export const useCodeExecution = () => {
         description: 'Please wait a moment before trying again.',
         duration: 5000,
       });
-      return false;
+      return { success: false };
     }
 
     if (data.status?.id === 6) {
@@ -88,7 +96,7 @@ export const useCodeExecution = () => {
         description: errorMessage,
         duration: 10000,
       });
-      return false;
+      return { success: false };
     }
 
     if (data.status?.id === 11 || data.status?.id === 12) {
@@ -98,11 +106,10 @@ export const useCodeExecution = () => {
         description: errorMessage,
         duration: 10000,
       });
-      return false;
+      return { success: false };
     }
 
     try {
-      // Handle both Accepted (3) and Wrong Answer (4) statuses
       if (data.status?.id === 3 || data.status?.id === 4) {
         const stdout = atob(data.stdout || '');
         console.log('Raw stdout:', stdout);
@@ -117,7 +124,6 @@ export const useCodeExecution = () => {
         }
 
         if (!isSubmission) {
-          // Single test case run
           console.log('Single test case run result:', results);
           if (results.passed) {
             toast.success('Code ran successfully!', {
@@ -136,16 +142,15 @@ export const useCodeExecution = () => {
               duration: 5000,
             });
           }
-          return results.passed;
+          return { success: results.passed, results };
         }
 
-        // For submissions, check our test results
         if (results.allPassed) {
           triggerConfetti();
           toast.success('Solution Accepted! All test cases passed.', {
             duration: 5000,
           });
-          return true;
+          return { success: true, results };
         } else {
           console.log('Not all tests passed. Results:', results.results);
           const failedTest = results.results.find((test: any) => !test.passed);
@@ -162,7 +167,7 @@ export const useCodeExecution = () => {
               duration: 10000,
             });
           }
-          return false;
+          return { success: false, results };
         }
       }
     } catch (error) {
@@ -170,7 +175,7 @@ export const useCodeExecution = () => {
       console.error('Original response data:', data);
       console.error('Stdout (if available):', data.stdout ? atob(data.stdout) : 'No stdout');
       toast.error('Error processing test results');
-      return false;
+      return { success: false };
     }
 
     if (data.status?.id !== 3 && data.status?.id !== 4) {
@@ -178,10 +183,10 @@ export const useCodeExecution = () => {
       toast.error(`Execution Error: ${data.status?.description || 'Unknown error'}`, {
         duration: 5000,
       });
-      return false;
+      return { success: false };
     }
 
-    return false;
+    return { success: false };
   };
 
   const executeCode = async (
@@ -197,7 +202,6 @@ export const useCodeExecution = () => {
       return;
     }
 
-    // Make sure we have test cases
     if (!question.test_cases || !Array.isArray(question.test_cases) || question.test_cases.length === 0) {
       toast.error('This question has no test cases defined');
       return;
@@ -216,6 +220,7 @@ export const useCodeExecution = () => {
     setIsExecuting(true);
     setCurrentOperation(operation);
     setLastExecutionTime(now);
+    setLastExecutionResult(null);
 
     try {
       console.log('Sending test cases:', question.test_cases);
@@ -231,13 +236,28 @@ export const useCodeExecution = () => {
 
       if (response.error) {
         console.error(`Error response from Supabase:`, response.error);
+        setLastExecutionResult({
+          operation,
+          success: false
+        });
         throw response.error;
       }
 
-      handleJudge0Response(response.data, operation === 'submit', question.test_cases || []);
+      const result = handleJudge0Response(response.data, operation === 'submit', question.test_cases || []);
+      setLastExecutionResult({
+        operation,
+        success: result.success,
+        results: result.results
+      });
+      
+      return result;
     } catch (error) {
       console.error(`Error during ${operation}:`, error);
       toast.error(`Error executing code: ${(error as Error).message}`);
+      setLastExecutionResult({
+        operation,
+        success: false
+      });
     } finally {
       setIsExecuting(false);
       setTimeout(() => setCurrentOperation(null), 1000);
@@ -247,6 +267,7 @@ export const useCodeExecution = () => {
   return {
     isExecuting,
     currentOperation,
-    executeCode
+    executeCode,
+    lastExecutionResult
   };
 };
