@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -64,16 +65,20 @@ const Battle = () => {
           }))
         : [];
       
-      let initialCodeObj: { javascript: string; python: string; cpp: string; java: string; } = defaultInitialCode;
+      let initialCodeObj = defaultInitialCode;
       
-      if (data.initial_code && typeof data.initial_code === 'object') {
+      // Check if initial_code is an object first
+      if (data.initial_code && typeof data.initial_code === 'object' && !Array.isArray(data.initial_code)) {
+        const initialCode = data.initial_code as Record<string, any>;
+        
         initialCodeObj = {
-          javascript: typeof data.initial_code.javascript === 'string' ? data.initial_code.javascript : defaultInitialCode.javascript,
-          python: typeof data.initial_code.python === 'string' ? data.initial_code.python : defaultInitialCode.python,
-          cpp: typeof data.initial_code.cpp === 'string' ? data.initial_code.cpp : defaultInitialCode.cpp,
-          java: typeof data.initial_code.java === 'string' ? data.initial_code.java : defaultInitialCode.java,
+          javascript: typeof initialCode.javascript === 'string' ? initialCode.javascript : defaultInitialCode.javascript,
+          python: typeof initialCode.python === 'string' ? initialCode.python : defaultInitialCode.python,
+          cpp: typeof initialCode.cpp === 'string' ? initialCode.cpp : defaultInitialCode.cpp,
+          java: typeof initialCode.java === 'string' ? initialCode.java : defaultInitialCode.java,
         };
       } else if (data.title) {
+        // Fallback to predefined solutions based on question title
         if (data.title.includes('Valid Parentheses')) {
           initialCodeObj = validParenthesesSolution;
         } else if (data.title.includes('Reverse String')) {
