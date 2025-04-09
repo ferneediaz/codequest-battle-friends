@@ -33,6 +33,9 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
+    // Log the first test case to understand its structure
+    console.log('First test case structure:', JSON.stringify(testCases[0]));
+
     // Generate validation logic based on question title
     let validationCode = '';
     
@@ -67,6 +70,11 @@ function validateSolution(testCase) {
     } else if (questionTitle && questionTitle.includes("Mage's Maximum Power")) {
       validationCode = `
 function validateSolution(testCase) {
+  // Ensure we're getting the correct input property
+  if (!testCase.input || !testCase.input.nums) {
+    console.error('Invalid test case structure:', JSON.stringify(testCase));
+    return false;
+  }
   const result = solution(testCase.input.nums);
   return result === testCase.expected;
 }`;
@@ -88,6 +96,9 @@ const results = [];
 
 for (const test of testCases) {
   try {
+    // Debug the test case structure
+    console.log('Processing test case:', JSON.stringify(test));
+
     const userResult = ${questionTitle && questionTitle.includes('Reverse String') 
       ? `(() => { const arr = [...test.input.s]; solution(arr); return arr; })()` 
       : questionTitle && questionTitle.includes('Valid Parentheses')
@@ -111,6 +122,7 @@ for (const test of testCases) {
     
     if (!passed) break;
   } catch (error) {
+    console.error('Error executing test case:', error.message);
     results.push({
       input: test.input,
       error: error.message,
@@ -126,6 +138,9 @@ console.log(JSON.stringify({ allPassed, results }));
 // Single test case for run mode (just use the first test case)
 const test = ${JSON.stringify(testCases[0])};
 try {
+  // Debug the test case structure
+  console.log('Processing test case:', JSON.stringify(test));
+
   const userResult = ${questionTitle && questionTitle.includes('Reverse String') 
     ? `(() => { const arr = [...test.input.s]; solution(arr); return arr; })()` 
     : questionTitle && questionTitle.includes('Valid Parentheses')
@@ -143,6 +158,7 @@ try {
     passed
   }));
 } catch (error) {
+  console.error('Error executing test case:', error.message);
   console.log(JSON.stringify({
     input: test.input,
     error: error.message,
