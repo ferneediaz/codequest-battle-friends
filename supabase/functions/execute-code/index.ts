@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -33,8 +32,8 @@ serve(async (req) => {
       throw new Error('Judge0 API key not configured');
     }
 
-    // Log the first test case to understand its structure
-    console.log('First test case structure:', JSON.stringify(testCases[0]));
+    // Log the complete test cases for debugging
+    console.log('Test cases:', JSON.stringify(testCases));
 
     // Generate validation logic based on question title
     let validationCode = '';
@@ -70,16 +69,62 @@ function validateSolution(testCase) {
     } else if (questionTitle && questionTitle.includes("Mage's Maximum Power")) {
       validationCode = `
 function validateSolution(testCase) {
-  // Ensure we're getting the correct input property
-  if (!testCase.input || !testCase.input.nums) {
-    console.error('Invalid test case structure:', JSON.stringify(testCase));
+  try {
+    // Make sure we have the nums property
+    if (!testCase.input || !testCase.input.nums) {
+      console.error('Test case missing nums property:', JSON.stringify(testCase));
+      // Handle cases where the test case structure might be different
+      // Try to extract the nums array directly if input is an array
+      if (Array.isArray(testCase.input)) {
+        const result = solution(testCase.input);
+        return result === testCase.expected;
+      } else if (testCase.input === undefined && Array.isArray(testCase)) {
+        // If the test case is directly an array, try using it
+        const result = solution(testCase);
+        return result === testCase.expected;
+      }
+      return false;
+    }
+    
+    const result = solution(testCase.input.nums);
+    return result === testCase.expected;
+  } catch (error) {
+    console.error('Validation error:', error.message);
     return false;
   }
-  const result = solution(testCase.input.nums);
-  return result === testCase.expected;
 }`;
     }
     // Add more question-specific validations here
+
+    // Preprocess test cases for Mage's Maximum Power if needed
+    let processedTestCases = testCases;
+    if (questionTitle && questionTitle.includes("Mage's Maximum Power")) {
+      // Check if test cases need restructuring
+      const firstCase = testCases[0];
+      if (!firstCase.input || !firstCase.input.nums) {
+        console.log('Restructuring test cases for Mage\'s Maximum Power');
+        
+        // Try to adapt the test case format if it's not in the expected structure
+        processedTestCases = testCases.map(tc => {
+          // If the test case is already properly structured, return it as is
+          if (tc.input && tc.input.nums) return tc;
+          
+          // Otherwise, try to build a properly structured test case
+          if (Array.isArray(tc.input)) {
+            return { input: { nums: tc.input }, expected: tc.expected };
+          } else if (Array.isArray(tc)) {
+            // Handle case where test case might be an array directly
+            return { input: { nums: tc }, expected: tc.expected || 0 };
+          } else if (tc.expected !== undefined) {
+            // Try to make a best guess at the structure
+            return { input: { nums: [] }, expected: tc.expected };
+          }
+          
+          // Fallback case
+          return { input: { nums: [] }, expected: 0 };
+        });
+      }
+    }
 
     // Common validation function for both run and submit modes
     const processedCode = `
@@ -90,7 +135,7 @@ ${validationCode}
 
 ${isSubmission ? `
 // Test all cases for submit mode
-const testCases = ${JSON.stringify(testCases)};
+const testCases = ${JSON.stringify(processedTestCases)};
 let allPassed = true;
 const results = [];
 
@@ -136,7 +181,7 @@ for (const test of testCases) {
 console.log(JSON.stringify({ allPassed, results }));
 ` : `
 // Single test case for run mode (just use the first test case)
-const test = ${JSON.stringify(testCases[0])};
+const test = ${JSON.stringify(processedTestCases[0])};
 try {
   // Debug the test case structure
   console.log('Processing test case:', JSON.stringify(test));
