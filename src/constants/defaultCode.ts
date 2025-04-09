@@ -1,4 +1,3 @@
-
 export const defaultInitialCode = {
   javascript: `function solution(nums, target) {
   // Write your solution here
@@ -260,7 +259,7 @@ public:
     void solution(vector<char>& s) {
         // Write your solution here
         // s: vector<char>& - Array of characters (will be modified in-place)
-        // Do not return anything, modify s in-place instead
+        // Do not return anything, modify s-in-place instead
         
         /* SOLUTION - uncomment to see the answer
         int left = 0;
@@ -281,7 +280,7 @@ public:
     public void solution(char[] s) {
         // Write your solution here
         // s: char[] - Array of characters (will be modified in-place)
-        // Do not return anything, modify s in-place instead
+        // Do not return anything, modify s-in-place instead
         
         /* SOLUTION - uncomment to see the answer
         int left = 0;
@@ -296,6 +295,105 @@ public:
             right--;
         }
         */
+    }
+}`
+};
+
+// Solutions for Mage's Maximum Power problem (Maximum Subarray)
+export const magesMaximumPowerSolution = {
+  javascript: `function solution(nums) {
+  // Write your solution here
+  // nums: number[] - Array of integers
+  // return: number - Maximum sum of contiguous subarray
+  
+  /* SOLUTION - uncomment to see the answer
+  if (nums.length === 0) return 0;
+  
+  let maxSoFar = nums[0];
+  let maxEndingHere = nums[0];
+  
+  for (let i = 1; i < nums.length; i++) {
+    // Either take the current element alone or add it to the previous subarray
+    maxEndingHere = Math.max(nums[i], maxEndingHere + nums[i]);
+    
+    // Update the maximum sum found so far
+    maxSoFar = Math.max(maxSoFar, maxEndingHere);
+  }
+  
+  return maxSoFar;
+  */
+}`,
+  python: `def solution(nums):
+    # Write your solution here
+    # nums: List[int] - Array of integers
+    # return: int - Maximum sum of contiguous subarray
+    
+    ''' SOLUTION - uncomment to see the answer
+    if not nums:
+        return 0
+        
+    max_so_far = nums[0]
+    max_ending_here = nums[0]
+    
+    for i in range(1, len(nums)):
+        # Either take the current element alone or add it to the previous subarray
+        max_ending_here = max(nums[i], max_ending_here + nums[i])
+        
+        # Update the maximum sum found so far
+        max_so_far = max(max_so_far, max_ending_here)
+    
+    return max_so_far
+    '''
+    pass`,
+  cpp: `class Solution {
+public:
+    int solution(vector<int>& nums) {
+        // Write your solution here
+        // nums: vector<int> - Array of integers
+        // return: int - Maximum sum of contiguous subarray
+        
+        /* SOLUTION - uncomment to see the answer
+        if (nums.empty()) return 0;
+        
+        int maxSoFar = nums[0];
+        int maxEndingHere = nums[0];
+        
+        for (int i = 1; i < nums.size(); i++) {
+            // Either take the current element alone or add it to the previous subarray
+            maxEndingHere = max(nums[i], maxEndingHere + nums[i]);
+            
+            // Update the maximum sum found so far
+            maxSoFar = max(maxSoFar, maxEndingHere);
+        }
+        
+        return maxSoFar;
+        */
+        return 0;
+    }
+};`,
+  java: `class Solution {
+    public int solution(int[] nums) {
+        // Write your solution here
+        // nums: int[] - Array of integers
+        // return: int - Maximum sum of contiguous subarray
+        
+        /* SOLUTION - uncomment to see the answer
+        if (nums.length == 0) return 0;
+        
+        int maxSoFar = nums[0];
+        int maxEndingHere = nums[0];
+        
+        for (int i = 1; i < nums.length; i++) {
+            // Either take the current element alone or add it to the previous subarray
+            maxEndingHere = Math.max(nums[i], maxEndingHere + nums[i]);
+            
+            // Update the maximum sum found so far
+            maxSoFar = Math.max(maxSoFar, maxEndingHere);
+        }
+        
+        return maxSoFar;
+        */
+        return 0;
     }
 }`
 };

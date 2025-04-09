@@ -9,7 +9,7 @@ import { Language, QuestionData } from '@/types/battle';
 import { EditorToolbar } from './EditorToolbar';
 import { useCodeExecution } from '@/hooks/useCodeExecution';
 import { ViewUpdate } from '@codemirror/view';
-import { defaultInitialCode, validParenthesesSolution, reverseStringSolution } from '@/constants/defaultCode';
+import { defaultInitialCode, validParenthesesSolution, reverseStringSolution, magesMaximumPowerSolution } from '@/constants/defaultCode';
 import confetti from 'canvas-confetti';
 
 interface CodeEditorProps {
@@ -81,6 +81,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return validParenthesesSolution[language];
     } else if (question.title.includes('Reverse String')) {
       return reverseStringSolution[language];
+    } else if (question.title.includes("Mage's Maximum Power")) {
+      return magesMaximumPowerSolution[language];
     } else if (question.initial_code && question.initial_code[language]) {
       return question.initial_code[language];
     }

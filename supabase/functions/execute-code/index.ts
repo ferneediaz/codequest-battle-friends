@@ -64,6 +64,12 @@ function validateSolution(testCase) {
   solution(inputArray);
   return JSON.stringify(inputArray) === JSON.stringify(testCase.expected);
 }`;
+    } else if (questionTitle && questionTitle.includes("Mage's Maximum Power")) {
+      validationCode = `
+function validateSolution(testCase) {
+  const result = solution(testCase.input.nums);
+  return result === testCase.expected;
+}`;
     }
     // Add more question-specific validations here
 
@@ -86,6 +92,8 @@ for (const test of testCases) {
       ? `(() => { const arr = [...test.input.s]; solution(arr); return arr; })()` 
       : questionTitle && questionTitle.includes('Valid Parentheses')
         ? `solution(test.input.s)` 
+        : questionTitle && questionTitle.includes("Mage's Maximum Power")
+        ? `solution(test.input.nums)`
         : `solution(test.input.nums, test.input.target)`};
     
     const passed = validateSolution(test);
@@ -122,6 +130,8 @@ try {
     ? `(() => { const arr = [...test.input.s]; solution(arr); return arr; })()` 
     : questionTitle && questionTitle.includes('Valid Parentheses')
       ? `solution(test.input.s)` 
+      : questionTitle && questionTitle.includes("Mage's Maximum Power")
+      ? `solution(test.input.nums)`
       : `solution(test.input.nums, test.input.target)`};
       
   const passed = validateSolution(test);
