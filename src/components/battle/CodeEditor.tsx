@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
@@ -9,8 +9,7 @@ import { Language, QuestionData } from '@/types/battle';
 import { EditorToolbar } from './EditorToolbar';
 import { useCodeExecution } from '@/hooks/useCodeExecution';
 import { ViewUpdate } from '@codemirror/view';
-import { defaultInitialCode, validParenthesesSolution, reverseStringSolution, magesMaximumPowerSolution } from '@/constants/defaultCode';
-import confetti from 'canvas-confetti';
+import { defaultInitialCode } from '@/constants/defaultCode';
 
 interface CodeEditorProps {
   code: string;
@@ -29,31 +28,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   currentRoom,
   question
 }) => {
-  const { isExecuting, currentOperation, executeCode, lastExecutionResult } = useCodeExecution();
+  const { isExecuting, currentOperation, executeCode } = useCodeExecution();
 
-  useEffect(() => {
-    // Trigger confetti when all test cases pass
-    if (lastExecutionResult && 
-        lastExecutionResult.operation === 'submit' && 
-        lastExecutionResult.success && 
-        lastExecutionResult.results?.allPassed) {
-      confetti({
-        particleCount: 200,
-        spread: 100,
-        origin: { y: 0.6 }
-      });
-    }
-  }, [lastExecutionResult]);
-
-  const handleRunCode = () => {
-    if (isExecuting) return;
-    executeCode('run', code, language, question);
-  };
-
-  const handleSubmitCode = () => {
-    if (isExecuting) return;
-    executeCode('submit', code, language, question);
-  };
+  const handleRunCode = () => executeCode('run', code, language, question);
+  const handleSubmitCode = () => executeCode('submit', code, language, question);
 
   const getExtensionsForLanguage = (language: Language) => {
     switch (language) {
@@ -70,26 +48,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     }
   };
 
-  // Get the appropriate code based on question and language
-  const getInitialCodeForQuestion = () => {
-    if (!question) {
-      return defaultInitialCode[language];
-    }
-
-    // Choose solution template based on question title
-    if (question.title.includes('Valid Parentheses')) {
-      return validParenthesesSolution[language];
-    } else if (question.title.includes('Reverse String')) {
-      return reverseStringSolution[language];
-    } else if (question.title.includes("Mage's Maximum Power")) {
-      return magesMaximumPowerSolution[language];
-    } else if (question.initial_code && question.initial_code[language]) {
-      return question.initial_code[language];
-    }
-    
-    return defaultInitialCode[language];
-  };
-
   return (
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-30"></div>
@@ -104,7 +62,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         />
         <div className="relative w-full h-auto overflow-auto">
           <CodeMirror
-            value={code || getInitialCodeForQuestion()}
+            value={code || defaultInitialCode[language]}
             height="100%"
             extensions={getExtensionsForLanguage(language)}
             theme="dark"

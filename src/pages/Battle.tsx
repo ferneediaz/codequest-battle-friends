@@ -15,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
-import { defaultInitialCode, validParenthesesSolution, reverseStringSolution } from "@/constants/defaultCode";
+import { defaultInitialCode } from "@/constants/defaultCode";
 
 const Battle = () => {
   const navigate = useNavigate();
@@ -50,7 +50,6 @@ const Battle = () => {
         throw error;
       }
 
-      // Parse test cases and examples
       const parsedTestCases = Array.isArray(data.test_cases) 
         ? data.test_cases.map((tc: any) => ({
             input: tc.input,
@@ -65,37 +64,32 @@ const Battle = () => {
             explanation: ex.explanation
           }))
         : [];
-      
-      // Initialize with default code
-      let initialCodeObj = defaultInitialCode;
-      
-      // Check if initial_code is an object and process it
+
+      let initialCode: QuestionData['initial_code'];
+
       if (data.initial_code && typeof data.initial_code === 'object' && !Array.isArray(data.initial_code)) {
-        const initialCode = data.initial_code as Record<string, any>;
-        
-        initialCodeObj = {
-          javascript: typeof initialCode.javascript === 'string' ? initialCode.javascript : defaultInitialCode.javascript,
-          python: typeof initialCode.python === 'string' ? initialCode.python : defaultInitialCode.python,
-          cpp: typeof initialCode.cpp === 'string' ? initialCode.cpp : defaultInitialCode.cpp,
-          java: typeof initialCode.java === 'string' ? initialCode.java : defaultInitialCode.java,
+        initialCode = {
+          javascript: String(data.initial_code.javascript || defaultInitialCode.javascript),
+          python: String(data.initial_code.python || defaultInitialCode.python),
+          cpp: String(data.initial_code.cpp || defaultInitialCode.cpp),
+          java: String(data.initial_code.java || defaultInitialCode.java)
         };
-      } else if (data.title) {
-        // Fallback to predefined solutions based on question title
-        if (data.title.includes('Valid Parentheses')) {
-          initialCodeObj = validParenthesesSolution;
-        } else if (data.title.includes('Reverse String')) {
-          initialCodeObj = reverseStringSolution;
-        }
+      } else {
+        initialCode = {
+          javascript: defaultInitialCode.javascript,
+          python: defaultInitialCode.python,
+          cpp: defaultInitialCode.cpp,
+          java: defaultInitialCode.java
+        };
       }
       
-      // Return the transformed data
       const transformedData: QuestionData = {
         id: data.id,
         title: data.title,
         description: data.description,
         difficulty: data.difficulty,
         category: data.category,
-        initial_code: initialCodeObj,
+        initial_code: initialCode,
         test_cases: parsedTestCases,
         examples: parsedExamples,
         constraints: Array.isArray(data.constraints) ? data.constraints : []
@@ -107,8 +101,10 @@ const Battle = () => {
   });
 
   useEffect(() => {
-    if (question && question.initial_code?.[language]) {
+    if (question?.initial_code?.[language]) {
       setCode(question.initial_code[language]);
+    } else if (defaultInitialCode[language]) {
+      setCode(defaultInitialCode[language]);
     }
   }, [question, language, setCode]);
 
@@ -167,7 +163,7 @@ const Battle = () => {
               currentRoom={currentRoom}
               setCurrentRoom={setCurrentRoom}
               setCode={setCode}
-              initialCode={question?.initial_code?.[language] || ""}
+              initialCode={question?.initial_code?.[language] || defaultInitialCode[language]}
               userRole={userRole}
               setUserRole={setUserRole}
               participants={participants}
